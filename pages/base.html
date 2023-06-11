@@ -1,0 +1,78 @@
+{{ define "base" }}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>dela</title>
+    <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
+    <script src="/static/bootstrap/js/bootstrap.min.js"></script>
+    <!-- <link rel="stylesheet" href="/static/stylesheet.css"> -->
+    <link rel="shortcut icon" href="/static/images/favicon.png" type="image/x-icon">
+</head>
+
+<body class="d-flex flex-column h-100">
+    <header class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-4 border-bottom">
+        <div class="col-md-3 mb-2 mb-md-0">
+          <a href="/" class="d-inline-flex link-body-emphasis text-decoration-none">
+            <svg class="bi" width="40" height="32" role="img" aria-label="Bootstrap"><use xlink:href="#bootstrap"></use></svg>
+          </a>
+        </div>
+  
+        <!-- <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
+          <li><a href="/" class="nav-link px-2">Home</a></li>
+          <li><a href="/about" class="nav-link px-2">About</a></li>
+          <li><span href="#" class="nav-link px-2" id="logged-in-as"></span></li>
+        </ul> -->
+  
+        <div class="col-md-3 text-end" id="bar-auth">
+          <a href="/login" class="btn btn-outline-primary me-2">Log in</a>
+          <a href="/register" class="btn btn-primary">Register</a>
+        </div>
+    </header>
+
+    <div style="margin: auto;
+    margin-top: 5ch;
+    margin-bottom: 10ch;
+    max-width: 120ch;">
+        {{ template "content" . }}
+    </div>
+</body>
+
+</html>
+
+<script src="/scripts/auth.js"></script>
+<script>
+    window.onload = async () => {
+        let username = getUsername();
+        let password = getUserPassword();
+
+        if (username  == null | username  == "") {
+            return;
+        } 
+
+        // Check if auth info is indeed valid
+        let response = await fetch("/api/user", {
+            method: "GET",
+            headers: {
+                "EncryptedBase64": "false",
+                "Auth": username  + "<-->" + password
+            },
+        });
+
+        if (response.ok) {
+            let barAuth = document.getElementById("bar-auth");
+            barAuth.innerHTML = "<b>" + username + "</b>" + " | ";
+            barAuth.innerHTML += '<button id="log-out-btn" class="btn btn-primary" type="button">Log out</button>';
+            document.getElementById("log-out-btn").addEventListener("click", (event) => {
+                // Log out
+                forgetAuthInfo();
+                window.location.replace("/");
+            });
+        } 
+    }
+</script>
+
+{{ end }}

@@ -1,0 +1,60 @@
+{{ template "base" . }}
+
+{{ define "content" }}
+
+<h3>Register</h3>
+<form name="registerForm" onsubmit="return false;">
+  <p>
+      <label for="username" class="form-label">Username</label> <br>
+      <input type="text" name="username" minlength="3" required>
+  </p>
+
+  <p>
+      <label for="password" class="form-label">Password</label> <br>
+      <input type="password" name="password" minlength="3" required>
+  </p>
+
+    <p><span id="error_message" class="text-danger"></span></p> 
+
+    <p>
+        <input type="submit" value="Register" class="btn btn-primary" onmouseup="register();">
+    </p>
+</form>
+
+<script>
+async function register() {
+  let registerForm = document.forms["registerForm"];
+
+  let username = String(registerForm.elements["username"].value).trim();
+  if (username.length < 3) {
+      return;
+  }
+
+  let password = String(registerForm.elements["password"].value);
+  if (password.length < 3) {
+      return;
+  }
+
+  let passwordSHA256 = sha256(password);
+  let postData = {
+      username: username,
+      password: passwordSHA256,
+  };
+
+  let response = await fetch("/api/user", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(postData),
+  });
+
+  if (response.ok) {
+      rememberAuthInfo(postData.username, postData.password);
+      window.location.replace("/");
+  } else {
+      document.getElementById("error_message").innerText = await response.text();
+  }
+};
+</script>
+{{ end }}

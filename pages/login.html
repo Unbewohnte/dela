@@ -1,0 +1,58 @@
+{{ template "base" . }}
+
+{{ define "content" }}
+
+<h3>Log in</h3>
+
+<form name="loginForm" onsubmit="return false;">
+    <p>
+        <label for="username" class="form-label">Username</label> <br>
+        <input type="text" name="username" minlength="3" required>
+    </p>
+
+    <p>
+        <label for="password" class="form-label">Password</label> <br>
+        <input type="password" name="password" minlength="3" required>
+    </p>
+    
+    <p><span id="error_message" class="text-danger"></span></p> 
+
+    <p>
+        <input type="submit" value="Log in" class="btn btn-primary" onmouseup="logIn()">
+    </p>
+</form>
+
+<script>
+async function logIn() {
+    let loginForm = document.forms["loginForm"];
+
+    let username = String(loginForm.elements["username"].value).trim();
+    if (username.length < 3) {
+        return;
+    }
+
+    let password = String(loginForm.elements["password"].value);
+    if (password.length < 3) {
+        return;
+    }
+    password = sha256(password);
+
+    // Check if auth info is indeed valid
+    let response = await fetch("/api/user", {
+        method: "GET",
+        headers: {
+            "EncryptedBase64": "false",
+            "Auth": username + "<-->" + password
+        },
+    });
+
+    if (response.ok) {
+        rememberAuthInfo(username, password);
+        window.location.replace("/");
+    } else {
+        document.getElementById("error_message").innerText = await response.text();
+    }
+}
+
+</script>
+{{ end }}
