@@ -125,7 +125,7 @@ func New(config conf.Conf) (*Server, error) {
 	})
 	mux.HandleFunc("/api/user", server.UserEndpoint)
 	mux.HandleFunc("/api/todo", server.TodoEndpoint)
-	mux.HandleFunc("/api/groups", server.TodoGroupEndpoint)
+	mux.HandleFunc("/api/group", server.TodoGroupEndpoint)
 
 	server.http.Handler = mux
 	logger.Info("[Server] Created an HTTP server instance")

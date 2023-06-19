@@ -4,20 +4,20 @@ import "database/sql"
 
 // Todo group structure
 type TodoGroup struct {
-	ID              uint64
-	Name            string
-	TimeCreatedUnix uint64
-	OwnerUsername   string
+	ID              uint64 `json: "id"`
+	Name            string `json: "name"`
+	TimeCreatedUnix uint64 `json: "timeCreatedUnix`
+	OwnerUsername   string `json: "ownerUsername`
 }
 
 // Todo structure
 type Todo struct {
-	ID              uint64
-	GroupID         uint64
-	Text            string
-	TimeCreatedUnix uint64
-	DueUnix         uint64
-	OwnerUsername   string
+	ID              uint64 `json: "id"`
+	GroupID         uint64 `json: "groupId"`
+	Text            string `json: "text"`
+	TimeCreatedUnix uint64 `json: "timeCreatedUnix"`
+	DueUnix         uint64 `json: "dueUnix"`
+	OwnerUsername   string `json: "ownerUsername"`
 }
 
 // Creates a new TODO group in the database
@@ -65,6 +65,27 @@ func (db *DB) GetTodoGroup(id uint64) (*TodoGroup, error) {
 	}
 
 	return todoGroup, nil
+}
+
+// Retrieves information on ALL TODO groups
+func (db *DB) GetTodoGroups() ([]*TodoGroup, error) {
+	var groups []*TodoGroup
+
+	rows, err := db.Query("SELECT * FROM todo_groups")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		todoGroup, err := scanTodoGroup(rows)
+		if err != nil {
+			return groups, err
+		}
+		groups = append(groups, todoGroup)
+	}
+
+	return groups, nil
 }
 
 // Deletes information about a TODO group of given ID from the database
@@ -122,6 +143,27 @@ func (db *DB) GetTodo(id uint64) (*Todo, error) {
 	}
 
 	return todo, nil
+}
+
+// Retrieves information on ALL TODOs
+func (db *DB) GetTodos() ([]*Todo, error) {
+	var todos []*Todo
+
+	rows, err := db.Query("SELECT * FROM todos")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		todo, err := scanTodo(rows)
+		if err != nil {
+			return todos, err
+		}
+		todos = append(todos, todo)
+	}
+
+	return todos, nil
 }
 
 // Creates a new TODO in the database

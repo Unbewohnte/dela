@@ -45,11 +45,14 @@
 
 <script src="/scripts/auth.js"></script>
 <script>
-    window.onload = async () => {
+    document.addEventListener('DOMContentLoaded', async function() {
         let username = getUsername();
         let password = getUserPassword();
 
-        if (username  == null | username  == "") {
+        if (username  == null | username  == "" | password == null | password == "") {
+            if (window.location.pathname != "/about" && window.location.pathname != "/login" && window.location.pathname != "/register") {
+                window.location.replace("/about");
+            }
             return;
         } 
 
@@ -69,10 +72,12 @@
             document.getElementById("log-out-btn").addEventListener("click", (event) => {
                 // Log out
                 forgetAuthInfo();
-                window.location.replace("/");
+                window.location.replace("/about");
             });
-        } 
-    }
+        } else {
+            window.location.replace("/about");
+        }
+    }, false)
 </script>
 
 {{ end }}

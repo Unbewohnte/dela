@@ -89,6 +89,22 @@ func (s *Server) UserEndpoint(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 
+		// Create an initial TODO group
+		err = s.db.CreateTodoGroup(
+			db.TodoGroup{
+				Name:            "Todos",
+				TimeCreatedUnix: uint64(time.Now().Unix()),
+				OwnerUsername:   newUser.Username,
+			},
+		)
+		if err != nil {
+			// Oops, that's VERY bad. Delete newly created user
+			s.db.DeleteUser(newUser.Username)
+			logger.Error("[SERVER] Failed to create an initial TODO group for a newly created \"%s\": %s. Deleted.", newUser.Username, err)
+			http.Error(w, "Failed to create initial TODO group", http.StatusInternalServerError)
+			return
+		}
+
 		// Success!
 		w.WriteHeader(http.StatusOK)
 		logger.Info("[Server] Created a new user \"%s\"", newUser.Username)
@@ -190,41 +206,29 @@ func (s *Server) TodoEndpoint(w http.ResponseWriter, req *http.Request) {
 		logger.Info("[Server] Created a new TODO for %s", newTodo.OwnerUsername)
 	case http.MethodGet:
 		// Retrieve TODO information
-
 		// Check authentication information
 		if !IsRequestAuthValid(req, s.db) {
 			http.Error(w, "Invalid user auth data", http.StatusForbidden)
 			return
 		}
 
-		todoID, err := GetTodoIDFromReq(req)
-		if err != nil {
-			http.Error(w, "Invalid TODO ID", http.StatusBadRequest)
-			return
-		}
-
-		if !DoesUserOwnTodo(GetUsernameFromAuth(req), todoID, s.db) {
-			http.Error(w, "You don't own this TODO", http.StatusForbidden)
-			return
-		}
-
 		// Get TODO
-		todo, err := s.db.GetTodo(todoID)
+		todos, err := s.db.GetAllUserTodos(GetUsernameFromAuth(req))
 		if err != nil {
-			http.Error(w, "Failed to get TODO", http.StatusInternalServerError)
+			http.Error(w, "Failed to get TODOs", http.StatusInternalServerError)
 			return
 		}
 
 		// Marshal to JSON
-		todoBytes, err := json.Marshal(&todo)
+		todosBytes, err := json.Marshal(&todos)
 		if err != nil {
-			http.Error(w, "Failed to marhsal TODO JSON", http.StatusInternalServerError)
+			http.Error(w, "Failed to marhsal TODOs JSON", http.StatusInternalServerError)
 			return
 		}
 
 		// Send out
 		w.Header().Add("Content-Type", "application/json")
-		w.Write(todoBytes)
+		w.Write(todosBytes)
 
 	case http.MethodPatch:
 		// Change TODO due date and text
@@ -350,7 +354,7 @@ func (s *Server) TodoGroupEndpoint(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		logger.Info("[Server] Created a new TODO group for %s", newGroup.OwnerUsername)
 	case http.MethodGet:
-		// Retrieve todo group
+		// Retrieve all todo groups
 
 		// Check authentication information
 		if !IsRequestAuthValid(req, s.db) {
@@ -358,28 +362,17 @@ func (s *Server) TodoGroupEndpoint(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		groupID, err := GetTodoIDFromReq(req)
+		// Get groups
+		groups, err := s.db.GetAllUserTodoGroups(GetUsernameFromAuth(req))
 		if err != nil {
-			http.Error(w, "Invalid group ID", http.StatusBadRequest)
-			return
-		}
-
-		if !DoesUserOwnTodoGroup(GetUsernameFromAuth(req), groupID, s.db) {
-			http.Error(w, "You don't own this group", http.StatusForbidden)
-			return
-		}
-
-		// Get group
-		group, err := s.db.GetTodoGroup(groupID)
-		if err != nil {
-			http.Error(w, "Failed to get TODO group", http.StatusInternalServerError)
+			http.Error(w, "Failed to get TODO groups", http.StatusInternalServerError)
 			return
 		}
 
 		// Marshal to JSON
-		groupBytes, err := json.Marshal(&group)
+		groupBytes, err := json.Marshal(&groups)
 		if err != nil {
-			http.Error(w, "Failed to marhsal TODO group JSON", http.StatusInternalServerError)
+			http.Error(w, "Failed to marhsal TODO groups JSON", http.StatusInternalServerError)
 			return
 		}
 

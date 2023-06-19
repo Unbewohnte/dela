@@ -4,9 +4,9 @@ import "database/sql"
 
 // User structure
 type User struct {
-	Username        string
-	Password        string
-	TimeCreatedUnix uint64
+	Username        string `json: "username"`
+	Password        string `json: "password"`
+	TimeCreatedUnix uint64 `json: "timeCreatedUnix"`
 }
 
 func scanUser(rows *sql.Rows) (*User, error) {
