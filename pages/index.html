@@ -176,8 +176,23 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', async function() {
-    document.getElementById("new-todo-submit").addEventListener("click", (event) => {
+    document.getElementById("new-todo-submit").addEventListener("click", async (event) => {
+        let newTodoTextInput =  document.getElementById("new-todo-text");
+        let newTodoText = newTodoTextInput.value;
+        newTodoTextInput.value = "";
 
+        let newTodoDueInput =  document.getElementById("new-todo-due");
+        let newTodoDue = newTodoDueInput.value;
+        newTodoDueInput.value = 0;
+
+        // Make a request
+        let response = await fetch("/api/group", {
+            method: "GET",
+            headers: {
+                "EncryptedBase64": "false",
+                "Auth": username  + "<-->" + password
+            },
+        });
     });
 
     let groups = [];
