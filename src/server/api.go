@@ -231,41 +231,41 @@ func (s *Server) TodoEndpoint(w http.ResponseWriter, req *http.Request) {
 		w.Header().Add("Content-Type", "application/json")
 		w.Write(todosBytes)
 
-	case http.MethodPatch:
-		// Change TODO due date and text
+	// case http.MethodPatch:
+	// 	// Change TODO due date and text
 
-		// Check authentication information
-		if !IsRequestAuthValid(req, s.db) {
-			http.Error(w, "Invalid user auth data", http.StatusForbidden)
-			return
-		}
+	// 	// Check authentication information
+	// 	if !IsRequestAuthValid(req, s.db) {
+	// 		http.Error(w, "Invalid user auth data", http.StatusForbidden)
+	// 		return
+	// 	}
 
-		// Read body
-		body, err := io.ReadAll(req.Body)
-		if err != nil {
-			logger.Warning("[Server] Failed to read request body to possibly update a TODO: %s", err)
-			http.Error(w, "Failed to read body", http.StatusInternalServerError)
-			return
-		}
+	// 	// Read body
+	// 	body, err := io.ReadAll(req.Body)
+	// 	if err != nil {
+	// 		logger.Warning("[Server] Failed to read request body to possibly update a TODO: %s", err)
+	// 		http.Error(w, "Failed to read body", http.StatusInternalServerError)
+	// 		return
+	// 	}
 
-		// Unmarshal JSON
-		var todo db.Todo
-		err = json.Unmarshal(body, &todo)
-		if err != nil {
-			logger.Warning("[Server] Received invalid TODO JSON in order to update: %s", err)
-			http.Error(w, "Invalid TODO JSON", http.StatusBadRequest)
-			return
-		}
+	// 	// Unmarshal JSON
+	// 	var todo db.Todo
+	// 	err = json.Unmarshal(body, &todo)
+	// 	if err != nil {
+	// 		logger.Warning("[Server] Received invalid TODO JSON in order to update: %s", err)
+	// 		http.Error(w, "Invalid TODO JSON", http.StatusBadRequest)
+	// 		return
+	// 	}
 
-		// TODO
-		err = s.db.UpdateTodo(todo.ID, todo)
-		if err != nil {
-			logger.Warning("[Server] Failed to update TODO: %s", err)
-			http.Error(w, "Failed to update", http.StatusBadRequest)
-			return
-		}
+	// 	// TODO
+	// 	err = s.db.UpdateTodo(todo.ID, todo)
+	// 	if err != nil {
+	// 		logger.Warning("[Server] Failed to update TODO: %s", err)
+	// 		http.Error(w, "Failed to update", http.StatusBadRequest)
+	// 		return
+	// 	}
 
-		w.WriteHeader(http.StatusOK)
+	// 	w.WriteHeader(http.StatusOK)
 	default:
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}

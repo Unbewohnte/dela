@@ -49,10 +49,10 @@ func New(config conf.Conf) (*Server, error) {
 	}
 
 	// get database working
-	serverDB, err := db.FromFile(filepath.Join(config.BaseContentDir, config.ProdDBName))
+	serverDB, err := db.FromFile(config.ProdDBPath)
 	if err != nil {
 		// Create one then
-		serverDB, err = db.Create(filepath.Join(config.BaseContentDir, config.ProdDBName))
+		serverDB, err = db.Create(config.ProdDBPath)
 		if err != nil {
 			logger.Error("Failed to create a new database: %s", err)
 			return nil, err

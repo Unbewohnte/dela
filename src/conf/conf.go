@@ -11,7 +11,7 @@ type Conf struct {
 	CertFilePath   string `json:"cert_file_path"`
 	KeyFilePath    string `json:"key_file_path"`
 	BaseContentDir string `json:"base_content_dir"`
-	ProdDBName     string `json:"production_db"`
+	ProdDBPath     string `json:"production_db"`
 }
 
 // Creates a default server configuration
@@ -21,7 +21,7 @@ func Default() Conf {
 		CertFilePath:   "",
 		KeyFilePath:    "",
 		BaseContentDir: ".",
-		ProdDBName:     "dela.db",
+		ProdDBPath:     "dela.db",
 	}
 }
 

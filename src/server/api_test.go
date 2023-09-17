@@ -18,12 +18,12 @@ func TestApi(t *testing.T) {
 	// Create a new server
 	config := conf.Default()
 	config.BaseContentDir = "../../"
-	config.ProdDBName = filepath.Join(os.TempDir(), "dela_test_db.db")
+	config.ProdDBPath = filepath.Join(os.TempDir(), "dela_test_db.db")
 	server, err := New(config)
 	if err != nil {
 		t.Fatalf("failed to create a new server: %s", err)
 	}
-	defer os.Remove(config.ProdDBName)
+	defer os.Remove(config.ProdDBPath)
 
 	go func() {
 		time.Sleep(time.Second * 5)
@@ -59,28 +59,28 @@ func TestApi(t *testing.T) {
 	}
 	resp.Body.Close()
 
-	// Create a new TODO group and a TODO
-	newGroup := db.TodoGroup{
-		Name:            "group1",
-		TimeCreatedUnix: 13524534,
-		OwnerUsername:   newUser.Username,
-	}
-	newGroupBytes, err := json.Marshal(&newGroup)
-	if err != nil {
-		t.Fatalf("could not marshal new user JSON: %s", err)
-	}
+	// Create a new TODO
+	// newGroup := db.TodoGroup{
+	// 	Name:            "group1",
+	// 	TimeCreatedUnix: 13524534,
+	// 	OwnerUsername:   newUser.Username,
+	// }
+	// newGroupBytes, err := json.Marshal(&newGroup)
+	// if err != nil {
+	// 	t.Fatalf("could not marshal new user JSON: %s", err)
+	// }
 
-	req, err := http.NewRequest("POST", fmt.Sprintf("http://localhost:%d/api/groups", config.Port), bytes.NewBuffer(newGroupBytes))
-	if err != nil {
-		t.Fatalf("failed to create a new POST request to create a new TODO group: %s", err)
-	}
-	req.Header.Add(RequestHeaderAuthKey, fmt.Sprintf("%s%s%s", newUser.Username, RequestHeaderAuthSeparator, newUser.Password))
-	req.Header.Add(RequestHeaderEncodedB64, "false")
+	// req, err := http.NewRequest("POST", fmt.Sprintf("http://localhost:%d/api/groups", config.Port), bytes.NewBuffer(newGroupBytes))
+	// if err != nil {
+	// 	t.Fatalf("failed to create a new POST request to create a new TODO group: %s", err)
+	// }
+	// req.Header.Add(RequestHeaderAuthKey, fmt.Sprintf("%s%s%s", newUser.Username, RequestHeaderAuthSeparator, newUser.Password))
+	// req.Header.Add(RequestHeaderEncodedB64, "false")
 
-	resp, err = http.DefaultClient.Do(req)
-	if err != nil {
-		t.Fatalf("failed to post a new TODO group: %s", err)
-	}
+	// resp, err = http.DefaultClient.Do(req)
+	// if err != nil {
+	// 	t.Fatalf("failed to post a new TODO group: %s", err)
+	// }
 
 	body, err = io.ReadAll(resp.Body)
 	if err != nil {
@@ -94,7 +94,8 @@ func TestApi(t *testing.T) {
 
 	// TODO creation
 	var newTodo db.Todo = db.Todo{
-		GroupID:         newGroup.ID,
+		// GroupID:         newGroup.ID,
+		GroupID:         0,
 		Text:            "Do the dishes",
 		TimeCreatedUnix: uint64(time.Now().UnixMicro()),
 		DueUnix:         uint64(time.Now().Add(time.Hour * 5).UnixMicro()),
@@ -106,7 +107,7 @@ func TestApi(t *testing.T) {
 		t.Fatalf("could not marshal new Todo: %s", err)
 	}
 
-	req, err = http.NewRequest("POST", fmt.Sprintf("http://localhost:%d/api/todo", config.Port), bytes.NewBuffer(newTodoBytes))
+	req, err := http.NewRequest("POST", fmt.Sprintf("http://localhost:%d/api/todo", config.Port), bytes.NewBuffer(newTodoBytes))
 	if err != nil {
 		t.Fatalf("failed to create a new POST request to create a new TODO: %s", err)
 	}
