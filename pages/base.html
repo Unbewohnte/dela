@@ -44,12 +44,13 @@
 </html>
 
 <script src="/scripts/auth.js"></script>
+<script src="/scripts/api.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', async function() {
         let username = getUsername();
         let password = getUserPassword();
 
-        if (username  == null | username  == "" | password == null | password == "") {
+        if (username == null | username  == "" | password == null | password == "") {
             if (window.location.pathname != "/about" && window.location.pathname != "/login" && window.location.pathname != "/register") {
                 window.location.replace("/about");
             }
@@ -57,14 +58,7 @@
         } 
 
         // Check if auth info is indeed valid
-        let response = await fetch("/api/user", {
-            method: "GET",
-            headers: {
-                "EncryptedBase64": "false",
-                "Auth": username  + "<-->" + password
-            },
-        });
-
+        let response = await get_user(username, password);
         if (response.ok) {
             let barAuth = document.getElementById("bar-auth");
             barAuth.innerHTML = "<b>" + username + "</b>" + " | ";
@@ -75,6 +69,7 @@
                 window.location.replace("/about");
             });
         } else {
+            forgetAuthInfo();
             window.location.replace("/about");
         }
     }, false)

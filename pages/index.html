@@ -154,31 +154,44 @@
     </form>
   </div> -->
   
-  <form>
+<form action="javascript:void(0);">
     <div class="mb-3">
-      <label for="new-todo-text" class="form-label">TODO</label>
-      <input type="text" class="form-control" id="new-todo-text">
+        <label for="new-todo-text" class="form-label">TODO</label>
+        <input type="text" class="form-control" id="new-todo-text">
     </div>
     <div class="mb-3">
-      <label for="new-todo-due" class="form-label">Due</label>
-      <input type="datetime-local" class="form-control" id="new-todo-due">
+        <label for="new-todo-due" class="form-label">Due</label>
+        <input type="datetime-local" class="form-control" id="new-todo-due">
     </div>
     <button id="new-todo-submit" class="btn btn-primary">Add</button>
-  </form>
+</form>
 
-  <div id="todos">
 
-  </div>
+<div id="groups">
 
-  <div id="groups">
+</div>
 
-  </div>
+<div id="todos">
+
+</div>
+
 
 <script>
-  document.addEventListener('DOMContentLoaded', async function() {
+document.addEventListener('DOMContentLoaded', async function() {
+    let username = getUsername();
+    let password = getUserPassword();
+
+
+    // Make "Add" button to send 
     document.getElementById("new-todo-submit").addEventListener("click", async (event) => {
         let newTodoTextInput =  document.getElementById("new-todo-text");
         let newTodoText = newTodoTextInput.value;
+        if (newTodoText.length < 1) {
+            newTodoTextInput.setCustomValidity("At least one character is needed!");
+            return;
+        } else {
+            newTodoTextInput.setCustomValidity("");
+        }
         newTodoTextInput.value = "";
 
         let newTodoDueInput =  document.getElementById("new-todo-due");
@@ -186,57 +199,34 @@
         newTodoDueInput.value = 0;
 
         // Make a request
-        let response = await fetch("/api/group", {
-            method: "GET",
-            headers: {
-                "EncryptedBase64": "false",
-                "Auth": username  + "<-->" + password
-            },
-        });
+        let response = await post_new_todo(username, password, {text: newTodoText});
+        if (response.ok) {
+            location.reload();
+        }
     });
 
-    let groups = [];
-    let todos = [];
 
-    let username = getUsername();
-    let password = getUserPassword();
-
-    // TODO groups
-    let response = await fetch("/api/group", {
-            method: "GET",
-            headers: {
-                "EncryptedBase64": "false",
-                "Auth": username  + "<-->" + password
-            },
-    });
-
-    let groupsJson = await response.json();
-    if (response.ok) {
-          let groupsDiv = document.getElementById("groups");
-          groupsJson.forEach((item) => {
-              groupsDiv.innerHTML += "<p>" +  item.Name + "</p>";
-          });
-    }
-
-    // TODOs
-    response = await fetch("/api/todo", {
-            method: "GET",
-            headers: {
-                "EncryptedBase64": "false",
-                "Auth": username  + "<-->" + password
-            },
-    });
-
+    // Fetch and display TODOs
+    response = await get_todos(username, password);
     let todosJson = await response.json();
-    if (response.ok) {
+    if (response.ok && todosJson != null) {
         let todosDiv = document.getElementById("todos");
         todosJson.forEach((item) => {
-          todosDiv.innerHTML += "<p>" +  item.Text + "</p>";
+            console.log(item);
+
+            let todo_complete_btn_id = "btn-complete-" + String(item.id);
+
+            todosDiv.innerHTML += "<p>" +  item.text + 
+                "<small><button class='btn btn-success' id='" + todo_complete_btn_id + "'>" + 
+                "Done</button></small></p>";
+        
+            document.getElementById(todo_complete_btn_id).addEventListener("click", async (event) => {
+                response = await delete_todo(username, password, item);
+                if (response.ok) {
+                    location.reload();
+                }
+            });
         });
-        // for (let i = 0; i < todosJson.length; i++) {
-          // console.log(todosJson[i]);
-            // todosDiv.innerHTML += "<p>" +  todosJson[i].text + "</p>";
-        // }
     }
 }, false)
 </script>

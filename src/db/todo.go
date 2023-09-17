@@ -4,20 +4,20 @@ import "database/sql"
 
 // Todo group structure
 type TodoGroup struct {
-	ID              uint64 `json: "id"`
-	Name            string `json: "name"`
-	TimeCreatedUnix uint64 `json: "timeCreatedUnix`
-	OwnerUsername   string `json: "ownerUsername`
+	ID              uint64 `json:"id"`
+	Name            string `json:"name"`
+	TimeCreatedUnix uint64 `json:"timeCreatedUnix"`
+	OwnerUsername   string `json:"ownerUsername"`
 }
 
 // Todo structure
 type Todo struct {
-	ID              uint64 `json: "id"`
-	GroupID         uint64 `json: "groupId"`
-	Text            string `json: "text"`
-	TimeCreatedUnix uint64 `json: "timeCreatedUnix"`
-	DueUnix         uint64 `json: "dueUnix"`
-	OwnerUsername   string `json: "ownerUsername"`
+	ID              uint64 `json:"id"`
+	GroupID         uint64 `json:"groupId"`
+	Text            string `json:"text"`
+	TimeCreatedUnix uint64 `json:"timeCreatedUnix"`
+	DueUnix         uint64 `json:"dueUnix"`
+	OwnerUsername   string `json:"ownerUsername"`
 }
 
 // Creates a new TODO group in the database
@@ -115,6 +115,7 @@ func scanTodo(rows *sql.Rows) (*Todo, error) {
 		&newTodo.ID,
 		&newTodo.GroupID,
 		&newTodo.Text,
+		&newTodo.TimeCreatedUnix,
 		&newTodo.DueUnix,
 		&newTodo.OwnerUsername,
 	)
@@ -169,9 +170,10 @@ func (db *DB) GetTodos() ([]*Todo, error) {
 // Creates a new TODO in the database
 func (db *DB) CreateTodo(todo Todo) error {
 	_, err := db.Exec(
-		"INSERT INTO todos(group_id, text, due_unix, owner_username) VALUES(?, ?, ?, ?)",
+		"INSERT INTO todos(group_id, text, time_created_unix, due_unix, owner_username) VALUES(?, ?, ?, ?, ?)",
 		todo.GroupID,
 		todo.Text,
+		todo.TimeCreatedUnix,
 		todo.DueUnix,
 		todo.OwnerUsername,
 	)

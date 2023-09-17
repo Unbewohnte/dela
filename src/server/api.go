@@ -198,6 +198,7 @@ func (s *Server) TodoEndpoint(w http.ResponseWriter, req *http.Request) {
 		err = s.db.CreateTodo(newTodo)
 		if err != nil {
 			http.Error(w, "Failed to create TODO", http.StatusInternalServerError)
+			logger.Error("[Server] Failed to put a new todo (%+v) into the db: %s", newTodo, err)
 			return
 		}
 

@@ -40,6 +40,7 @@ func setUpTables(db *DB) error {
 		id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,
 		group_id INTEGER NOT NULL,
 		text TEXT NOT NULL,
+		time_created_unix INTEGER,
 		due_unix INTEGER,
 		owner_username TEXT NOT NULL,
 		FOREIGN KEY(group_id) REFERENCES todo_groups(id),
