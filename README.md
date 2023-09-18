@@ -1,4 +1,4 @@
-# dela - daily events list application (pun интедед)
+# dela (pun интедед) - daily events list application, aka web TODO list
 
 
 ## License
