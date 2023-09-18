@@ -1,5 +1,5 @@
 /*
-	Copyright (c) 2023 Kasyanov Nikolay Alexeyevich (Unbewohnte)
+	2023 Kasyanov Nikolay Alexeyevich (Unbewohnte)
 */
 
 
