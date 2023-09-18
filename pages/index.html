@@ -8,17 +8,13 @@
         <label for="new-todo-text" class="form-label">TODO</label>
         <input type="text" class="form-control" id="new-todo-text">
     </div>
-    <div class="mb-3">
+    <!-- <div class="mb-3">
         <label for="new-todo-due" class="form-label">Due</label>
         <input type="datetime-local" class="form-control" id="new-todo-due">
-    </div>
+    </div> -->
     <button id="new-todo-submit" class="btn btn-primary">Add</button>
 </form>
 
-
-<div id="groups">
-
-</div>
 
 <div id="todos">
 
@@ -43,9 +39,9 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
         newTodoTextInput.value = "";
 
-        let newTodoDueInput =  document.getElementById("new-todo-due");
-        let newTodoDue = newTodoDueInput.value;
-        newTodoDueInput.value = 0;
+        // let newTodoDueInput =  document.getElementById("new-todo-due");
+        // let newTodoDue = newTodoDueInput.value;
+        // newTodoDueInput.value = 0;
 
         // Make a request
         let response = await post_new_todo(username, password, {text: newTodoText});
