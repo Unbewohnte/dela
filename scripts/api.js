@@ -37,13 +37,12 @@ async function get_todo_groups(username, password) {
     });
 }
 
-async function delete_todo(username, password, todo) {
-    return fetch("/api/todo", {
+async function delete_todo(username, password, id) {
+    return fetch("/api/todo/"+String(id), {
         method: "DELETE",
         headers: {
             "EnctyptedBase64": "false",
             "Auth": username + "<-->" + password,
-            body: JSON.stringify(todo),
         },
     });
 }

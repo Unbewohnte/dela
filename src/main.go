@@ -44,8 +44,6 @@ func init() {
 		Conf.BaseContentDir = WDir
 	}
 
-	// Check if database exists and create it otherwise
-
 	logger.Info("[Init] Successful initializaion!")
 }
 

@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"path"
+	"strconv"
 	"time"
 )
 
@@ -14,23 +16,6 @@ func (s *Server) UserEndpoint(w http.ResponseWriter, req *http.Request) {
 	case http.MethodDelete:
 		// Delete an existing user
 		defer req.Body.Close()
-
-		// Read body
-		body, err := io.ReadAll(req.Body)
-		if err != nil {
-			logger.Warning("[Server] Failed to read request body to delete a user: %s", err)
-			http.Error(w, "Failed to read body", http.StatusInternalServerError)
-			return
-		}
-
-		// Unmarshal JSON
-		var newUser db.User
-		err = json.Unmarshal(body, &newUser)
-		if err != nil {
-			logger.Warning("[Server] Received invalid user JSON for deletion: %s", err)
-			http.Error(w, "Invalid user JSON", http.StatusBadRequest)
-			return
-		}
 
 		username := GetUsernameFromAuth(req)
 
@@ -43,7 +28,7 @@ func (s *Server) UserEndpoint(w http.ResponseWriter, req *http.Request) {
 
 		// It is, indeed, a user
 		// Delete with all TODOs
-		err = s.db.DeleteUserClean(username)
+		err := s.db.DeleteUserClean(username)
 		if err != nil {
 			logger.Error("[Server] Failed to delete %s: %s", username, err)
 			http.Error(w, "Failed to delete user or TODO contents", http.StatusInternalServerError)
@@ -127,36 +112,28 @@ func (s *Server) TodoEndpoint(w http.ResponseWriter, req *http.Request) {
 		// Delete an existing TODO
 		defer req.Body.Close()
 
-		// Read body
-		body, err := io.ReadAll(req.Body)
-		if err != nil {
-			logger.Warning("[Server] Failed to read request body to possibly delete a TODO: %s", err)
-			http.Error(w, "Failed to read body", http.StatusInternalServerError)
-			return
-		}
-
-		// Unmarshal JSON
-		var todo db.Todo
-		err = json.Unmarshal(body, &todo)
-		if err != nil {
-			logger.Warning("[Server] Received invalid TODO JSON for deletion: %s", err)
-			http.Error(w, "Invalid TODO JSON", http.StatusBadRequest)
-			return
-		}
-
-		// Check if given user actually owns this TODO
+		// Check if this user actually exists and the password is valid
 		if !IsRequestAuthValid(req, s.db) {
 			http.Error(w, "Invalid user auth data", http.StatusForbidden)
 			return
 		}
 
-		if !DoesUserOwnTodo(GetUsernameFromAuth(req), todo.ID, s.db) {
+		// Obtain TODO ID
+		todoIDStr := path.Base(req.URL.Path)
+		todoID, err := strconv.ParseUint(todoIDStr, 10, 64)
+		if err != nil {
+			http.Error(w, "Invalid TODO ID", http.StatusBadRequest)
+			return
+		}
+
+		// Check if the user owns this TODO
+		if !DoesUserOwnTodo(GetUsernameFromAuth(req), todoID, s.db) {
 			http.Error(w, "You don't own this TODO", http.StatusForbidden)
 			return
 		}
 
 		// Now delete
-		err = s.db.DeleteTodo(todo.ID)
+		err = s.db.DeleteTodo(todoID)
 		if err != nil {
 			logger.Error("[Server] Failed to delete %s's TODO: %s", GetUsernameFromAuth(req), err)
 			http.Error(w, "Failed to delete TODO", http.StatusInternalServerError)
@@ -164,6 +141,7 @@ func (s *Server) TodoEndpoint(w http.ResponseWriter, req *http.Request) {
 		}
 
 		// Success!
+		logger.Info("[Server] deleted TODO with ID %d", todoID)
 		w.WriteHeader(http.StatusOK)
 
 	case http.MethodPost:

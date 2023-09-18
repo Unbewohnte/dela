@@ -49,10 +49,10 @@ func New(config conf.Conf) (*Server, error) {
 	}
 
 	// get database working
-	serverDB, err := db.FromFile(config.ProdDBPath)
+	serverDB, err := db.FromFile(filepath.Join(config.BaseContentDir, config.ProdDBName))
 	if err != nil {
 		// Create one then
-		serverDB, err = db.Create(config.ProdDBPath)
+		serverDB, err = db.Create(filepath.Join(config.BaseContentDir, config.ProdDBName))
 		if err != nil {
 			logger.Error("Failed to create a new database: %s", err)
 			return nil, err
@@ -95,7 +95,7 @@ func New(config conf.Conf) (*Server, error) {
 				filepath.Join(server.config.BaseContentDir, PagesDirName), "base.html", "index.html",
 			)
 			if err != nil {
-				http.Error(w, "Internal server error", http.StatusInternalServerError)
+				http.Error(w, "Page processing error", http.StatusInternalServerError)
 			}
 
 			requestedPage.ExecuteTemplate(w, "index.html", nil)
@@ -109,22 +109,14 @@ func New(config conf.Conf) (*Server, error) {
 			if err == nil {
 				requestedPage.ExecuteTemplate(w, req.URL.Path[1:]+".html", nil)
 			} else {
-				// Redirect to the index
-				index, err := getPage(
-					filepath.Join(server.config.BaseContentDir, PagesDirName),
-					"base.html",
-					req.URL.Path[1:]+".html",
-				)
-				if err != nil {
-					http.Error(w, "Internal server error", http.StatusInternalServerError)
-				}
-
-				index.ExecuteTemplate(w, "index.html", nil)
+				http.Error(w, "Page processing error", http.StatusInternalServerError)
 			}
 		}
 	})
 	mux.HandleFunc("/api/user", server.UserEndpoint)
 	mux.HandleFunc("/api/todo", server.TodoEndpoint)
+	mux.HandleFunc("/api/todo/", server.TodoEndpoint)
+
 	// mux.HandleFunc("/api/group", server.TodoGroupEndpoint)
 
 	server.http.Handler = mux

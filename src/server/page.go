@@ -1,7 +1,6 @@
 package server
 
 import (
-	"Unbewohnte/dela/logger"
 	"html/template"
 	"path/filepath"
 )
@@ -13,7 +12,6 @@ func getPage(pagesDir string, basePageName string, pageName string) (*template.T
 		filepath.Join(pagesDir, pageName),
 	)
 	if err != nil {
-		logger.Error("Failed to parse page files (pagename is \"%s\"): %s", pageName, err)
 		return nil, err
 	}
 

@@ -209,23 +209,29 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Fetch and display TODOs
     response = await get_todos(username, password);
     let todosJson = await response.json();
+    let todos = [];
+    let completeButtonIDs = [];
     if (response.ok && todosJson != null) {
         let todosDiv = document.getElementById("todos");
         todosJson.forEach((item) => {
             console.log(item);
-
-            let todo_complete_btn_id = "btn-complete-" + String(item.id);
+            todos.push(item);
+            let todoCompleteBtnID = "btn-complete-" + String(item.id);
 
             todosDiv.innerHTML += "<p>" +  item.text + 
-                "<small><button class='btn btn-success' id='" + todo_complete_btn_id + "'>" + 
+                "<small><button class='btn btn-success' style='margin:10px;' id='" + todoCompleteBtnID + "'>" + 
                 "Done</button></small></p>";
-        
-            document.getElementById(todo_complete_btn_id).addEventListener("click", async (event) => {
-                response = await delete_todo(username, password, item);
-                if (response.ok) {
-                    location.reload();
-                }
-            });
+            
+                completeButtonIDs.push(todoCompleteBtnID);
+        });
+    }
+
+    for (let i = 0; i < completeButtonIDs.length; i++) {
+        document.getElementById(completeButtonIDs[i]).addEventListener("click", async (event) => {
+            response = await delete_todo(username, password, todos[i].id);
+            if (response.ok) {
+                location.reload();
+            }
         });
     }
 }, false)

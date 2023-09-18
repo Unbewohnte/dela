@@ -18,12 +18,12 @@ func TestApi(t *testing.T) {
 	// Create a new server
 	config := conf.Default()
 	config.BaseContentDir = "../../"
-	config.ProdDBPath = filepath.Join(os.TempDir(), "dela_test_db.db")
+	config.ProdDBName = filepath.Join(os.TempDir(), "dela_test_db.db")
 	server, err := New(config)
 	if err != nil {
 		t.Fatalf("failed to create a new server: %s", err)
 	}
-	defer os.Remove(config.ProdDBPath)
+	defer os.Remove(config.ProdDBName)
 
 	go func() {
 		time.Sleep(time.Second * 5)
