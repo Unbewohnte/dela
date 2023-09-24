@@ -41,10 +41,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
         newTodoTextInput.value = "";
 
-        // let newTodoDueInput =  document.getElementById("new-todo-due");
-        // let newTodoDue = newTodoDueInput.value;
-        // newTodoDueInput.value = 0;
-
         // Make a request
         let response = await post_new_todo(username, password, {text: newTodoText});
         if (response.ok) {
@@ -69,7 +65,10 @@ document.addEventListener('DOMContentLoaded', async function() {
             todos.push(item);
             let todoCompleteBtnID = "btn-complete-" + String(item.id);
 
+            // Display
+            let timeCreated = new Date(item.timeCreatedUnix * 1000);
             todosDiv.innerHTML += "<tr><td>" +  item.text + "</td>" +
+                "<td>" + " " + timeCreated.getDate() + "/" + timeCreated.getMonth() + "/" + timeCreated.getFullYear() + "</td>" +
                 "<td><button class='btn btn-success' id='" + todoCompleteBtnID + "'>" + 
                 "Done</button></td></tr>";
             
