@@ -61,6 +61,8 @@ func setUpTables(db *DB) error {
 		time_created_unix INTEGER,
 		due_unix INTEGER,
 		owner_username TEXT NOT NULL,
+		is_done INTEGER,
+		completion_time_unix INTEGER,
 		FOREIGN KEY(group_id) REFERENCES todo_groups(id),
 		FOREIGN KEY(owner_username) REFERENCES users(username))`,
 	)

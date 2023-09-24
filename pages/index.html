@@ -59,7 +59,11 @@ document.addEventListener('DOMContentLoaded', async function() {
     if (response.ok && todosJson != null) {
         let todosDiv = document.getElementById("todos");
         todosJson.forEach((item) => {
-            console.log(item);
+            // Do not work with completed TODOs yet
+            if (item.isDone == true) {
+                return;
+            }
+
             todos.push(item);
             let todoCompleteBtnID = "btn-complete-" + String(item.id);
 

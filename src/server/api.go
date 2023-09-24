@@ -150,16 +150,33 @@ func (s *Server) TodoEndpoint(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		// Now delete
-		err = s.db.DeleteTodo(todoID)
+		// Mark TODO as done and assign a completion time
+		updatedTodo, err := s.db.GetTodo(todoID)
 		if err != nil {
-			logger.Error("[Server] Failed to delete %s's TODO: %s", GetUsernameFromAuth(req), err)
-			http.Error(w, "Failed to delete TODO", http.StatusInternalServerError)
+			logger.Error("[Server] Failed to get todo with id %d for marking completion: %s", todoID, err)
+			http.Error(w, "TODO retrieval error", http.StatusInternalServerError)
+			return
+		}
+		updatedTodo.IsDone = true
+		updatedTodo.CompletionTimeUnix = uint64(time.Now().Unix())
+
+		err = s.db.UpdateTodo(todoID, *updatedTodo)
+		if err != nil {
+			logger.Error("[Server] Failed to update TODO with id %d: %s", todoID, err)
+			http.Error(w, "Failed to update TODO information", http.StatusInternalServerError)
 			return
 		}
 
+		// Now delete
+		// err = s.db.DeleteTodo(todoID)
+		// if err != nil {
+		// 	logger.Error("[Server] Failed to delete %s's TODO: %s", GetUsernameFromAuth(req), err)
+		// 	http.Error(w, "Failed to delete TODO", http.StatusInternalServerError)
+		// 	return
+		// }
+
 		// Success!
-		logger.Info("[Server] deleted TODO with ID %d", todoID)
+		logger.Info("[Server] updated (marked as done) TODO with ID %d", todoID)
 		w.WriteHeader(http.StatusOK)
 
 	case http.MethodPost:

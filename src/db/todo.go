@@ -30,12 +30,14 @@ type TodoGroup struct {
 
 // Todo structure
 type Todo struct {
-	ID              uint64 `json:"id"`
-	GroupID         uint64 `json:"groupId"`
-	Text            string `json:"text"`
-	TimeCreatedUnix uint64 `json:"timeCreatedUnix"`
-	DueUnix         uint64 `json:"dueUnix"`
-	OwnerUsername   string `json:"ownerUsername"`
+	ID                 uint64 `json:"id"`
+	GroupID            uint64 `json:"groupId"`
+	Text               string `json:"text"`
+	TimeCreatedUnix    uint64 `json:"timeCreatedUnix"`
+	DueUnix            uint64 `json:"dueUnix"`
+	OwnerUsername      string `json:"ownerUsername"`
+	IsDone             bool   `json:"isDone"`
+	CompletionTimeUnix uint64 `json:"completionTimeUnix"`
 }
 
 // Creates a new TODO group in the database
@@ -136,6 +138,8 @@ func scanTodo(rows *sql.Rows) (*Todo, error) {
 		&newTodo.TimeCreatedUnix,
 		&newTodo.DueUnix,
 		&newTodo.OwnerUsername,
+		&newTodo.IsDone,
+		&newTodo.CompletionTimeUnix,
 	)
 	if err != nil {
 		return nil, err
@@ -188,12 +192,14 @@ func (db *DB) GetTodos() ([]*Todo, error) {
 // Creates a new TODO in the database
 func (db *DB) CreateTodo(todo Todo) error {
 	_, err := db.Exec(
-		"INSERT INTO todos(group_id, text, time_created_unix, due_unix, owner_username) VALUES(?, ?, ?, ?, ?)",
+		"INSERT INTO todos(group_id, text, time_created_unix, due_unix, owner_username, is_done, completion_time_unix) VALUES(?, ?, ?, ?, ?, ?, ?)",
 		todo.GroupID,
 		todo.Text,
 		todo.TimeCreatedUnix,
 		todo.DueUnix,
 		todo.OwnerUsername,
+		todo.IsDone,
+		todo.CompletionTimeUnix,
 	)
 
 	return err
@@ -209,13 +215,15 @@ func (db *DB) DeleteTodo(id uint64) error {
 	return err
 }
 
-// Updates TODO's due date, text and group id
+// Updates TODO's due date, text, done state, completion time and group id
 func (db *DB) UpdateTodo(todoID uint64, updatedTodo Todo) error {
 	_, err := db.Exec(
-		"UPDATE todos SET group_id=?, due_unix=?, text=?  WHERE id=?",
+		"UPDATE todos SET group_id=?, due_unix=?, text=?, is_done=?, completion_time_unix=?  WHERE id=?",
 		updatedTodo.GroupID,
 		updatedTodo.DueUnix,
 		updatedTodo.Text,
+		updatedTodo.IsDone,
+		updatedTodo.CompletionTimeUnix,
 		todoID,
 	)
 
