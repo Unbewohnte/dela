@@ -6,6 +6,8 @@ all:
 	 cp -r scripts bin && \
 	 cp -r static bin
 
+portable: clean all
+	cd bin/ && zip -r dela.zip * && mv dela.zip ..
 
 clean:
 	rm -rf bin

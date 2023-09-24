@@ -22,8 +22,16 @@ import (
 	"Unbewohnte/dela/conf"
 	"Unbewohnte/dela/logger"
 	"Unbewohnte/dela/server"
+	"flag"
+	"fmt"
 	"os"
 	"path/filepath"
+)
+
+const Version string = "0.1.0"
+
+var (
+	printVersion *bool = flag.Bool("version", false, "Print version information and exit")
 )
 
 const ConfName string = "conf.json"
@@ -34,6 +42,13 @@ var (
 )
 
 func init() {
+	// Parse flags
+	flag.Parse()
+	if *printVersion {
+		fmt.Printf("dela v%s - a web TODO list\n(c) 2023 Kasyanov Nikolay Alexeyevich (Unbewohnte)\n", Version)
+		os.Exit(0)
+	}
+
 	// Initialize logging
 	logger.SetOutput(os.Stdout)
 
