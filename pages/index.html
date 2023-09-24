@@ -4,20 +4,21 @@
 
   
 <form action="javascript:void(0);">
-    <div class="mb-3">
-        <label for="new-todo-text" class="form-label">TODO</label>
-        <input type="text" class="form-control" id="new-todo-text">
+    <div class="container text-center">
+        <div class="row">
+            <div class="col">
+                <input type="text" class="form-control" id="new-todo-text" placeholder="TODO text">
+            </div>
+            <div class="col">
+                <button id="new-todo-submit" class="btn btn-primary">Add</button>
+            </div>
+        </div>
     </div>
-    <!-- <div class="mb-3">
-        <label for="new-todo-due" class="form-label">Due</label>
-        <input type="datetime-local" class="form-control" id="new-todo-due">
-    </div> -->
-    <button id="new-todo-submit" class="btn btn-primary">Add</button>
 </form>
 
 
-<div id="todos">
-
+<div class="container text-center" style="margin-top: 40px;">
+    <table id="todos" class="table table-hover"></table>
 </div>
 
 
@@ -26,6 +27,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     let username = getUsername();
     let password = getUserPassword();
 
+    document.getElementById("new-todo-text").focus();
 
     // Make "Add" button to send 
     document.getElementById("new-todo-submit").addEventListener("click", async (event) => {
@@ -67,9 +69,9 @@ document.addEventListener('DOMContentLoaded', async function() {
             todos.push(item);
             let todoCompleteBtnID = "btn-complete-" + String(item.id);
 
-            todosDiv.innerHTML += "<p>" +  item.text + 
-                "<small><button class='btn btn-success' style='margin:10px;' id='" + todoCompleteBtnID + "'>" + 
-                "Done</button></small></p>";
+            todosDiv.innerHTML += "<tr><td>" +  item.text + "</td>" +
+                "<td><button class='btn btn-success' id='" + todoCompleteBtnID + "'>" + 
+                "Done</button></td></tr>";
             
                 completeButtonIDs.push(todoCompleteBtnID);
         });
