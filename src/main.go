@@ -28,7 +28,7 @@ import (
 	"path/filepath"
 )
 
-const Version string = "0.1.0"
+const Version string = "0.1.1"
 
 var (
 	printVersion *bool = flag.Bool("version", false, "Print version information and exit")
