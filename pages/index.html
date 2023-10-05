@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         newTodoTextInput.value = "";
 
         // Make a request
-        let response = await post_new_todo(username, password, {text: newTodoText});
+        let response = await postNewTodo(username, password, {text: newTodoText});
         if (response.ok) {
             location.reload();
         }
@@ -50,10 +50,12 @@ document.addEventListener('DOMContentLoaded', async function() {
 
 
     // Fetch and display TODOs
-    response = await get_todos(username, password);
+    response = await getTodos(username, password);
     let todosJson = await response.json();
     let todos = [];
     let completeButtonIDs = [];
+    let deleteButtonIDs = [];
+
     if (response.ok && todosJson != null) {
         let todosDiv = document.getElementById("todos");
         todosJson.forEach((item) => {
@@ -72,16 +74,30 @@ document.addEventListener('DOMContentLoaded', async function() {
             todosDiv.innerHTML += "<tr><td>" +  item.text + "</td>" +
                 "<td>" + " " + timeCreated.getDate() + "/" + timeCreated.getMonth() + "/" + timeCreated.getFullYear() + "</td>" +
                 "<td><button class='btn btn-success' id='" + todoCompleteBtnID + "'>" + 
-                "<img src='/static/images/check.svg'></button><button class='btn btn-danger id='"
-                 + todoDeleteBtnID + "><img src='/static/images/trash3-fill.svg'></button></td></tr>";
+                "<img src='/static/images/check.svg'></button><button class='btn btn-danger' id='" +
+                todoDeleteBtnID + "'><img src='/static/images/trash3-fill.svg'></button></td></tr>";
             
                 completeButtonIDs.push(todoCompleteBtnID);
+                deleteButtonIDs.push(todoDeleteBtnID);
         });
     }
 
+    // Loop over all buttons (doesn't matter which ones because the amounts are equal)
     for (let i = 0; i < completeButtonIDs.length; i++) {
+        // Done button
         document.getElementById(completeButtonIDs[i]).addEventListener("click", async (event) => {
-            response = await delete_todo(username, password, todos[i].id);
+            // Mark as done
+            todos[i].isDone = true;
+            // Update
+            response = await updateTodo(username, password, todos[i].id, todos[i]);
+            if (response.ok) {
+                location.reload();
+            }
+        });
+
+        // Delete button
+        document.getElementById(deleteButtonIDs[i]).addEventListener("click", async (event) => {
+            response = await deleteTodo(username, password, todos[i].id);
             if (response.ok) {
                 location.reload();
             }

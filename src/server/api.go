@@ -124,7 +124,7 @@ func (s *Server) UserEndpoint(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (s *Server) TodoEndpoint(w http.ResponseWriter, req *http.Request) {
+func (s *Server) SpecificTodoEndpoint(w http.ResponseWriter, req *http.Request) {
 	switch req.Method {
 	case http.MethodDelete:
 		// Delete an existing TODO
@@ -150,35 +150,92 @@ func (s *Server) TodoEndpoint(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		// Mark TODO as done and assign a completion time
-		updatedTodo, err := s.db.GetTodo(todoID)
-		if err != nil {
-			logger.Error("[Server] Failed to get todo with id %d for marking completion: %s", todoID, err)
-			http.Error(w, "TODO retrieval error", http.StatusInternalServerError)
-			return
-		}
-		updatedTodo.IsDone = true
-		updatedTodo.CompletionTimeUnix = uint64(time.Now().Unix())
-
-		err = s.db.UpdateTodo(todoID, *updatedTodo)
-		if err != nil {
-			logger.Error("[Server] Failed to update TODO with id %d: %s", todoID, err)
-			http.Error(w, "Failed to update TODO information", http.StatusInternalServerError)
-			return
-		}
-
-		// Now delete
-		// err = s.db.DeleteTodo(todoID)
+		// // Mark TODO as done and assign a completion time
+		// updatedTodo, err := s.db.GetTodo(todoID)
 		// if err != nil {
-		// 	logger.Error("[Server] Failed to delete %s's TODO: %s", GetUsernameFromAuth(req), err)
-		// 	http.Error(w, "Failed to delete TODO", http.StatusInternalServerError)
+		// 	logger.Error("[Server] Failed to get todo with id %d for marking completion: %s", todoID, err)
+		// 	http.Error(w, "TODO retrieval error", http.StatusInternalServerError)
+		// 	return
+		// }
+		// updatedTodo.IsDone = true
+		// updatedTodo.CompletionTimeUnix = uint64(time.Now().Unix())
+
+		// err = s.db.UpdateTodo(todoID, *updatedTodo)
+		// if err != nil {
+		// 	logger.Error("[Server] Failed to update TODO with id %d: %s", todoID, err)
+		// 	http.Error(w, "Failed to update TODO information", http.StatusInternalServerError)
 		// 	return
 		// }
 
+		// Now delete
+		err = s.db.DeleteTodo(todoID)
+		if err != nil {
+			logger.Error("[Server] Failed to delete %s's TODO: %s", GetUsernameFromAuth(req), err)
+			http.Error(w, "Failed to delete TODO", http.StatusInternalServerError)
+			return
+		}
+
 		// Success!
-		logger.Info("[Server] updated (marked as done) TODO with ID %d", todoID)
+		logger.Info("[Server] Deleted TODO with ID %d", todoID)
 		w.WriteHeader(http.StatusOK)
 
+	case http.MethodPost:
+		// Change TODO information
+
+		// Check authentication information
+		if !IsRequestAuthValid(req, s.db) {
+			http.Error(w, "Invalid user auth data", http.StatusForbidden)
+			return
+		}
+
+		// Obtain TODO ID
+		todoIDStr := path.Base(req.URL.Path)
+		todoID, err := strconv.ParseUint(todoIDStr, 10, 64)
+		if err != nil {
+			http.Error(w, "Invalid TODO ID", http.StatusBadRequest)
+			return
+		}
+
+		// Check if the user owns this TODO
+		if !DoesUserOwnTodo(GetUsernameFromAuth(req), todoID, s.db) {
+			http.Error(w, "You don't own this TODO", http.StatusForbidden)
+			return
+		}
+
+		// Read body
+		body, err := io.ReadAll(req.Body)
+		if err != nil {
+			logger.Warning("[Server] Failed to read request body to possibly update a TODO: %s", err)
+			http.Error(w, "Failed to read body", http.StatusInternalServerError)
+			return
+		}
+
+		// Unmarshal JSON
+		var updatedTodo db.Todo
+		err = json.Unmarshal(body, &updatedTodo)
+		if err != nil {
+			logger.Warning("[Server] Received invalid TODO JSON in order to update: %s", err)
+			http.Error(w, "Invalid TODO JSON", http.StatusBadRequest)
+			return
+		}
+
+		// Update. (Creation date, owner username and an ID do not change)
+		err = s.db.UpdateTodo(todoID, updatedTodo)
+		if err != nil {
+			logger.Warning("[Server] Failed to update TODO: %s", err)
+			http.Error(w, "Failed to update", http.StatusBadRequest)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		logger.Info("[Server] Updated TODO with ID %d", todoID)
+
+	default:
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
+}
+
+func (s *Server) TodoEndpoint(w http.ResponseWriter, req *http.Request) {
+	switch req.Method {
 	case http.MethodPost:
 		// Create a new TODO
 		defer req.Body.Close()
@@ -218,6 +275,7 @@ func (s *Server) TodoEndpoint(w http.ResponseWriter, req *http.Request) {
 		// Success!
 		w.WriteHeader(http.StatusOK)
 		logger.Info("[Server] Created a new TODO for %s", newTodo.OwnerUsername)
+
 	case http.MethodGet:
 		// Retrieve TODO information
 		// Check authentication information
@@ -226,7 +284,7 @@ func (s *Server) TodoEndpoint(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		// Get TODO
+		// Get all user TODOs
 		todos, err := s.db.GetAllUserTodos(GetUsernameFromAuth(req))
 		if err != nil {
 			http.Error(w, "Failed to get TODOs", http.StatusInternalServerError)
@@ -243,42 +301,6 @@ func (s *Server) TodoEndpoint(w http.ResponseWriter, req *http.Request) {
 		// Send out
 		w.Header().Add("Content-Type", "application/json")
 		w.Write(todosBytes)
-
-	// case http.MethodPatch:
-	// 	// Change TODO due date and text
-
-	// 	// Check authentication information
-	// 	if !IsRequestAuthValid(req, s.db) {
-	// 		http.Error(w, "Invalid user auth data", http.StatusForbidden)
-	// 		return
-	// 	}
-
-	// 	// Read body
-	// 	body, err := io.ReadAll(req.Body)
-	// 	if err != nil {
-	// 		logger.Warning("[Server] Failed to read request body to possibly update a TODO: %s", err)
-	// 		http.Error(w, "Failed to read body", http.StatusInternalServerError)
-	// 		return
-	// 	}
-
-	// 	// Unmarshal JSON
-	// 	var todo db.Todo
-	// 	err = json.Unmarshal(body, &todo)
-	// 	if err != nil {
-	// 		logger.Warning("[Server] Received invalid TODO JSON in order to update: %s", err)
-	// 		http.Error(w, "Invalid TODO JSON", http.StatusBadRequest)
-	// 		return
-	// 	}
-
-	// 	// TODO
-	// 	err = s.db.UpdateTodo(todo.ID, todo)
-	// 	if err != nil {
-	// 		logger.Warning("[Server] Failed to update TODO: %s", err)
-	// 		http.Error(w, "Failed to update", http.StatusBadRequest)
-	// 		return
-	// 	}
-
-	// 	w.WriteHeader(http.StatusOK)
 	default:
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}

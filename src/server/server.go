@@ -133,7 +133,7 @@ func New(config conf.Conf) (*Server, error) {
 	})
 	mux.HandleFunc("/api/user", server.UserEndpoint)
 	mux.HandleFunc("/api/todo", server.TodoEndpoint)
-	mux.HandleFunc("/api/todo/", server.TodoEndpoint)
+	mux.HandleFunc("/api/todo/", server.SpecificTodoEndpoint)
 
 	// mux.HandleFunc("/api/group", server.TodoGroupEndpoint)
 

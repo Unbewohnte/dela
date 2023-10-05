@@ -51,7 +51,7 @@
         } 
 
         // Check if auth info is indeed valid
-        let response = await get_user(username, password);
+        let response = await getUser(username, password);
         if (response.ok) {
             let barAuth = document.getElementById("bar-auth");
             barAuth.innerHTML = "<b>" + username + "</b>" + " | ";

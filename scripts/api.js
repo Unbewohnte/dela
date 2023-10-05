@@ -3,7 +3,7 @@
 */
 
 
-async function post_new_todo(username, password, new_todo) {
+async function postNewTodo(username, password, new_todo) {
     return fetch("/api/todo", {
         method: "POST",
         headers: {
@@ -16,7 +16,7 @@ async function post_new_todo(username, password, new_todo) {
 }
 
 
-async function get_todos(username, password) {
+async function getTodos(username, password) {
     return fetch("/api/todo", {
         method: "GET",
         headers: {
@@ -27,7 +27,7 @@ async function get_todos(username, password) {
 }
 
 
-async function get_todo_groups(username, password) {
+async function getTodoGroups(username, password) {
     return fetch("/api/group", {
         method: "GET",
         headers: {
@@ -37,7 +37,7 @@ async function get_todo_groups(username, password) {
     });
 }
 
-async function delete_todo(username, password, id) {
+async function deleteTodo(username, password, id) {
     return fetch("/api/todo/"+String(id), {
         method: "DELETE",
         headers: {
@@ -47,7 +47,18 @@ async function delete_todo(username, password, id) {
     });
 }
 
-async function get_user(username, password) {
+async function updateTodo(username, password, id, updatedTodo) {
+    return fetch("/api/todo/"+String(id), {
+        method: "POST",
+        headers: {
+            "EncryptedBase64": "false",
+            "Auth": username + "<-->" + password,
+        },
+        body: JSON.stringify(updatedTodo),
+    });
+}
+
+async function getUser(username, password) {
     return fetch("/api/user", {
         method: "GET",
         headers: {
