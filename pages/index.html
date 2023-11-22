@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             // Display
             let timeCreated = new Date(item.timeCreatedUnix * 1000);
             todosDiv.innerHTML += "<tr><td>" +  item.text + "</td>" +
-                "<td>" + " " + timeCreated.getDate() + "/" + timeCreated.getMonth() + "/" + timeCreated.getFullYear() + "</td>" +
+                "<td>" + " " + timeCreated.getDate() + "/" + (timeCreated.getMonth() + 1) + "/" + timeCreated.getFullYear() + "</td>" +
                 "<td><button class='btn btn-success' id='" + todoCompleteBtnID + "'>" + 
                 "<img src='/static/images/check.svg'></button><button class='btn btn-danger' id='" +
                 todoDeleteBtnID + "'><img src='/static/images/trash3-fill.svg'></button></td></tr>";

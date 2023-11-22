@@ -4,7 +4,7 @@
 
 
 const AuthHeaderKey = "Auth";
-const AuthSeparator = "<->" // username<->password
+const AuthSeparator = "<-->" // username<-->password
 const authStorageUsername = "username";
 const authStoragePassword = "password";
 
