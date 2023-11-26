@@ -11,6 +11,7 @@
             </div>
             <div class="col">
                 <button id="new-todo-submit" class="btn btn-primary">Add</button>
+                <button class="btn btn-secondary" id="show-done">Show Done</button>
             </div>
         </div>
     </div>
@@ -23,13 +24,132 @@
 
 
 <script>
+async function displayTodos(showDone) {
+    let username = getUsername();
+    let password = getUserPassword();
+
+    // Fetch and display TODOs
+    response = await getTodos(username, password);
+    let todosJson = await response.json();    
+    let todosDisplayed = [];
+
+    if (response.ok && todosJson != null) {
+        let todosDiv = document.getElementById("todos");
+        // Clear what we've had before
+        todosDiv.innerHTML = "";
+
+        todosJson.forEach((item) => {
+            if (showDone === true && item.isDone == true) {
+                // An already done Todo
+
+                let todoDeleteBtnID = "btn-delete-" + String(item.id);
+
+                // Display
+                let timeCreated = new Date(item.timeCreatedUnix * 1000);
+                if (item.completionTimeUnix != 0) {
+                    let timeDone = new Date(item.completionTimeUnix * 1000);
+
+                    todosDiv.innerHTML += "<tr><td>" +  item.text + "</td>" +
+                    "<td>" + " " + timeCreated.getDate() + "/" + (timeCreated.getMonth() + 1) + "/" + timeCreated.getFullYear() + "</td>" +
+                    "<td>" + " " + timeDone.getDate() + "/" + (timeDone.getMonth() + 1) + "/" + timeDone.getFullYear() + "</td>" +
+                    "<td>" + "<button class='btn btn-danger' id='" +
+                    todoDeleteBtnID + "'><img src='/static/images/trash3-fill.svg'></button></td></tr>";
+                } else {
+                    todosDiv.innerHTML += "<tr><td>" +  item.text + "</td>" +
+                    "<td>" + " " + timeCreated.getDate() + "/" + (timeCreated.getMonth() + 1) + "/" + timeCreated.getFullYear() + "</td>" +
+                    "<td></td>" +
+                    "<td>" + "<button class='btn btn-danger' id='" +
+                    todoDeleteBtnID + "'><img src='/static/images/trash3-fill.svg'></button></td></tr>";
+                }
+             
+
+                todosDisplayed.push({item: item, buttonDel: todoDeleteBtnID});
+
+
+            } else if (showDone === false && item.isDone == false) {
+                // A yet to be done Todo
+
+                let todoCompleteBtnID = "btn-complete-" + String(item.id);
+                let todoDeleteBtnID = "btn-delete-" + String(item.id);
+                let todoEditBtnID = "btn-edit-" + String(item.id);
+
+                // Display
+                let timeCreated = new Date(item.timeCreatedUnix * 1000);
+                todosDiv.innerHTML += "<tr><td>" +  item.text + "</td>" +
+                    "<td>" + " " + timeCreated.getDate() + "/" + (timeCreated.getMonth() + 1) + "/" + timeCreated.getFullYear() + "</td>" +
+                    "<td><button class='btn btn-success' id='" + todoCompleteBtnID + "'>" + 
+                    "<img src='/static/images/check.svg'></button><button class='btn btn-danger' id='" +
+                    todoDeleteBtnID + "'><img src='/static/images/trash3-fill.svg'></button></td></tr>";
+                
+                todosDisplayed.push({item: item, buttonDel: todoDeleteBtnID, buttonComplete: todoCompleteBtnID});
+
+            }
+        });
+    }
+
+
+    // Loop over all buttons (doesn't matter which ones because the amounts are equal)
+    for (let i = 0; i < todosDisplayed.length; i++) {
+        let elem = todosDisplayed[i];
+
+        if (showDone === false && elem.item.isDone === false) {
+            // Done button
+            document.getElementById(elem.buttonComplete).addEventListener("click", async (event) => {
+                // Mark as done
+                elem.item.isDone = true;
+                // Set completion time
+                elem.item.completionTimeUnix = Math.floor(Date.now() / 1000);
+
+                // Update
+                response = await updateTodo(username, password, elem.item.id, elem.item);
+                if (response.ok) {
+                    location.reload();
+                }
+            });
+
+            // Delete button
+            document.getElementById(elem.buttonDel).addEventListener("click", async (event) => {
+                response = await deleteTodo(username, password, elem.item.id);
+                if (response.ok) {
+                    location.reload();
+                }
+            });
+        } else {
+            // Delete button
+            document.getElementById(elem.buttonDel).addEventListener("click", async (event) => {
+                response = await deleteTodo(username, password, elem.item.id);
+                if (response.ok) {
+                    location.reload();
+                }
+            });
+        }
+    }
+}
+
+
 document.addEventListener('DOMContentLoaded', async function() {
     let username = getUsername();
     let password = getUserPassword();
 
     document.getElementById("new-todo-text").focus();
 
-    // Make "Add" button to send 
+
+    let showDoneButton = document.getElementById("show-done");
+    showDoneButton.addEventListener("click", (event) => {
+        displayTodos(true); // Re-display without reloading
+
+        // Rename the button
+        showDoneButton.innerText = "Show To Do";
+        showDoneButton.className = "btn btn-success";
+        
+        // Make it "reset to default"
+        showDoneButton.addEventListener("click", (event) => {
+            location.reload();
+        });
+    });
+
+
+    // "Add" button
     document.getElementById("new-todo-submit").addEventListener("click", async (event) => {
         let newTodoTextInput =  document.getElementById("new-todo-text");
         let newTodoText = newTodoTextInput.value;
@@ -50,59 +170,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
 
     // Fetch and display TODOs
-    response = await getTodos(username, password);
-    let todosJson = await response.json();
-    let todos = [];
-    let completeButtonIDs = [];
-    let deleteButtonIDs = [];
-
-    if (response.ok && todosJson != null) {
-        let todosDiv = document.getElementById("todos");
-        todosJson.forEach((item) => {
-            // Do not work with completed TODOs yet
-            if (item.isDone == true) {
-                return;
-            }
-
-            todos.push(item);
-            let todoCompleteBtnID = "btn-complete-" + String(item.id);
-            let todoDeleteBtnID = "btn-delete-" + String(item.id);
-            let todoEditBtnID = "btn-edit-" + String(item.id);
-
-            // Display
-            let timeCreated = new Date(item.timeCreatedUnix * 1000);
-            todosDiv.innerHTML += "<tr><td>" +  item.text + "</td>" +
-                "<td>" + " " + timeCreated.getDate() + "/" + (timeCreated.getMonth() + 1) + "/" + timeCreated.getFullYear() + "</td>" +
-                "<td><button class='btn btn-success' id='" + todoCompleteBtnID + "'>" + 
-                "<img src='/static/images/check.svg'></button><button class='btn btn-danger' id='" +
-                todoDeleteBtnID + "'><img src='/static/images/trash3-fill.svg'></button></td></tr>";
-            
-                completeButtonIDs.push(todoCompleteBtnID);
-                deleteButtonIDs.push(todoDeleteBtnID);
-        });
-    }
-
-    // Loop over all buttons (doesn't matter which ones because the amounts are equal)
-    for (let i = 0; i < completeButtonIDs.length; i++) {
-        // Done button
-        document.getElementById(completeButtonIDs[i]).addEventListener("click", async (event) => {
-            // Mark as done
-            todos[i].isDone = true;
-            // Update
-            response = await updateTodo(username, password, todos[i].id, todos[i]);
-            if (response.ok) {
-                location.reload();
-            }
-        });
-
-        // Delete button
-        document.getElementById(deleteButtonIDs[i]).addEventListener("click", async (event) => {
-            response = await deleteTodo(username, password, todos[i].id);
-            if (response.ok) {
-                location.reload();
-            }
-        });
-    }
+    await displayTodos(false);
 }, false)
 </script>
 
