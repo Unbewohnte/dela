@@ -46,21 +46,13 @@ async function displayTodos(showDone) {
 
                 // Display
                 let timeCreated = new Date(item.timeCreatedUnix * 1000);
-                if (item.completionTimeUnix != 0) {
-                    let timeDone = new Date(item.completionTimeUnix * 1000);
+                let timeDone = new Date(item.completionTimeUnix * 1000);
+                todosDiv.innerHTML += "<tr><td>" +  item.text + "</td>" +
+                "<td>" + " " + timeCreated.getDate() + "/" + (timeCreated.getMonth() + 1) + "/" + timeCreated.getFullYear() + " | " +
+                timeDone.getDate() + "/" + (timeDone.getMonth() + 1) + "/" + timeDone.getFullYear() + "</td>" +
+                "<td>" + "<button class='btn btn-danger' id='" +
+                todoDeleteBtnID + "'><img src='/static/images/trash3-fill.svg'></button></td></tr>";
 
-                    todosDiv.innerHTML += "<tr><td>" +  item.text + "</td>" +
-                    "<td>" + " " + timeCreated.getDate() + "/" + (timeCreated.getMonth() + 1) + "/" + timeCreated.getFullYear() + "</td>" +
-                    "<td>" + " " + timeDone.getDate() + "/" + (timeDone.getMonth() + 1) + "/" + timeDone.getFullYear() + "</td>" +
-                    "<td>" + "<button class='btn btn-danger' id='" +
-                    todoDeleteBtnID + "'><img src='/static/images/trash3-fill.svg'></button></td></tr>";
-                } else {
-                    todosDiv.innerHTML += "<tr><td>" +  item.text + "</td>" +
-                    "<td>" + " " + timeCreated.getDate() + "/" + (timeCreated.getMonth() + 1) + "/" + timeCreated.getFullYear() + "</td>" +
-                    "<td></td>" +
-                    "<td>" + "<button class='btn btn-danger' id='" +
-                    todoDeleteBtnID + "'><img src='/static/images/trash3-fill.svg'></button></td></tr>";
-                }
              
 
                 todosDisplayed.push({item: item, buttonDel: todoDeleteBtnID});
