@@ -1,0 +1,92 @@
+{{ define "base" }}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>dela</title>
+    <link rel="shortcut icon" href="/static/images/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
+    <script src="/static/bootstrap/js/bootstrap.min.js"></script>
+</head>
+
+<!-- <body class="d-flex flex-column h-100" style="width: 100%;"> -->
+<body class="w-100 h-100">
+    <!-- Header -->
+    <!-- <header class="d-flex flex-wrap align-items-center justify-content-center py-3 mb-4 border-bottom">
+        <div class="col-md-3 mb-2 mb-md-0">
+          <a href="/" class="d-inline-flex link-body-emphasis text-decoration-none">
+            <img width="64" height="64" src="/static/images/android-chrome-192x192.png" alt="Dela">
+          </a>
+        </div>
+  
+        <div class="col-md-3 text-end" id="bar-auth">
+          <a href="/login" class="btn btn-outline-primary"><img src="/static/images/door-open-fill.svg" alt="Log in"></a>
+          <a href="/register" class="btn btn-outline-primary"><img src="/static/images/person-fill-add.svg" alt="Register"></a>
+        </div>
+    </header> -->
+    <header class="p-3 text-bg-primary">
+        <div class="container">
+          <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+            <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none">
+              <a href="/" class="d-inline-flex link-body-emphasis text-decoration-none">
+                <img width="64" height="64" src="/static/images/android-chrome-192x192.png" alt="Dela">
+              </a>
+            </a>
+    
+            <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
+              <li><a href="/register" class="nav-link px-2 text-white">Register</a></li>
+              <li><a href="/about" class="nav-link px-2 text-white">About</a></li>
+            </ul>
+    
+            <div class="text-end" id="bar-auth">
+              <a href="/login" class="btn btn-outline-light me-2">Login</a>
+              <a href="/register" class="btn btn-warning">Sign-up</a>
+            </div>
+          </div>
+        </div>
+      </header>
+    
+
+    
+    <!-- Content -->
+    {{ template "content" . }}
+
+</body>
+</html>
+
+<script src="/scripts/auth.js"></script>
+<script src="/scripts/api.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', async function() {
+        let login = getLogin();
+        let password = getUserPassword();
+
+        if (login == null | login  == "" | password == null | password == "") {
+            if (window.location.pathname != "/about" && window.location.pathname != "/login" && window.location.pathname != "/register") {
+                window.location.replace("/about");
+            }
+            return;
+        } 
+
+        // Check if auth info is indeed valid
+        let response = await getUser(login, password);
+        if (response.ok) {
+            let barAuth = document.getElementById("bar-auth");
+            barAuth.innerHTML = "<b>" + login + "</b>" + " | ";
+            barAuth.innerHTML += '<button id="log-out-btn" class="btn btn-outline-light me-2"><img src="/static/images/person-dash-fill.svg"></button>';
+            document.getElementById("log-out-btn").addEventListener("click", (event) => {
+                // Log out
+                forgetAuthInfo();
+                window.location.replace("/about");
+            });
+        } else {
+            forgetAuthInfo();
+            window.location.replace("/about");
+        }
+    }, false)
+</script>
+
+{{ end }}

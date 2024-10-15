@@ -1,0 +1,58 @@
+{{ template "base" . }}
+
+{{ define "content" }}
+
+
+<main class="d-flex flex-wrap align-content-center align-items-center">
+    <div class="p-2 flex-fill text-wrap text-center">
+        <!-- text-center -->
+        <h3>Log in</h3>
+        <form name="loginForm" onsubmit="return false;">
+            <p>
+                <label for="login" class="form-label">Login</label> <br>
+                <input type="text" name="login" minlength="3" placeholder="Login" required>
+            </p>
+        
+            <p>
+                <label for="password" class="form-label">Password</label> <br>
+                <input type="password" name="password" minlength="3" placeholder="Password" required>
+            </p>
+            
+            <p><span id="error_message" class="text-danger"></span></p> 
+        
+            <p>
+                <input type="submit" value="Log in" class="btn btn-primary" onclick="logIn()">
+            </p>
+        </form>
+            
+    </div>
+</main>
+
+<script>
+async function logIn() {
+    let loginForm = document.forms["loginForm"];
+
+    let login = String(loginForm.elements["login"].value).trim();
+    if (login.length < 3) {
+        return;
+    }
+
+    let password = String(loginForm.elements["password"].value);
+    if (password.length < 3) {
+        return;
+    }
+    password = sha256(password);
+
+    // Check if auth info is indeed valid
+    let response = await getUser(login, password);
+
+    if (response.ok) {
+        rememberAuthInfo(login, password);
+        window.location.replace("/");
+    } else {
+        document.getElementById("error_message").innerText = await response.text();
+    }
+}
+
+</script>
+{{ end }}

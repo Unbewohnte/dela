@@ -1,0 +1,270 @@
+{{ template "base" . }}
+
+{{ define "content" }}
+
+<!-- Sidebar -->
+<div id="sidebar" class="flex-shrink-1 p-2 d-flex flex-column align-items-stretch bg-body-tertiary" style="width: 380px;">
+    <a href="/" class="d-flex align-items-center flex-shrink-0 p-3 link-body-emphasis text-decoration-none border-bottom">
+      <svg class="bi pe-none me-2" width="30" height="24"><use xlink:href="#bootstrap"></use></svg>
+      <span class="fs-5 fw-semibold">List group</span>
+    </a>
+    <div class="list-group list-group-flush border-bottom scrollarea">
+      <a href="#" class="list-group-item list-group-item-action active py-3 lh-sm" aria-current="true">
+        <div class="d-flex w-100 align-items-center justify-content-between">
+          <strong class="mb-1">List group item heading</strong>
+          <small>Wed</small>
+        </div>
+        <div class="col-10 mb-1 small">Some placeholder content in a paragraph below the heading and date.</div>
+      </a>
+      <a href="#" class="list-group-item list-group-item-action py-3 lh-sm">
+        <div class="d-flex w-100 align-items-center justify-content-between">
+          <strong class="mb-1">List group item heading</strong>
+          <small class="text-body-secondary">Tues</small>
+        </div>
+        <div class="col-10 mb-1 small">Some placeholder content in a paragraph below the heading and date.</div>
+      </a>
+      <a href="#" class="list-group-item list-group-item-action py-3 lh-sm">
+        <div class="d-flex w-100 align-items-center justify-content-between">
+          <strong class="mb-1">List group item heading</strong>
+          <small class="text-body-secondary">Mon</small>
+        </div>
+        <div class="col-10 mb-1 small">Some placeholder content in a paragraph below the heading and date.</div>
+      </a>
+
+      <a href="#" class="list-group-item list-group-item-action py-3 lh-sm" aria-current="true">
+        <div class="d-flex w-100 align-items-center justify-content-between">
+          <strong class="mb-1">List group item heading</strong>
+          <small class="text-body-secondary">Wed</small>
+        </div>
+        <div class="col-10 mb-1 small">Some placeholder content in a paragraph below the heading and date.</div>
+      </a>
+      <a href="#" class="list-group-item list-group-item-action py-3 lh-sm">
+        <div class="d-flex w-100 align-items-center justify-content-between">
+          <strong class="mb-1">List group item heading</strong>
+          <small class="text-body-secondary">Tues</small>
+        </div>
+        <div class="col-10 mb-1 small">Some placeholder content in a paragraph below the heading and date.</div>
+      </a>
+      <a href="#" class="list-group-item list-group-item-action py-3 lh-sm">
+        <div class="d-flex w-100 align-items-center justify-content-between">
+          <strong class="mb-1">List group item heading</strong>
+          <small class="text-body-secondary">Mon</small>
+        </div>
+        <div class="col-10 mb-1 small">Some placeholder content in a paragraph below the heading and date.</div>
+      </a>
+      <a href="#" class="list-group-item list-group-item-action py-3 lh-sm" aria-current="true">
+        <div class="d-flex w-100 align-items-center justify-content-between">
+          <strong class="mb-1">List group item heading</strong>
+          <small class="text-body-secondary">Wed</small>
+        </div>
+        <div class="col-10 mb-1 small">Some placeholder content in a paragraph below the heading and date.</div>
+      </a>
+      <a href="#" class="list-group-item list-group-item-action py-3 lh-sm">
+        <div class="d-flex w-100 align-items-center justify-content-between">
+          <strong class="mb-1">List group item heading</strong>
+          <small class="text-body-secondary">Tues</small>
+        </div>
+        <div class="col-10 mb-1 small">Some placeholder content in a paragraph below the heading and date.</div>
+      </a>
+      <a href="#" class="list-group-item list-group-item-action py-3 lh-sm">
+        <div class="d-flex w-100 align-items-center justify-content-between">
+          <strong class="mb-1">List group item heading</strong>
+          <small class="text-body-secondary">Mon</small>
+        </div>
+        <div class="col-10 mb-1 small">Some placeholder content in a paragraph below the heading and date.</div>
+      </a>
+      <a href="#" class="list-group-item list-group-item-action py-3 lh-sm" aria-current="true">
+        <div class="d-flex w-100 align-items-center justify-content-between">
+          <strong class="mb-1">List group item heading</strong>
+          <small class="text-body-secondary">Wed</small>
+        </div>
+        <div class="col-10 mb-1 small">Some placeholder content in a paragraph below the heading and date.</div>
+      </a>
+      <a href="#" class="list-group-item list-group-item-action py-3 lh-sm">
+        <div class="d-flex w-100 align-items-center justify-content-between">
+          <strong class="mb-1">List group item heading</strong>
+          <small class="text-body-secondary">Tues</small>
+        </div>
+        <div class="col-10 mb-1 small">Some placeholder content in a paragraph below the heading and date.</div>
+      </a>
+      <a href="#" class="list-group-item list-group-item-action py-3 lh-sm">
+        <div class="d-flex w-100 align-items-center justify-content-between">
+          <strong class="mb-1">List group item heading</strong>
+          <small class="text-body-secondary">Mon</small>
+        </div>
+        <div class="col-10 mb-1 small">Some placeholder content in a paragraph below the heading and date.</div>
+      </a>
+    </div>
+</div>
+
+  
+<form action="javascript:void(0);">
+    <div class="container text-center">
+        <div class="row">
+            <div class="col">
+                <input type="text" class="form-control" id="new-todo-text" placeholder="TODO text">
+            </div>
+            <div class="col">
+                <button id="new-todo-submit" class="btn btn-primary">Add</button>
+                <button class="btn btn-secondary" id="show-done">Show Done</button>
+            </div>
+        </div>
+    </div>
+</form>
+
+
+<div class="container text-center" style="margin-top: 4ch;">
+    <table id="todos" class="table table-hover" style="word-wrap: break-word;">
+        {{ for .Todos }}
+            <tr>
+                {{ .Name }}
+            </tr>
+        {{ end }}
+    </table>
+</div>
+
+
+<script>
+async function displayTodos(showDone) {
+    let username = getUsername();
+    let password = getUserPassword();
+
+    // Fetch and display TODOs
+    let response = await getTodos(username, password);
+    let todosJson = await response.json();    
+    let todosDisplayed = [];
+
+    if (response.ok && todosJson != null) {
+        let todosDiv = document.getElementById("todos");
+        // Clear what we've had before
+        todosDiv.innerHTML = "";
+
+        todosJson.forEach((item) => {
+            if (showDone === true && item.isDone == true) {
+                // An already done Todo
+
+                let todoDeleteBtnID = "btn-delete-" + String(item.id);
+
+                // Display
+                let timeCreated = new Date(item.timeCreatedUnix * 1000);
+                let timeDone = new Date(item.completionTimeUnix * 1000);
+                todosDiv.innerHTML += "<tr><td>" +  item.text + "</td>" +
+                "<td>" + " " + timeCreated.getDate() + "/" + (timeCreated.getMonth() + 1) + "/" + timeCreated.getFullYear() + " | " +
+                timeDone.getDate() + "/" + (timeDone.getMonth() + 1) + "/" + timeDone.getFullYear() + "</td>" +
+                "<td>" + "<button class='btn btn-danger' id='" +
+                todoDeleteBtnID + "'><img src='/static/images/trash3-fill.svg'></button></td></tr>";
+
+             
+
+                todosDisplayed.push({item: item, buttonDel: todoDeleteBtnID});
+
+
+            } else if (showDone === false && item.isDone == false) {
+                // A yet to be done Todo
+
+                let todoCompleteBtnID = "btn-complete-" + String(item.id);
+                let todoDeleteBtnID = "btn-delete-" + String(item.id);
+                let todoEditBtnID = "btn-edit-" + String(item.id);
+
+                // Display
+                let timeCreated = new Date(item.timeCreatedUnix * 1000);
+                todosDiv.innerHTML += "<tr><td>" +  item.text + "</td>" +
+                    "<td>" + " " + timeCreated.getDate() + "/" + (timeCreated.getMonth() + 1) + "/" + timeCreated.getFullYear() + "</td>" +
+                    "<td><button class='btn btn-success' id='" + todoCompleteBtnID + "'>" + 
+                    "<img src='/static/images/check.svg'></button><button class='btn btn-danger' id='" +
+                    todoDeleteBtnID + "'><img src='/static/images/trash3-fill.svg'></button></td></tr>";
+                
+                todosDisplayed.push({item: item, buttonDel: todoDeleteBtnID, buttonComplete: todoCompleteBtnID});
+
+            }
+        });
+    }
+
+
+    // Loop over all buttons (doesn't matter which ones because the amounts are equal)
+    for (let i = 0; i < todosDisplayed.length; i++) {
+        let elem = todosDisplayed[i];
+
+        if (showDone === false && elem.item.isDone === false) {
+            // Done button
+            document.getElementById(elem.buttonComplete).addEventListener("click", async (event) => {
+                // Mark as done
+                elem.item.isDone = true;
+                // Set completion time
+                elem.item.completionTimeUnix = Math.floor(Date.now() / 1000);
+
+                // Update
+                response = await updateTodo(username, password, elem.item.id, elem.item);
+                if (response.ok) {
+                    location.reload();
+                }
+            });
+
+            // Delete button
+            document.getElementById(elem.buttonDel).addEventListener("click", async (event) => {
+                response = await deleteTodo(username, password, elem.item.id);
+                if (response.ok) {
+                    location.reload();
+                }
+            });
+        } else {
+            // Delete button
+            document.getElementById(elem.buttonDel).addEventListener("click", async (event) => {
+                response = await deleteTodo(username, password, elem.item.id);
+                if (response.ok) {
+                    location.reload();
+                }
+            });
+        }
+    }
+}
+
+
+document.addEventListener('DOMContentLoaded', async function() {
+    let username = getUsername();
+    let password = getUserPassword();
+
+    document.getElementById("new-todo-text").focus();
+
+
+    let showDoneButton = document.getElementById("show-done");
+    showDoneButton.addEventListener("click", (event) => {
+        displayTodos(true); // Re-display without reloading
+
+        // Rename the button
+        showDoneButton.innerText = "Show To Do";
+        showDoneButton.className = "btn btn-success";
+        
+        // Make it "reset to default"
+        showDoneButton.addEventListener("click", (event) => {
+            location.reload();
+        });
+    });
+
+
+    // "Add" button
+    document.getElementById("new-todo-submit").addEventListener("click", async (event) => {
+        let newTodoTextInput =  document.getElementById("new-todo-text");
+        let newTodoText = newTodoTextInput.value;
+        if (newTodoText.length < 1) {
+            newTodoTextInput.setCustomValidity("At least one character is needed!");
+            return;
+        } else {
+            newTodoTextInput.setCustomValidity("");
+        }
+        newTodoTextInput.value = "";
+
+        // Make a request
+        let response = await postNewTodo(username, password, {text: newTodoText});
+        if (response.ok) {
+            location.reload();
+        }
+    });
+
+
+    // Fetch and display TODOs
+    await displayTodos(false);
+}, false)
+</script>
+
+{{ end }}
