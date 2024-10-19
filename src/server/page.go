@@ -1,6 +1,6 @@
 /*
   	dela - web TODO list
-    Copyright (C) 2023  Kasyanov Nikolay Alexeyevich (Unbewohnte)
+    Copyright (C) 2023, 2024  Kasyanov Nikolay Alexeyevich (Unbewohnte)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as published by
@@ -19,6 +19,7 @@
 package server
 
 import (
+	"Unbewohnte/dela/db"
 	"html/template"
 	"path/filepath"
 )
@@ -34,4 +35,43 @@ func getPage(pagesDir string, basePageName string, pageName string) (*template.T
 	}
 
 	return page, nil
+}
+
+type IndexPageData struct {
+	Groups []*db.TodoGroup `json:"groups"`
+}
+
+func GetIndexPageData(db *db.DB, login string) (*IndexPageData, error) {
+	groups, err := db.GetAllUserTodoGroups(login)
+	if err != nil {
+		return nil, err
+	}
+
+	return &IndexPageData{
+		Groups: groups,
+	}, nil
+}
+
+type CategoryPageData struct {
+	Groups         []*db.TodoGroup `json:"groups"`
+	CurrentGroupId uint64          `json:"currentGroupId"`
+	Todos          []*db.Todo      `json:"todos"`
+}
+
+func GetCategoryPageData(db *db.DB, login string, groupId uint64) (*CategoryPageData, error) {
+	groups, err := db.GetAllUserTodoGroups(login)
+	if err != nil {
+		return nil, err
+	}
+
+	todos, err := db.GetGroupTodos(groupId)
+	if err != nil {
+		return nil, err
+	}
+
+	return &CategoryPageData{
+		Groups:         groups,
+		CurrentGroupId: groupId,
+		Todos:          todos,
+	}, nil
 }

@@ -1,29 +1,6 @@
 /*
-	2023 Kasyanov Nikolay Alexeyevich (Unbewohnte)
+	2024 Kasyanov Nikolay Alexeyevich (Unbewohnte)
 */
-
-
-// Saves auth information to local storage  
-function rememberAuthInfo(login, password) {
-  localStorage.setItem("login", login);
-  localStorage.setItem("password", password);
-}
-
-// Retrieves user's password from local storage
-function getUserPassword() {
-  return localStorage.getItem("password");
-}
-
-// Retrieves user's login from local storage
-function getLogin() {
-return localStorage.getItem("login");
-}
-
-// Removes all auth information from local storage 
-function forgetAuthInfo() {
-localStorage.removeItem("login");
-localStorage.removeItem("password");
-}
 
 /**
  * [js-sha256]{@link https://github.com/emn178/js-sha256}

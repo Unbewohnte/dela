@@ -1,6 +1,6 @@
 /*
   	dela - web TODO list
-    Copyright (C) 2023  Kasyanov Nikolay Alexeyevich (Unbewohnte)
+    Copyright (C) 2023, 2024  Kasyanov Nikolay Alexeyevich (Unbewohnte)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as published by
@@ -25,8 +25,11 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/http/cookiejar"
 	"os"
+	"path"
 	"path/filepath"
+	"strconv"
 	"time"
 )
 
@@ -37,9 +40,10 @@ const (
 )
 
 type Server struct {
-	config conf.Conf
-	db     *db.DB
-	http   http.Server
+	config    conf.Conf
+	db        *db.DB
+	http      http.Server
+	cookieJar *cookiejar.Jar
 }
 
 // Creates a new server instance with provided config
@@ -102,19 +106,75 @@ func New(config conf.Conf) (*Server, error) {
 
 	// handle page requests
 	mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
-		switch req.URL.Path {
-		case "/":
+		if req.Method != "GET" {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+
+		if req.URL.Path == "/" {
+			// Auth first
+			if !IsUserAuthorizedReq(req, server.db) {
+				http.Redirect(w, req, "/about", http.StatusTemporaryRedirect)
+				return
+			}
+
 			requestedPage, err := getPage(
 				filepath.Join(server.config.BaseContentDir, PagesDirName), "base.html", "index.html",
 			)
 			if err != nil {
-				http.Redirect(w, req, "/about", http.StatusTemporaryRedirect)
+				http.Redirect(w, req, "/error", http.StatusTemporaryRedirect)
 				logger.Error("[Server][/] Failed to get a page: %s", err)
 				return
 			}
 
-			requestedPage.ExecuteTemplate(w, "index.html", nil)
-		default:
+			pageData, err := GetIndexPageData(server.db, GetLoginFromReq(req))
+			if err != nil {
+				http.Redirect(w, req, "/error", http.StatusTemporaryRedirect)
+				logger.Error("[Server][/] Failed to get index page data: %s", err)
+				return
+			}
+
+			requestedPage.ExecuteTemplate(w, "index.html", &pageData)
+		} else if path.Dir(req.URL.Path) == "/group" {
+			if req.Method != "GET" {
+				http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+				return
+			}
+
+			// Auth first
+			if !IsUserAuthorizedReq(req, server.db) {
+				http.Redirect(w, req, "/about", http.StatusTemporaryRedirect)
+				return
+			}
+
+			// Get group ID
+			groupId, err := strconv.ParseUint(path.Base(req.URL.Path), 10, 64)
+			if err != nil {
+				http.Redirect(w, req, "/error", http.StatusTemporaryRedirect)
+				return
+			}
+
+			requestedPage, err := getPage(
+				filepath.Join(server.config.BaseContentDir, PagesDirName), "base.html", "category.html",
+			)
+			if err != nil {
+				http.Redirect(w, req, "/error", http.StatusTemporaryRedirect)
+				logger.Error("[Server][/category/] Failed to get a page: %s", err)
+				return
+			}
+
+			// Get page data
+			pageData, err := GetCategoryPageData(server.db, GetLoginFromReq(req), groupId)
+			if err != nil {
+				http.Redirect(w, req, "/error", http.StatusTemporaryRedirect)
+				logger.Error("[Server][/category/] Failed to get category (%d) page data: %s", groupId, err)
+				return
+			}
+
+			requestedPage.ExecuteTemplate(w, "category.html", &pageData)
+
+		} else {
+			// default
 			requestedPage, err := getPage(
 				filepath.Join(server.config.BaseContentDir, PagesDirName),
 				"base.html",
@@ -123,7 +183,8 @@ func New(config conf.Conf) (*Server, error) {
 			if err == nil {
 				requestedPage.ExecuteTemplate(w, req.URL.Path[1:]+".html", nil)
 			} else {
-				http.Error(w, "Page processing error", http.StatusInternalServerError)
+				// http.Error(w, "Page processing error", http.StatusInternalServerError)
+				http.Redirect(w, req, "/error", http.StatusTemporaryRedirect)
 			}
 		}
 	})
@@ -131,6 +192,7 @@ func New(config conf.Conf) (*Server, error) {
 	mux.HandleFunc("/api/user/delete", server.EndpointUserDelete)        // Non specific
 	mux.HandleFunc("/api/user/update", server.EndpointUserUpdate)        // Non specific
 	mux.HandleFunc("/api/user/create", server.EndpointUserCreate)        // Non specific
+	mux.HandleFunc("/api/todo/create", server.EndpointTodoCreate)        // Non specific
 	mux.HandleFunc("/api/todo/get", server.EndpointUserTodosGet)         // Non specific
 	mux.HandleFunc("/api/todo/delete/", server.EndpointTodoDelete)       // Specific
 	mux.HandleFunc("/api/todo/update/", server.EndpointTodoUpdate)       // Specific
@@ -140,6 +202,9 @@ func New(config conf.Conf) (*Server, error) {
 	mux.HandleFunc("/api/group/delete/", server.EndpointTodoGroupDelete) // Specific
 
 	server.http.Handler = mux
+	jar, _ := cookiejar.New(nil)
+	server.cookieJar = jar
+
 	logger.Info("[Server] Created an HTTP server instance")
 
 	return &server, nil

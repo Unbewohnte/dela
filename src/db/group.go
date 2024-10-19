@@ -1,3 +1,21 @@
+/*
+  	dela - web TODO list
+    Copyright (C) 2023, 2024  Kasyanov Nikolay Alexeyevich (Unbewohnte)
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
 package db
 
 import "database/sql"
@@ -8,15 +26,26 @@ type TodoGroup struct {
 	Name            string `json:"name"`
 	TimeCreatedUnix uint64 `json:"timeCreatedUnix"`
 	OwnerLogin      string `json:"ownerLogin"`
+	Removable       bool   `json:"removable"`
+}
+
+func NewTodoGroup(name string, timeCreatedUnix uint64, ownerLogin string, removable bool) TodoGroup {
+	return TodoGroup{
+		Name:            name,
+		TimeCreatedUnix: timeCreatedUnix,
+		OwnerLogin:      ownerLogin,
+		Removable:       removable,
+	}
 }
 
 // Creates a new TODO group in the database
 func (db *DB) CreateTodoGroup(group TodoGroup) error {
 	_, err := db.Exec(
-		"INSERT INTO todo_groups(name, time_created_unix, owner_username) VALUES(?, ?, ?)",
+		"INSERT INTO todo_groups(name, time_created_unix, owner_login, removable) VALUES(?, ?, ?, ?)",
 		group.Name,
 		group.TimeCreatedUnix,
 		group.OwnerLogin,
+		group.Removable,
 	)
 
 	return err
@@ -29,6 +58,7 @@ func scanTodoGroup(rows *sql.Rows) (*TodoGroup, error) {
 		&newTodoGroup.Name,
 		&newTodoGroup.TimeCreatedUnix,
 		&newTodoGroup.OwnerLogin,
+		&newTodoGroup.Removable,
 	)
 	if err != nil {
 		return nil, err
@@ -76,6 +106,26 @@ func (db *DB) GetTodoGroups() ([]*TodoGroup, error) {
 	}
 
 	return groups, nil
+}
+
+func (db *DB) GetGroupTodos(groupId uint64) ([]*Todo, error) {
+	rows, err := db.Query("SELECT * FROM todos WHERE group_id=?", groupId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var todos []*Todo
+
+	for rows.Next() {
+		todoGroup, err := scanTodo(rows)
+		if err != nil {
+			return todos, err
+		}
+		todos = append(todos, todoGroup)
+	}
+
+	return todos, nil
 }
 
 // Deletes information about a TODO group of given ID from the database

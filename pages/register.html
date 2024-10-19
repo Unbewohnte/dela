@@ -59,7 +59,6 @@ async function register() {
   let response = await postNewUser(postData);
 
   if (response.ok) {
-      rememberAuthInfo(postData.login, postData.password);
       window.location.replace("/");
   } else {
       document.getElementById("error_message").innerText = await response.text();

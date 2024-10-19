@@ -44,10 +44,8 @@ async function logIn() {
     password = sha256(password);
 
     // Check if auth info is indeed valid
-    let response = await getUser(login, password);
-
+    let response = await getUser();
     if (response.ok) {
-        rememberAuthInfo(login, password);
         window.location.replace("/");
     } else {
         document.getElementById("error_message").innerText = await response.text();

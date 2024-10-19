@@ -1,6 +1,6 @@
 /*
   	dela - web TODO list
-    Copyright (C) 2023  Kasyanov Nikolay Alexeyevich (Unbewohnte)
+    Copyright (C) 2023, 2024  Kasyanov Nikolay Alexeyevich (Unbewohnte)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as published by
@@ -95,7 +95,7 @@ func (db *DB) GetTodos() ([]*Todo, error) {
 // Creates a new TODO in the database
 func (db *DB) CreateTodo(todo Todo) error {
 	_, err := db.Exec(
-		"INSERT INTO todos(group_id, text, time_created_unix, due_unix, owner_username, is_done, completion_time_unix) VALUES(?, ?, ?, ?, ?, ?, ?)",
+		"INSERT INTO todos(group_id, text, time_created_unix, due_unix, owner_login, is_done, completion_time_unix) VALUES(?, ?, ?, ?, ?, ?, ?)",
 		todo.GroupID,
 		todo.Text,
 		todo.TimeCreatedUnix,
@@ -134,12 +134,12 @@ func (db *DB) UpdateTodo(todoID uint64, updatedTodo Todo) error {
 }
 
 // Searches and retrieves TODO groups created by the user
-func (db *DB) GetAllUserTodoGroups(username string) ([]*TodoGroup, error) {
+func (db *DB) GetAllUserTodoGroups(login string) ([]*TodoGroup, error) {
 	var todoGroups []*TodoGroup
 
 	rows, err := db.Query(
-		"SELECT * FROM todo_groups WHERE owner_username=?",
-		username,
+		"SELECT * FROM todo_groups WHERE owner_login=?",
+		login,
 	)
 	if err != nil {
 		return nil, err
@@ -158,12 +158,12 @@ func (db *DB) GetAllUserTodoGroups(username string) ([]*TodoGroup, error) {
 }
 
 // Searches and retrieves TODOs created by the user
-func (db *DB) GetAllUserTodos(username string) ([]*Todo, error) {
+func (db *DB) GetAllUserTodos(login string) ([]*Todo, error) {
 	var todos []*Todo
 
 	rows, err := db.Query(
-		"SELECT * FROM todos WHERE owner_username=?",
-		username,
+		"SELECT * FROM todos WHERE owner_login=?",
+		login,
 	)
 	if err != nil {
 		return nil, err
@@ -183,20 +183,20 @@ func (db *DB) GetAllUserTodos(username string) ([]*Todo, error) {
 }
 
 // Deletes all information regarding TODOs of specified user
-func (db *DB) DeleteAllUserTodos(username string) error {
+func (db *DB) DeleteAllUserTodos(login string) error {
 	_, err := db.Exec(
-		"DELETE FROM todos WHERE owner_username=?",
-		username,
+		"DELETE FROM todos WHERE owner_login=?",
+		login,
 	)
 
 	return err
 }
 
 // Deletes all information regarding TODO groups of specified user
-func (db *DB) DeleteAllUserTodoGroups(username string) error {
+func (db *DB) DeleteAllUserTodoGroups(login string) error {
 	_, err := db.Exec(
-		"DELETE FROM todo_groups WHERE owner_username=?",
-		username,
+		"DELETE FROM todo_groups WHERE owner_login=?",
+		login,
 	)
 
 	return err

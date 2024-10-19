@@ -1,6 +1,6 @@
 /*
   	dela - web TODO list
-    Copyright (C) 2023  Kasyanov Nikolay Alexeyevich (Unbewohnte)
+    Copyright (C) 2023, 2024  Kasyanov Nikolay Alexeyevich (Unbewohnte)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as published by
@@ -22,6 +22,7 @@ import (
 	"Unbewohnte/dela/db"
 	"Unbewohnte/dela/logger"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"path"
@@ -70,12 +71,36 @@ func (s *Server) EndpointUserCreate(w http.ResponseWriter, req *http.Request) {
 	}
 
 	logger.Info("[Server][EndpointUserCreate] Created a new user with login \"%s\"", user.Login)
+
+	// Create a non-removable default category
+	err = s.db.CreateTodoGroup(db.NewTodoGroup(
+		"Notes",
+		uint64(time.Now().Unix()),
+		user.Login,
+		false,
+	))
+	if err != nil {
+		http.Error(w, "Failed to create default group", http.StatusInternalServerError)
+		logger.Error("[Server][EndpojntUserCreate] Failed to create a default group for %s: %s", user.Login, err)
+		return
+	}
+
+	// Send cookie
+	http.SetCookie(w, &http.Cookie{
+		Name:     "auth",
+		Value:    fmt.Sprintf("%s:%s", user.Login, user.Password),
+		SameSite: http.SameSiteStrictMode,
+		HttpOnly: false,
+		Path:     "/",
+		Secure:   true,
+	})
 	w.WriteHeader(http.StatusOK)
 }
 
 func (s *Server) EndpointUserUpdate(w http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
 	}
 
 	// Retrieve user data
@@ -103,7 +128,7 @@ func (s *Server) EndpointUserUpdate(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// Check whether the user in request is the user specified in JSON
-	login, _, _ := req.BasicAuth()
+	login := GetLoginFromReq(req)
 	if login != user.Login {
 		// Gotcha!
 		logger.Warning("[Server][EndpointUserUpdate] %s tried to update user information of %s!", login, user.Login)
@@ -138,7 +163,7 @@ func (s *Server) EndpointUserDelete(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// Delete
-	login, _, _ := req.BasicAuth()
+	login := GetLoginFromReq(req)
 	err := s.db.DeleteUser(login)
 	if err != nil {
 		http.Error(w, "Failed to delete user", http.StatusInternalServerError)
@@ -165,7 +190,7 @@ func (s *Server) EndpointUserGet(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// Get information from the database
-	login, _, _ := req.BasicAuth()
+	login := GetLoginFromReq(req)
 	userDB, err := s.db.GetUser(login)
 	if err != nil {
 		logger.Error("[Server][EndpointUserGet] Failed to retrieve information on \"%s\": %s", login, err)
@@ -207,7 +232,7 @@ func (s *Server) EndpointTodoUpdate(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// Check if the user owns this TODO
-	if !s.db.DoesUserOwnTodo(todoID, GetLoginFromAuth(req)) {
+	if !s.db.DoesUserOwnTodo(todoID, GetLoginFromReq(req)) {
 		http.Error(w, "You don't own this TODO", http.StatusForbidden)
 		return
 	}
@@ -265,7 +290,7 @@ func (s *Server) EndpointTodoDelete(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// Check if the user owns this TODO
-	if !s.db.DoesUserOwnTodo(todoID, GetLoginFromAuth(req)) {
+	if !s.db.DoesUserOwnTodo(todoID, GetLoginFromReq(req)) {
 		http.Error(w, "You don't own this TODO", http.StatusForbidden)
 		return
 	}
@@ -273,7 +298,7 @@ func (s *Server) EndpointTodoDelete(w http.ResponseWriter, req *http.Request) {
 	// Now delete
 	err = s.db.DeleteTodo(todoID)
 	if err != nil {
-		logger.Error("[Server] Failed to delete %s's TODO: %s", GetLoginFromAuth(req), err)
+		logger.Error("[Server] Failed to delete %s's TODO: %s", GetLoginFromReq(req), err)
 		http.Error(w, "Failed to delete TODO", http.StatusInternalServerError)
 		return
 	}
@@ -310,7 +335,7 @@ func (s *Server) EndpointTodoCreate(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// Add TODO to the database
-	newTodo.OwnerLogin = GetLoginFromAuth(req)
+	newTodo.OwnerLogin = GetLoginFromReq(req)
 	newTodo.TimeCreatedUnix = uint64(time.Now().Unix())
 	err = s.db.CreateTodo(newTodo)
 	if err != nil {
@@ -342,7 +367,7 @@ func (s *Server) EndpointUserTodosGet(w http.ResponseWriter, req *http.Request) 
 	}
 
 	// Get all user TODOs
-	todos, err := s.db.GetAllUserTodos(GetLoginFromAuth(req))
+	todos, err := s.db.GetAllUserTodos(GetLoginFromReq(req))
 	if err != nil {
 		http.Error(w, "Failed to get TODOs", http.StatusInternalServerError)
 		return
@@ -387,7 +412,7 @@ func (s *Server) EndpointTodoGroupDelete(w http.ResponseWriter, req *http.Reques
 		return
 	}
 
-	if !s.db.DoesUserOwnGroup(group.ID, GetLoginFromAuth(req)) {
+	if !s.db.DoesUserOwnGroup(group.ID, GetLoginFromReq(req)) {
 		http.Error(w, "You don't own this group", http.StatusForbidden)
 		return
 	}
@@ -395,7 +420,7 @@ func (s *Server) EndpointTodoGroupDelete(w http.ResponseWriter, req *http.Reques
 	// Now delete
 	err = s.db.DeleteTodoGroup(group.ID)
 	if err != nil {
-		logger.Error("[Server] Failed to delete %s's TODO group: %s", GetLoginFromAuth(req), err)
+		logger.Error("[Server] Failed to delete %s's TODO group: %s", GetLoginFromReq(req), err)
 		http.Error(w, "Failed to delete TODO group", http.StatusInternalServerError)
 		return
 	}
@@ -431,7 +456,7 @@ func (s *Server) EndpointTodoGroupCreate(w http.ResponseWriter, req *http.Reques
 	}
 
 	// Add group to the database
-	newGroup.OwnerLogin = GetLoginFromAuth(req)
+	newGroup.OwnerLogin = GetLoginFromReq(req)
 	newGroup.TimeCreatedUnix = uint64(time.Now().Unix())
 	err = s.db.CreateTodoGroup(newGroup)
 	if err != nil {
@@ -456,7 +481,7 @@ func (s *Server) EndpointTodoGroupGet(w http.ResponseWriter, req *http.Request) 
 	}
 
 	// Get groups
-	groups, err := s.db.GetAllUserTodoGroups(GetLoginFromAuth(req))
+	groups, err := s.db.GetAllUserTodoGroups(GetLoginFromReq(req))
 	if err != nil {
 		http.Error(w, "Failed to get TODO groups", http.StatusInternalServerError)
 		return

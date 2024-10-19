@@ -1,6 +1,6 @@
 /*
   	dela - web TODO list
-    Copyright (C) 2023  Kasyanov Nikolay Alexeyevich (Unbewohnte)
+    Copyright (C) 2023, 2024  Kasyanov Nikolay Alexeyevich (Unbewohnte)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as published by
@@ -21,6 +21,7 @@ package server
 import (
 	"Unbewohnte/dela/db"
 	"net/http"
+	"strings"
 )
 
 const (
@@ -34,11 +35,16 @@ func IsUserValid(user db.User) (bool, string) {
 	if uint(len(user.Login)) < MinimalLoginLength {
 		return false, "Login is too small"
 	}
+	for _, char := range user.Login {
+		if char < 0x21 || char > 0x7E {
+			// Not printable ASCII char!
+			return false, "Login has a non printable ASCII character"
+		}
+	}
 
 	if uint(len(user.Password)) < MinimalPasswordLength {
 		return false, "Password is too small"
 	}
-
 	for _, char := range user.Password {
 		if char < 0x21 || char > 0x7E {
 			// Not printable ASCII char!
@@ -63,15 +69,36 @@ func IsUserAuthorized(db *db.DB, user db.User) bool {
 	return true
 }
 
+// Returns login and password from a cookie. If an error is encountered, returns empty strings
+func AuthFromCookie(cookie *http.Cookie) (string, string) {
+	if cookie == nil {
+		return "", ""
+	}
+
+	parts := strings.Split(cookie.Value, ":")
+	if len(parts) != 2 {
+		return "", ""
+	}
+
+	return parts[0], parts[1]
+}
+
 /*
 Gets auth information from a request and
 checks if such a user exists and compares passwords.
 Returns true if such user exists and passwords do match
 */
 func IsUserAuthorizedReq(req *http.Request, dbase *db.DB) bool {
-	login, password, ok := req.BasicAuth()
-	if !ok {
-		return false
+	var login, password string
+	var ok bool
+	login, password, ok = req.BasicAuth()
+	if !ok || login == "" || password == "" {
+		cookie, err := req.Cookie("auth")
+		if err != nil {
+			return false
+		}
+
+		login, password = AuthFromCookie(cookie)
 	}
 
 	return IsUserAuthorized(dbase, db.User{
@@ -80,7 +107,17 @@ func IsUserAuthorizedReq(req *http.Request, dbase *db.DB) bool {
 	})
 }
 
-func GetLoginFromAuth(req *http.Request) string {
-	login, _, _ := req.BasicAuth()
+// Returns login value from basic auth or from cookie if the former does not exist
+func GetLoginFromReq(req *http.Request) string {
+	login, _, ok := req.BasicAuth()
+	if !ok || login == "" {
+		cookie, err := req.Cookie("auth")
+		if err != nil {
+			return ""
+		}
+
+		login, _ = AuthFromCookie(cookie)
+	}
+
 	return login
 }
