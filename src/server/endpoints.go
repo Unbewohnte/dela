@@ -265,6 +265,53 @@ func (s *Server) EndpointTodoUpdate(w http.ResponseWriter, req *http.Request) {
 	logger.Info("[Server] Updated TODO with ID %d", todoID)
 }
 
+func (s *Server) EndpointTodoMarkDone(w http.ResponseWriter, req *http.Request) {
+	defer req.Body.Close()
+
+	if req.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Check authentication information
+	if !IsUserAuthorizedReq(req, s.db) {
+		http.Error(w, "Invalid user auth data", http.StatusForbidden)
+		return
+	}
+
+	// Obtain TODO ID
+	todoIDStr := path.Base(req.URL.Path)
+	todoID, err := strconv.ParseUint(todoIDStr, 10, 64)
+	if err != nil {
+		http.Error(w, "Invalid TODO ID", http.StatusBadRequest)
+		return
+	}
+
+	// Check if the user owns this TODO
+	if !s.db.DoesUserOwnTodo(todoID, GetLoginFromReq(req)) {
+		http.Error(w, "You don't own this TODO", http.StatusForbidden)
+		return
+	}
+
+	todo, err := s.db.GetTodo(todoID)
+	if err != nil {
+		http.Error(w, "Can't access this TODO", http.StatusInternalServerError)
+		return
+	}
+
+	// Update
+	todo.IsDone = true
+	todo.CompletionTimeUnix = uint64(time.Now().Unix())
+	err = s.db.UpdateTodo(todoID, *todo)
+	if err != nil {
+		logger.Warning("[Server] Failed to update TODO: %s", err)
+		http.Error(w, "Failed to update", http.StatusBadRequest)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	logger.Info("[Server] Marked TODO as done %d", todoID)
+}
+
 func (s *Server) EndpointTodoDelete(w http.ResponseWriter, req *http.Request) {
 	defer req.Body.Close()
 

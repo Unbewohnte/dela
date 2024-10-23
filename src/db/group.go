@@ -18,7 +18,10 @@
 
 package db
 
-import "database/sql"
+import (
+	"database/sql"
+	"time"
+)
 
 // Todo group structure
 type TodoGroup struct {
@@ -27,6 +30,7 @@ type TodoGroup struct {
 	TimeCreatedUnix uint64 `json:"timeCreatedUnix"`
 	OwnerLogin      string `json:"ownerLogin"`
 	Removable       bool   `json:"removable"`
+	TimeCreated     string
 }
 
 func NewTodoGroup(name string, timeCreatedUnix uint64, ownerLogin string, removable bool) TodoGroup {
@@ -62,6 +66,14 @@ func scanTodoGroup(rows *sql.Rows) (*TodoGroup, error) {
 	)
 	if err != nil {
 		return nil, err
+	}
+
+	// Convert to Basic time
+	timeCreated := time.Unix(int64(newTodoGroup.TimeCreatedUnix), 0)
+	if timeCreated.Year() == 1970 {
+		newTodoGroup.TimeCreated = "None"
+	} else {
+		newTodoGroup.TimeCreated = timeCreated.Format(time.DateOnly)
 	}
 
 	return &newTodoGroup, nil

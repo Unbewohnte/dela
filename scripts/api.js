@@ -54,7 +54,7 @@ async function getAllGroups() {
 
 async function del(url) {
     return fetch(url, {
-        method: "DELETE",
+        method: "POST",
         credentials: "include",
         headers: {
             "Content-Type": "application/json",
@@ -72,6 +72,10 @@ async function update(url, json) {
 
 async function updateTodo(id, updatedTodo) {
     return update("/api/todo/update/"+id, updatedTodo);
+}
+
+async function markAsDone(id) {
+    return update("/api/todo/markdone/"+id);
 }
 
 async function updateGroup(id, updatedGroup) {

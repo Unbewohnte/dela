@@ -16,7 +16,7 @@
         <a href="/group/{{.ID}}" class="list-group-item list-group-item-action active py-3 lh-sm" aria-current="true">
           <div class="d-flex w-100 align-items-center justify-content-between">
             <strong class="mb-1">{{ .Name }}</strong>
-            <small>{{ .TimeCreatedUnix }}</small>
+            <small>{{ .TimeCreated }}</small>
           </div>
           <div class="col-10 mb-1 small">Is removable: {{ .Removable }}</div>
         </a>
@@ -39,94 +39,34 @@
     </a>
     {{ end }}
   </div>
+
+  <div>
+    <label for="newCategory">New category</label>
+    <input type="text" name="newCategory" id="new-category-input" placeholder="Category Name">
+    <input type="submit" value="Create" onclick="createNewCategory();">
+  </div>
 </div>
 </main>
 
 <script>
-// function todoBlock(todo, editable) {
-//   let todoCompleteBtnID = "btn-complete-" + String(todo.id);
-//   let todoDeleteBtnID = "btn-delete-" + String(todo.id);
-//   let todoEditBtnID = "btn-edit-" + String(todo.id);
+async function createNewCategory() {
+  let categoryInput = document.getElementById("new-category-input");
+  let newCategoryName = categoryInput.value;
+  if (newCategoryName.length < 1) {
+    categoryInput.setCustomValidity("At least one character is needed!");
+    return;
+  } else {
+    categoryInput.setCustomValidity("");
+  }
+  categoryInput.value = "";
 
-//   // Display
-//   let timeCreated = new Date(todo.timeCreatedUnix * 1000);
+  // Post new category and refresh
+  await postNewGroup({
+    Name: newCategoryName
+  });
 
-//   return "<tr><td>" +  todo.text + "</td>" +
-//       "<td>" + " " + 
-//       timeCreated.getDate() + "/" + 
-//       (timeCreated.getMonth() + 1) + "/" + 
-//       timeCreated.getFullYear() + "</td>" +
-//       "<td><button class='btn btn-success' id='" + todoCompleteBtnID + "'>" + 
-//       "<img src='/static/images/check.svg'></button><button class='btn btn-danger' id='" +
-//       todoDeleteBtnID + "'><img src='/static/images/trash3-fill.svg'></button></td></tr>";
-// }
-
-// async function displayTodos(showDone) {
-//     // Fetch and display TODOs
-//     let response = await getTodos();
-//     if (!response.ok) {
-//       // window.location.replace("/error")
-//       return;
-//     }
-
-//     let todosJson = await response.json();    
-//     if (todosJson == null) {  
-//       return;
-//     }
-
-//     let todosDisplayed = [];
-//     let todosDiv = document.getElementById("todos");
-//     // Clear what we've had before
-//     todosDiv.innerHTML = "";
-
-//     todosJson.forEach((item) => {
-//       let todoBlk = todoBlock(item, item.isDone);
-//       todosDiv.innerHTML += todoBlk;
-//     });
-// }
-
-
-// document.addEventListener('DOMContentLoaded', async function() {
-//     document.getElementById("new-todo-text").focus();
-
-//     let showDoneButton = document.getElementById("show-done");
-//     showDoneButton.addEventListener("click", (event) => {
-//         displayTodos(true); // Re-display without reloading
-
-//         // Rename the button
-//         showDoneButton.innerText = "Show To Do";
-//         showDoneButton.className = "btn btn-success";
-        
-//         // Make it "reset to default"
-//         showDoneButton.addEventListener("click", (event) => {
-//             location.reload();
-//         });
-//     });
-
-
-//     // "Add" button
-//     document.getElementById("new-todo-submit").addEventListener("click", async (event) => {
-//         let newTodoTextInput =  document.getElementById("new-todo-text");
-//         let newTodoText = newTodoTextInput.value;
-//         if (newTodoText.length < 1) {
-//             newTodoTextInput.setCustomValidity("At least one character is needed!");
-//             return;
-//         } else {
-//             newTodoTextInput.setCustomValidity("");
-//         }
-//         newTodoTextInput.value = "";
-
-//         // Make a request
-//         let response = await postNewTodo({text: newTodoText, groupId: groupId});
-//         if (response.ok) {
-//             location.reload();
-//         }
-//     });
-
-
-//     // Fetch and display TODOs
-//     await displayTodos(false);
-// }, false)
+  window.location.reload();
+}
 </script>
 
 {{ end }}

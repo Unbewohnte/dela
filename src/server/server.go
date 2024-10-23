@@ -196,6 +196,7 @@ func New(config conf.Conf) (*Server, error) {
 	mux.HandleFunc("/api/todo/get", server.EndpointUserTodosGet)         // Non specific
 	mux.HandleFunc("/api/todo/delete/", server.EndpointTodoDelete)       // Specific
 	mux.HandleFunc("/api/todo/update/", server.EndpointTodoUpdate)       // Specific
+	mux.HandleFunc("/api/todo/markdone/", server.EndpointTodoMarkDone)   // Specific
 	mux.HandleFunc("/api/group/create", server.EndpointTodoGroupCreate)  // Non specific
 	mux.HandleFunc("/api/group/get/", server.EndpointTodoGroupGet)       // Specific
 	mux.HandleFunc("/api/group/update/", server.EndpointTodoGroupUpdate) // Specific

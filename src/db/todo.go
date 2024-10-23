@@ -18,7 +18,10 @@
 
 package db
 
-import "database/sql"
+import (
+	"database/sql"
+	"time"
+)
 
 // Todo structure
 type Todo struct {
@@ -30,6 +33,9 @@ type Todo struct {
 	OwnerLogin         string `json:"ownerLogin"`
 	IsDone             bool   `json:"isDone"`
 	CompletionTimeUnix uint64 `json:"completionTimeUnix"`
+	TimeCreated        string
+	CompletionTime     string
+	Due                string
 }
 
 func scanTodo(rows *sql.Rows) (*Todo, error) {
@@ -46,6 +52,28 @@ func scanTodo(rows *sql.Rows) (*Todo, error) {
 	)
 	if err != nil {
 		return nil, err
+	}
+
+	// Convert to Basic time
+	timeCreated := time.Unix(int64(newTodo.TimeCreatedUnix), 0)
+	if timeCreated.Year() == 1970 {
+		newTodo.TimeCreated = "None"
+	} else {
+		newTodo.TimeCreated = timeCreated.Format(time.DateOnly)
+	}
+
+	due := time.Unix(int64(newTodo.DueUnix), 0)
+	if due.Year() == 1970 {
+		newTodo.Due = "None"
+	} else {
+		newTodo.Due = due.Format(time.DateOnly)
+	}
+
+	completionTime := time.Unix(int64(newTodo.CompletionTimeUnix), 0)
+	if completionTime.Year() == 1970 {
+		newTodo.CompletionTime = "None"
+	} else {
+		newTodo.CompletionTime = completionTime.Format(time.DateOnly)
 	}
 
 	return &newTodo, nil

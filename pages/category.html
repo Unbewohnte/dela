@@ -18,7 +18,7 @@
         <a href="/group/{{.ID}}" class="list-group-item list-group-item-action active py-3 lh-sm" aria-current="true">
           <div class="d-flex w-100 align-items-center justify-content-between">
             <strong class="mb-1">{{ .Name }}</strong>
-            <small>{{ .TimeCreatedUnix }}</small>
+            <small>{{ .TimeCreated }}</small>
           </div>
           <div class="col-10 mb-1 small">Is removable: {{ .Removable }}</div>
         </a>
@@ -46,29 +46,76 @@
     </form>
     
     <div class="container text-center">
-        <table class="table table-hover">
-          <thead>
-            <th>ToDo</th>
-            <th>Created</th>
-            <th>Due</th>
-            <th>Group Id</th>
-          </thead>
-          <tbody id="todos" class="text-break">
-            {{ range .Todos }}
-              <tr>
-                <td>{{ .Text }}</td>
-                <td>{{ .TimeCreatedUnix }}</td>
-                <td>{{ .DueUnix }}</td>
-                <td>{{ .GroupID }}</td>
-              </tr>
-            {{ end }}
-          </tbody>
-        </table>
+      <!-- Due -->
+      <table class="table table-hover" id="due-todos">
+        <thead>
+          <th>ToDo</th>
+          <th>Created</th>
+          <th>Due</th>
+        </thead>
+        <tbody class="text-break">
+          {{ range .Todos }}
+          {{ if not .IsDone }}
+            <tr>
+              <td>{{ .Text }}</td>
+              <td>{{ .TimeCreated }}</td>
+              <td>{{ .Due }}</td>
+              <td>
+                <button class="btn btn-success" onclick="markAsDoneRefresh({{.ID}});"><img src='/static/images/check.svg'></button>
+                <button class="btn btn-danger" onclick="deleteTodoRefresh({{.ID}});"><img src='/static/images/trash3-fill.svg'></button>
+              </td>
+            </tr>
+          {{ end }}
+          {{ end }}
+        </tbody>
+      </table>
+
+      <!-- Completed -->
+      <table class="table table-hover" style="display: none;" id="completed-todos">
+        <thead>
+          <th>ToDo</th>
+          <th>Created</th>
+          <th>Completed</th>
+        </thead>
+        <tbody class="text-break">
+          {{ range .Todos }}
+          {{ if .IsDone }}
+            <tr>
+              <td>{{ .Text }}</td>
+              <td>{{ .TimeCreated }}</td>
+              <td>{{ .CompletionTime }}</td>
+              <td>
+                <button class="btn btn-danger" onclick="deleteTodoRefresh({{.ID}});"><img src='/static/images/trash3-fill.svg'></button>
+              </td>
+            </tr>
+          {{ end }}
+          {{ end }}
+        </tbody>
+      </table>
     </div>
 </div>
 </main>
 
 <script>
+async function markAsDoneRefresh(id) {
+  await markAsDone(id);
+  window.location.reload();
+}
+
+async function deleteTodoRefresh(id) {
+  await deleteTodo(id);
+  window.location.reload();
+}
+
+async function showDone() {
+  // Hide not done, show done
+  let completedTodos = document.getElementById("completed-todos");
+  completedTodos.style.display = "table";
+
+  let dueTodos = document.getElementById("due-todos");
+  dueTodos.style.display = "none";
+}
+
 document.addEventListener('DOMContentLoaded', async function() {
     document.getElementById("new-todo-text").focus();
 
@@ -77,7 +124,9 @@ document.addEventListener('DOMContentLoaded', async function() {
         // Rename the button
         showDoneButton.innerText = "Show To Do";
         showDoneButton.className = "btn btn-success";
-        
+        // Show done
+        showDone();
+
         // Make it "reset to default"
         showDoneButton.addEventListener("click", (event) => {
             location.reload();
