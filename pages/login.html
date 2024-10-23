@@ -44,7 +44,7 @@ async function logIn() {
     password = sha256(password);
 
     // Check if auth info is indeed valid
-    let response = await getUser();
+    let response = await doLogin({login: login, password: password});
     if (response.ok) {
         window.location.replace("/");
     } else {

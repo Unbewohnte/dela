@@ -9,22 +9,26 @@
 
 <!-- Sidebar -->
 <div id="sidebar" class="flex-shrink-1 p-2 d-flex flex-column align-items-stretch bg-body-tertiary" style="width: 380px;">
-    <a href="/" class="d-flex align-items-center flex-shrink-0 p-3 link-body-emphasis text-decoration-none border-bottom">
-      <svg class="bi pe-none me-2" width="30" height="24"><use xlink:href="#bootstrap"></use></svg>
+  <a href="/" class="d-flex align-items-center flex-shrink-0 p-3 link-body-emphasis text-decoration-none border-bottom">
+      <img class="bi pe-none me-2" width="30" height="24" src="/static/images/arrows-fullscreen.svg">
       <span class="fs-5 fw-semibold">Categories</span>
-    </a>
-    {{ range .Groups  }}
-      <div class="list-group list-group-flush border-bottom scrollarea">
-        <a href="/group/{{.ID}}" class="list-group-item list-group-item-action active py-3 lh-sm" aria-current="true">
-          <div class="d-flex w-100 align-items-center justify-content-between">
-            <strong class="mb-1">{{ .Name }}</strong>
-            <small>{{ .TimeCreated }}</small>
-          </div>
-          <div class="col-10 mb-1 small">Is removable: {{ .Removable }}</div>
-        </a>
-      </div>
-    {{ end }}
+  </a>
+
+  <div class="list-group list-group-flush border-bottom scrollarea">
+  {{ range .Groups  }}
+      <a href="/group/{{.ID}}" class="list-group-item list-group-item-action py-3 lh-sm {{if eq .ID $.CurrentGroupId}} active {{end}}" aria-current="true">
+        <div class="d-flex w-100 align-items-center justify-content-between">
+          <strong class="mb-1">{{ .Name }}</strong>
+          <small>{{ .TimeCreated }}</small>
+        </div>
+        {{ if not .Removable }}
+          <div class="col-10 mb-1 small">Not removable</div>
+        {{ end }}
+      </a>
+  {{ end }}
+  </div>
 </div>
+
 
     
 <div class="p-2 flex-grow-1">
@@ -35,7 +39,8 @@
                     <input type="text" class="form-control" id="new-todo-text" placeholder="TODO text">
                 </div>
                 <div class="col">
-                    <input type="datetime-local" name="new-todo-due" id="new-todo-due" placeholder="Due">
+                    <label for="new-todo-due">Due</label>
+                    <input aria-placeholder="Due" type="date" name="new-todo-due" id="new-todo-due" placeholder="Due">
                 </div>
                 <div class="col">
                     <button id="new-todo-submit" class="btn btn-primary">Add</button>
@@ -136,7 +141,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     // "Add" button
     document.getElementById("new-todo-submit").addEventListener("click", async (event) => {
-        let newTodoTextInput =  document.getElementById("new-todo-text");
+        let newTodoTextInput = document.getElementById("new-todo-text");
         let newTodoText = newTodoTextInput.value;
         if (newTodoText.length < 1) {
             newTodoTextInput.setCustomValidity("At least one character is needed!");
@@ -146,10 +151,15 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
         newTodoTextInput.value = "";
 
+        let newTodoDueInput = document.getElementById("new-todo-due");
+        let dueTimeStamp = Date.parse(newTodoDueInput.value) / 1000;
+
         let groupId = document.getElementById("categoryId").innerText;
 
         // Make a request
-        let response = await postNewTodo({text: newTodoText, groupId: Number(groupId)});
+        let response = await postNewTodo(
+          {text: newTodoText, groupId: Number(groupId), dueUnix: Number(dueTimeStamp)}
+        );
         if (response.ok) {
             location.reload();
         }

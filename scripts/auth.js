@@ -1,6 +1,18 @@
 /*
-	2024 Kasyanov Nikolay Alexeyevich (Unbewohnte)
+	2024 Kasyanov Nikolay Alexeevich (Unbewohnte)
 */
+
+function getCookie(name){
+  return document.cookie.split(';').some(c => {
+      return c.trim().startsWith(name + '=');
+  });
+}
+
+function forgetAuthInfo() {
+  if(getCookie("auth")) {
+    document.cookie = "auth" + "=" + ";expires=Thu, 01 Jan 1970 00:00:01 GMT";
+  }
+}
 
 /**
  * [js-sha256]{@link https://github.com/emn178/js-sha256}

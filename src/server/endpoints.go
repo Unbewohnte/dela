@@ -97,6 +97,55 @@ func (s *Server) EndpointUserCreate(w http.ResponseWriter, req *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+func (s *Server) EndpointUserLogin(w http.ResponseWriter, req *http.Request) {
+	if req.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Retrieve user data
+	defer req.Body.Close()
+
+	contents, err := io.ReadAll(req.Body)
+	if err != nil {
+		logger.Error("[Server][EndpointUserLogin] Failed to read request body: %s", err)
+		http.Error(w, "Failed to read request body", http.StatusInternalServerError)
+		return
+	}
+
+	var user db.User
+	err = json.Unmarshal(contents, &user)
+	if err != nil {
+		logger.Error("[Server][EndpointUserLogin] Failed to unmarshal user data: %s", err)
+		http.Error(w, "User JSON unmarshal error", http.StatusInternalServerError)
+		return
+	}
+
+	// Check auth data
+	userDB, err := s.db.GetUser(user.Login)
+	if err != nil {
+		logger.Error("[Server][EndpointUserLogin] Failed to fetch user information from DB: %s", err)
+		http.Error(w, "Failed to fetch user information", http.StatusInternalServerError)
+		return
+	}
+
+	if user.Password != userDB.Password {
+		http.Error(w, "Failed auth", http.StatusForbidden)
+		return
+	}
+
+	// Send cookie
+	http.SetCookie(w, &http.Cookie{
+		Name:     "auth",
+		Value:    fmt.Sprintf("%s:%s", user.Login, user.Password),
+		SameSite: http.SameSiteStrictMode,
+		HttpOnly: false,
+		Path:     "/",
+		Secure:   true,
+	})
+	w.WriteHeader(http.StatusOK)
+}
+
 func (s *Server) EndpointUserUpdate(w http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -436,43 +485,47 @@ func (s *Server) EndpointTodoGroupDelete(w http.ResponseWriter, req *http.Reques
 	// Delete an existing group
 	defer req.Body.Close()
 
-	// Read body
-	body, err := io.ReadAll(req.Body)
-	if err != nil {
-		logger.Warning("[Server] Failed to read request body to possibly delete a TODO group: %s", err)
-		http.Error(w, "Failed to read body", http.StatusInternalServerError)
-		return
-	}
-
-	// Unmarshal JSON
-	var group db.TodoGroup
-	err = json.Unmarshal(body, &group)
-	if err != nil {
-		logger.Warning("[Server] Received invalid TODO group JSON for deletion: %s", err)
-		http.Error(w, "Invalid TODO group JSON", http.StatusBadRequest)
-		return
-	}
-
 	// Check if given user actually owns this group
 	if !IsUserAuthorizedReq(req, s.db) {
 		http.Error(w, "Invalid user auth data", http.StatusForbidden)
 		return
 	}
 
-	if !s.db.DoesUserOwnGroup(group.ID, GetLoginFromReq(req)) {
+	// Get group ID
+	groupId, err := strconv.ParseUint(path.Base(req.URL.Path), 10, 64)
+	if err != nil {
+		http.Error(w, "Bad Category ID", http.StatusBadRequest)
+		return
+	}
+
+	if !s.db.DoesUserOwnGroup(groupId, GetLoginFromReq(req)) {
 		http.Error(w, "You don't own this group", http.StatusForbidden)
 		return
 	}
 
-	// Now delete
-	err = s.db.DeleteTodoGroup(group.ID)
+	groupDB, err := s.db.GetTodoGroup(groupId)
 	if err != nil {
-		logger.Error("[Server] Failed to delete %s's TODO group: %s", GetLoginFromReq(req), err)
+		logger.Error("[Server][EndpointGroupDelete] Failed to fetch TODO group with Id %d: %s", groupId, err)
+		http.Error(w, "Failed to retrieve TODO group", http.StatusInternalServerError)
+		return
+	}
+
+	if !groupDB.Removable {
+		// Not removable
+		http.Error(w, "Not removable", http.StatusBadRequest)
+		return
+	}
+
+	// Delete
+	err = s.db.DeleteTodoGroup(groupId)
+	if err != nil {
+		logger.Error("[Server][EndpointGroupDelete] Failed to delete %s's TODO group: %s", GetLoginFromReq(req), err)
 		http.Error(w, "Failed to delete TODO group", http.StatusInternalServerError)
 		return
 	}
 
 	// Success!
+	logger.Info("[Server][EndpointGroupDelete] Deleted group ID: %d for %s", groupId, GetLoginFromReq(req))
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -505,6 +558,7 @@ func (s *Server) EndpointTodoGroupCreate(w http.ResponseWriter, req *http.Reques
 	// Add group to the database
 	newGroup.OwnerLogin = GetLoginFromReq(req)
 	newGroup.TimeCreatedUnix = uint64(time.Now().Unix())
+	newGroup.Removable = true
 	err = s.db.CreateTodoGroup(newGroup)
 	if err != nil {
 		http.Error(w, "Failed to create TODO group", http.StatusInternalServerError)

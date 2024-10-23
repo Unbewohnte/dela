@@ -45,24 +45,23 @@
 <script src="/scripts/api.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', async function() {
-      if (document.cookie.indexOf("auth=") == -1) {
-        if (window.location.pathname != "/about" && window.location.pathname != "/login" && window.location.pathname != "/register" && window.location.pathname != "/error") {
-          window.location.replace("/about");
+      // Check if auth info is valid
+      try {
+        let response = await getUser();
+        if (response.ok) {
+          let barAuth = document.getElementById("bar-auth");
+          barAuth.innerHTML = '<button id="log-out-btn" class="btn btn-outline-light me-2"><img src="/static/images/person-dash-fill.svg"></button>';
+          document.getElementById("log-out-btn").addEventListener("click", (event) => {
+            // Log out
+            forgetAuthInfo();
+            window.location.replace("/about");
+          });
         }
+      } catch(error) {
+        forgetAuthInfo();
         return;
-      } 
-
-      // Check if auth info is indeed valid
-      let response = await getUser();
-      if (response.ok) {
-        let barAuth = document.getElementById("bar-auth");
-        // barAuth.innerHTML = "<b>" + login + "</b>" + " | ";
-        barAuth.innerHTML = '<button id="log-out-btn" class="btn btn-outline-light me-2"><img src="/static/images/person-dash-fill.svg"></button>';
-        document.getElementById("log-out-btn").addEventListener("click", (event) => {
-          // Log out
-          window.location.replace("/about");
-        });
       }
+
     }, false)
 </script>
 

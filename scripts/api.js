@@ -26,6 +26,10 @@ async function postNewUser(newUser) {
     return post("/api/user/create", newUser)
 }
 
+async function doLogin(userInformation) {
+    return post("/api/user/login", userInformation)
+}
+
 async function get(url) {
     return fetch(url, {
         method: "GET",
@@ -64,6 +68,10 @@ async function del(url) {
 
 async function deleteTodo(id) {
     return del("/api/todo/delete/"+id);
+}
+
+async function deleteCategory(id) {
+    return del("/api/group/delete/"+id);
 }
 
 async function update(url, json) {

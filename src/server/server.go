@@ -192,6 +192,7 @@ func New(config conf.Conf) (*Server, error) {
 	mux.HandleFunc("/api/user/delete", server.EndpointUserDelete)        // Non specific
 	mux.HandleFunc("/api/user/update", server.EndpointUserUpdate)        // Non specific
 	mux.HandleFunc("/api/user/create", server.EndpointUserCreate)        // Non specific
+	mux.HandleFunc("/api/user/login", server.EndpointUserLogin)          // Non specific
 	mux.HandleFunc("/api/todo/create", server.EndpointTodoCreate)        // Non specific
 	mux.HandleFunc("/api/todo/get", server.EndpointUserTodosGet)         // Non specific
 	mux.HandleFunc("/api/todo/delete/", server.EndpointTodoDelete)       // Specific
