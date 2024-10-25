@@ -150,6 +150,23 @@ func (db *DB) DeleteTodoGroup(id uint64) error {
 	return err
 }
 
+// Deletes all ToDos associated with this group and then the group itself
+func (db *DB) DeleteTodoGroupClean(groupId uint64) error {
+	_, err := db.Exec("DELETE FROM todos WHERE group_id=?",
+		groupId,
+	)
+	if err != nil {
+		return err
+	}
+
+	_, err = db.Exec(
+		"DELETE FROM todo_groups WHERE id=?",
+		groupId,
+	)
+
+	return err
+}
+
 // Updates TODO group's name
 func (db *DB) UpdateTodoGroup(groupID uint64, updatedGroup TodoGroup) error {
 	_, err := db.Exec(

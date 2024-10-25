@@ -16,13 +16,13 @@
 
   <div class="list-group list-group-flush border-bottom scrollarea">
   {{ range .Groups  }}
-      <a href="/group/{{.ID}}" class="list-group-item list-group-item-action py-3 lh-sm {{if eq .ID $.CurrentGroupId}} active {{end}}" aria-current="true">
-        <div class="d-flex w-100 align-items-center justify-content-between">
-          <strong class="mb-1">{{ .Name }}</strong>
-          <small>{{ .TimeCreated }}</small>
+      <a id="group-{{.ID}}" href="/group/{{.ID}}" class="list-group-item list-group-item-action py-3 lh-sm {{if eq .ID $.CurrentGroupId}} active {{end}}" aria-current="true" ondragover="allowDrop(event);" ondrop="drop(event);">
+        <div id="group-{{.ID}}" class="d-flex w-100 align-items-center justify-content-between">
+          <strong id="group-{{.ID}}" class="mb-1">{{ .Name }}</strong>
+          <small id="group-{{.ID}}">{{ .TimeCreated }}</small>
         </div>
         {{ if not .Removable }}
-          <div class="col-10 mb-1 small">Not removable</div>
+          <div id="group-{{.ID}}" class="col-10 mb-1 small">Not removable</div>
         {{ end }}
       </a>
   {{ end }}
@@ -61,10 +61,11 @@
         <tbody class="text-break">
           {{ range .Todos }}
           {{ if not .IsDone }}
-            <tr>
-              <td>{{ .Text }}</td>
-              <td>{{ .TimeCreated }}</td>
-              <td>{{ .Due }}</td>
+            <tr draggable="true" id="todo-{{.ID}}" ondragstart="dragStart(event);">
+              <td class="todo-text">{{ .Text }}</td>
+              <td class="todo-created">{{ .TimeCreated }}</td>
+              <td class="todo-due">{{ .Due }}</td>
+              <td class="todo-due-unix" style="display: none;">{{ .DueUnix }}</td>
               <td>
                 <button class="btn btn-success" onclick="markAsDoneRefresh({{.ID}});"><img src='/static/images/check.svg'></button>
                 <button class="btn btn-danger" onclick="deleteTodoRefresh({{.ID}});"><img src='/static/images/trash3-fill.svg'></button>
@@ -119,6 +120,39 @@ async function showDone() {
 
   let dueTodos = document.getElementById("due-todos");
   dueTodos.style.display = "none";
+}
+
+function allowDrop(event) {
+  event.preventDefault();
+}
+
+function dragStart(event) {
+  event.dataTransfer.setData("text", event.target.id);
+  event.dataTransfer.effectAllowed = "move";
+}
+
+async function drop(event) {
+  event.preventDefault();
+
+  var todoPageId = event.dataTransfer.getData("text");
+  let draggedTodo = document.getElementById(todoPageId);
+  let todoId = todoPageId.split("-")[1];
+  let targetGroupId = event.target.id.split("-")[1];
+  if (targetGroupId == document.getElementById("categoryId").innerText) {
+    // Do nothing
+    return;
+  }
+  console.log("passed");
+
+  // Add a copy of this ToDo in the corresponding group
+  let result = await postNewTodo({
+    text: draggedTodo.getElementsByClassName("todo-text")[0].innerText,
+    groupId: Number(targetGroupId),
+    dueUnix: Number(draggedTodo.getElementsByClassName("todo-due-unix")[0].innerText),
+  });
+
+  // Delete this ToDo in this group
+  await deleteTodoRefresh(todoId);
 }
 
 document.addEventListener('DOMContentLoaded', async function() {

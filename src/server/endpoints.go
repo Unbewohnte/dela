@@ -407,6 +407,11 @@ func (s *Server) EndpointTodoDelete(w http.ResponseWriter, req *http.Request) {
 func (s *Server) EndpointTodoCreate(w http.ResponseWriter, req *http.Request) {
 	// Create a new TODO
 	defer req.Body.Close()
+	if req.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
 	// Read body
 	body, err := io.ReadAll(req.Body)
 	if err != nil {
@@ -431,6 +436,16 @@ func (s *Server) EndpointTodoCreate(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// Add TODO to the database
+	if newTodo.GroupID == 0 {
+		http.Error(w, "No group ID was provided", http.StatusBadRequest)
+		return
+	}
+
+	if !s.db.DoesUserOwnGroup(newTodo.GroupID, GetLoginFromReq(req)) {
+		http.Error(w, "You do not own this group", http.StatusForbidden)
+		return
+	}
+
 	newTodo.OwnerLogin = GetLoginFromReq(req)
 	newTodo.TimeCreatedUnix = uint64(time.Now().Unix())
 	err = s.db.CreateTodo(newTodo)
@@ -485,6 +500,11 @@ func (s *Server) EndpointTodoGroupDelete(w http.ResponseWriter, req *http.Reques
 	// Delete an existing group
 	defer req.Body.Close()
 
+	if req.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
 	// Check if given user actually owns this group
 	if !IsUserAuthorizedReq(req, s.db) {
 		http.Error(w, "Invalid user auth data", http.StatusForbidden)
@@ -516,8 +536,8 @@ func (s *Server) EndpointTodoGroupDelete(w http.ResponseWriter, req *http.Reques
 		return
 	}
 
-	// Delete
-	err = s.db.DeleteTodoGroup(groupId)
+	// Delete all ToDos associated with this group and then delete the group itself
+	err = s.db.DeleteTodoGroupClean(groupId)
 	if err != nil {
 		logger.Error("[Server][EndpointGroupDelete] Failed to delete %s's TODO group: %s", GetLoginFromReq(req), err)
 		http.Error(w, "Failed to delete TODO group", http.StatusInternalServerError)
@@ -525,13 +545,19 @@ func (s *Server) EndpointTodoGroupDelete(w http.ResponseWriter, req *http.Reques
 	}
 
 	// Success!
-	logger.Info("[Server][EndpointGroupDelete] Deleted group ID: %d for %s", groupId, GetLoginFromReq(req))
+	logger.Info("[Server][EndpointGroupDelete] Cleanly deleted group ID: %d for %s", groupId, GetLoginFromReq(req))
 	w.WriteHeader(http.StatusOK)
 }
 
 func (s *Server) EndpointTodoGroupCreate(w http.ResponseWriter, req *http.Request) {
 	// Create a new TODO group
 	defer req.Body.Close()
+
+	if req.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
 	// Read body
 	body, err := io.ReadAll(req.Body)
 	if err != nil {
@@ -568,7 +594,6 @@ func (s *Server) EndpointTodoGroupCreate(w http.ResponseWriter, req *http.Reques
 	// Success!
 	w.WriteHeader(http.StatusOK)
 	logger.Info("[Server] Created a new TODO group for %s", newGroup.OwnerLogin)
-
 }
 
 func (s *Server) EndpointTodoGroupGet(w http.ResponseWriter, req *http.Request) {
