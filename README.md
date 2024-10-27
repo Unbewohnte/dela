@@ -25,3 +25,6 @@ will create a `dela.zip` archive with all the content directories and the binary
 ## Use
 
 After the first run a configuration file will be put alongside the executable, upon the second launch server will start and the service will be accessible on the specified port.
+
+## License
+Dela is licensed under AGPL
