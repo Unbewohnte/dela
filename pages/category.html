@@ -8,7 +8,7 @@
 <main class="d-flex flex-wrap">
 
 <!-- Sidebar -->
-<div id="sidebar" class="flex-shrink-1 p-2 d-flex flex-column align-items-stretch bg-body-tertiary" style="width: 380px;">
+<div id="sidebar" class="border-right shadow-lg flex-shrink-1 p-2 d-flex flex-column align-items-stretch bg-body-tertiary" style="width: 380px;">
   <a href="/" class="d-flex align-items-center flex-shrink-0 p-3 link-body-emphasis text-decoration-none border-bottom">
       <img class="bi pe-none me-2" width="30" height="24" src="/static/images/arrows-fullscreen.svg">
       <span class="fs-5 fw-semibold">Categories</span>
@@ -67,8 +67,8 @@
               <td class="todo-due">{{ .Due }}</td>
               <td class="todo-due-unix" style="display: none;">{{ .DueUnix }}</td>
               <td>
-                <button class="btn btn-success" onclick="markAsDoneRefresh({{.ID}});"><img src='/static/images/check.svg'></button>
-                <button class="btn btn-danger" onclick="deleteTodoRefresh({{.ID}});"><img src='/static/images/trash3-fill.svg'></button>
+                <button class="btn btn-success" onclick="markAsDoneRefresh('{{.ID}}');"><img src='/static/images/check.svg'></button>
+                <button class="btn btn-danger" onclick="deleteTodoRefresh('{{.ID}}');"><img src='/static/images/trash3-fill.svg'></button>
               </td>
             </tr>
           {{ end }}
@@ -91,7 +91,7 @@
               <td>{{ .TimeCreated }}</td>
               <td>{{ .CompletionTime }}</td>
               <td>
-                <button class="btn btn-danger" onclick="deleteTodoRefresh({{.ID}});"><img src='/static/images/trash3-fill.svg'></button>
+                <button class="btn btn-danger" onclick="deleteTodoRefresh('{{.ID}}');"><img src='/static/images/trash3-fill.svg'></button>
               </td>
             </tr>
           {{ end }}

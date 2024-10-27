@@ -7,7 +7,7 @@
 
 <div class="d-flex flex-wrap">
   <!-- Sidebar -->
-  <div id="sidebar" class="flex-shrink-1 p-2 d-flex flex-column align-items-stretch bg-body-tertiary" style="width: 380px;">
+  <div id="sidebar" class="border-right shadow-lg flex-shrink-1 p-2 d-flex flex-column align-items-stretch bg-body-tertiary" style="width: 380px;">
     <a href="/" class="d-flex align-items-center flex-shrink-0 p-3 link-body-emphasis text-decoration-none border-bottom">
       <img class="bi pe-none me-2" width="30" height="24" src="/static/images/arrows-fullscreen.svg">
       <span class="fs-5 fw-semibold">Categories</span>
@@ -28,16 +28,13 @@
     </div>
 
 
-    <!-- <div class="d-flex flex-column p-4 gap-4 py-md-5 align-items-start justify-content-center"> -->
-    <div class="py-md-5">
-      <form onsubmit="return false;">
-        <input type="text" name="newCategory" class="form-control" id="new-category-input" placeholder="Category Name">
-        <input type="submit" value="Create" onclick="createNewCategory();" class="btn btn-primary">
-      </form>
+    <div class="input-group mb-3 py-md-5">
+      <input type="text" name="newCategory"aria-label="Category Name" aria-describedby="button-new-category" class="form-control" id="new-category-input" placeholder="Category Name">
+      <button id="button-new-category" onclick="createNewCategory();" class="btn btn-primary">Create</button >
     </div>
   </div>
 
-  <!-- <div class="d-flex flex-column flex-md-row p-4 gap-4 py-md-5 align-items-center justify-content-center flex-grow-1"> -->
+  <!-- Groups -->
   <div class="d-flex flex-column flex-grow-1 flex-md-row p-4 gap-4 py-md-5">
   <div class="list-group flex-grow-1">
     {{ range .Groups }}
@@ -54,7 +51,7 @@
         </a>
         {{ if .Removable }}
         <div class="small">
-          <button class="btn btn-danger" onclick="deleteCategoryRefresh({{.ID}})">
+          <button class="btn btn-danger" onclick="deleteCategoryRefresh('{{.ID}}')">
             <img src="/static/images/trash3-fill.svg" alt="Remove category">
           </button>
         </div>
@@ -64,8 +61,6 @@
   </div>
   </div>
 </div>
-
-<!-- d-flex flex-column align-items-center justify-content-center -->
 
 </main>
 
