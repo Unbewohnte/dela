@@ -154,6 +154,13 @@ func New(config conf.Conf) (*Server, error) {
 				return
 			}
 
+			// Check if it exists
+			if _, err = server.db.GetTodoGroup(groupId); err != nil {
+				// Group does not exist
+				http.Redirect(w, req, "/error", http.StatusTemporaryRedirect)
+				return
+			}
+
 			requestedPage, err := getPage(
 				filepath.Join(server.config.BaseContentDir, PagesDirName), "base.html", "category.html",
 			)
@@ -183,7 +190,6 @@ func New(config conf.Conf) (*Server, error) {
 			if err == nil {
 				requestedPage.ExecuteTemplate(w, req.URL.Path[1:]+".html", nil)
 			} else {
-				// http.Error(w, "Page processing error", http.StatusInternalServerError)
 				http.Redirect(w, req, "/error", http.StatusTemporaryRedirect)
 			}
 		}
