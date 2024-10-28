@@ -27,14 +27,15 @@
           <li><a href="/about" class="nav-link px-2 text-white">About</a></li>
         </ul>
 
-        <div class="text-end">
-          <button id="theme-switch-btn" class="btn btn-secondary">
+        <div class="text-end p-3">
+          <button id="theme-switch-btn" class="btn btn-secondary" onclick="toggleTheme();">
             <img id="theme-svg" src="/static/images/brightness-high.svg" alt="Change theme">
           </button>
         </div>
         <div class="text-end" id="bar-auth">
           <a href="/login" class="btn btn-outline-light me-2">Login</a>
           <a href="/register" class="btn btn-warning">Sign-up</a>
+        </div>
         </div>
       </div>
     </div>
@@ -49,43 +50,48 @@
 <script src="/scripts/auth.js"></script>
 <script src="/scripts/api.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', async function() {
-      // Check if auth info is valid
-      try {
-        let response = await getUser();
-        if (response.ok) {
-          let barAuth = document.getElementById("bar-auth");
-          barAuth.innerHTML = '<button id="log-out-btn" class="btn btn-outline-light me-2"><img src="/static/images/person-dash-fill.svg"></button>';
-          document.getElementById("log-out-btn").addEventListener("click", (event) => {
-            // Log out
-            forgetAuthInfo();
-            window.location.replace("/about");
-          });
-        }
-      } catch(error) {
+function toggleTheme() {
+  if (document.documentElement.getAttribute('data-bs-theme') == 'dark') {
+      document.documentElement.setAttribute('data-bs-theme','light');
+      localStorage.setItem("theme", "light");
+      document.getElementById("theme-svg").src = "/static/images/brightness-high.svg";
+  } else {
+      document.documentElement.setAttribute('data-bs-theme','dark');
+      localStorage.setItem("theme", "dark");
+      document.getElementById("theme-svg").src = "/static/images/moon-stars.svg";
+  }
+}
+
+document.addEventListener('DOMContentLoaded', async function() {
+  // Theme
+  let theme = localStorage.getItem("theme");
+  if (theme) {
+    document.documentElement.setAttribute('data-bs-theme', theme);
+    if (theme == "dark") {
+        document.getElementById("theme-svg").src = "/static/images/moon-stars.svg";
+    } else {
+        document.getElementById("theme-svg").src = "/static/images/brightness-high.svg";
+    }
+  }
+
+  // Check if auth info is valid
+  try {
+    let response = await getUser();
+    if (response.ok) {
+      let barAuth = document.getElementById("bar-auth");
+      barAuth.innerHTML = '<button id="log-out-btn" class="btn btn-outline-light me-2"><img src="/static/images/person-dash-fill.svg"></button>';
+      document.getElementById("log-out-btn").addEventListener("click", (event) => {
+        // Log out
         forgetAuthInfo();
-        return;
-      }
+        window.location.replace("/about");
+      });
+    }
+  } catch(error) {
+    forgetAuthInfo();
+    return;
+  }
 
-      // Theme
-      let theme = localStorage.getItem("theme");
-      if (theme) {
-        document.documentElement.setAttribute('data-bs-theme', theme);
-      }
-
-      document.getElementById('theme-switch-btn').addEventListener('click', () => {
-          if (document.documentElement.getAttribute('data-bs-theme') == 'dark') {
-              document.documentElement.setAttribute('data-bs-theme','light');
-              localStorage.setItem("theme", "light");
-              document.getElementById("theme-svg").src = "/static/images/brightness-high.svg";
-          } else {
-              document.documentElement.setAttribute('data-bs-theme','dark');
-              localStorage.setItem("theme", "dark");
-              document.getElementById("theme-svg").src = "/static/images/moon-stars.svg";
-          }
-      })
-
-    }, false)
+}, false)
 </script>
 
 {{ end }}

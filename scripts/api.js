@@ -34,9 +34,6 @@ async function get(url) {
     return fetch(url, {
         method: "GET",
         credentials: "include",
-        headers: {
-            "Content-Type": "application/json",
-        },
     })
 }
 
