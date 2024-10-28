@@ -14,7 +14,7 @@
       <span class="fs-5 fw-semibold">Categories</span>
   </a>
 
-  <div class="col list-group list-group-flush border-bottom scrollarea">
+  <div class="list-group list-group-flush border-bottom scrollarea">
   {{ range .Groups  }}
       <a id="group-{{.ID}}" href="/group/{{.ID}}" class="list-group-item list-group-item-action py-3 lh-sm {{if eq .ID $.CurrentGroupId}} active {{end}}" aria-current="true" ondragover="allowDrop(event);" ondrop="drop(event);">
         <div id="group-{{.ID}}" class="d-flex w-100 align-items-center justify-content-between">
