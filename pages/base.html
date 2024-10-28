@@ -27,6 +27,11 @@
           <li><a href="/about" class="nav-link px-2 text-white">About</a></li>
         </ul>
 
+        <div class="text-end">
+          <button id="theme-switch-btn" class="btn btn-secondary">
+            <img id="theme-svg" src="/static/images/brightness-high.svg" alt="Change theme">
+          </button>
+        </div>
         <div class="text-end" id="bar-auth">
           <a href="/login" class="btn btn-outline-light me-2">Login</a>
           <a href="/register" class="btn btn-warning">Sign-up</a>
@@ -61,6 +66,24 @@
         forgetAuthInfo();
         return;
       }
+
+      // Theme
+      let theme = localStorage.getItem("theme");
+      if (theme) {
+        document.documentElement.setAttribute('data-bs-theme', theme);
+      }
+
+      document.getElementById('theme-switch-btn').addEventListener('click', () => {
+          if (document.documentElement.getAttribute('data-bs-theme') == 'dark') {
+              document.documentElement.setAttribute('data-bs-theme','light');
+              localStorage.setItem("theme", "light");
+              document.getElementById("theme-svg").src = "/static/images/brightness-high.svg";
+          } else {
+              document.documentElement.setAttribute('data-bs-theme','dark');
+              localStorage.setItem("theme", "dark");
+              document.getElementById("theme-svg").src = "/static/images/moon-stars.svg";
+          }
+      })
 
     }, false)
 </script>
