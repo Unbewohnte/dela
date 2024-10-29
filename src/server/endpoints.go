@@ -92,7 +92,7 @@ func (s *Server) EndpointUserCreate(w http.ResponseWriter, req *http.Request) {
 		SameSite: http.SameSiteStrictMode,
 		HttpOnly: false,
 		Path:     "/",
-		Secure:   true,
+		Secure:   false,
 	})
 	w.WriteHeader(http.StatusOK)
 }
@@ -141,7 +141,7 @@ func (s *Server) EndpointUserLogin(w http.ResponseWriter, req *http.Request) {
 		SameSite: http.SameSiteStrictMode,
 		HttpOnly: false,
 		Path:     "/",
-		Secure:   true,
+		Secure:   false,
 	})
 	w.WriteHeader(http.StatusOK)
 }
