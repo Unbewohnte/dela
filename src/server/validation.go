@@ -20,20 +20,25 @@ package server
 
 import (
 	"Unbewohnte/dela/db"
+	"fmt"
 	"net/http"
 	"strings"
 )
 
 const (
 	MinimalLoginLength    uint = 3
-	MinimalUsernameLength uint = 3
 	MinimalPasswordLength uint = 5
+	MaxLoginLength        uint = 60
+	MaxPasswordLength     uint = 250
 )
 
 // Check if user is valid. Returns false and a reason-string if not
 func IsUserValid(user db.User) (bool, string) {
 	if uint(len(user.Login)) < MinimalLoginLength {
 		return false, "Login is too small"
+	}
+	if uint(len(user.Login)) > MaxLoginLength {
+		return false, fmt.Sprintf("Login is too big; Login should be up to %d characters", MaxLoginLength)
 	}
 	for _, char := range user.Login {
 		if char < 0x21 || char > 0x7E {
@@ -44,6 +49,9 @@ func IsUserValid(user db.User) (bool, string) {
 
 	if uint(len(user.Password)) < MinimalPasswordLength {
 		return false, "Password is too small"
+	}
+	if uint(len(user.Password)) > MaxPasswordLength {
+		return false, fmt.Sprintf("Password is too big; Password should be up to %d characters", MaxPasswordLength)
 	}
 	for _, char := range user.Password {
 		if char < 0x21 || char > 0x7E {
