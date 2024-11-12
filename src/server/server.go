@@ -134,7 +134,12 @@ func New(config conf.Conf) (*Server, error) {
 				return
 			}
 
-			requestedPage.ExecuteTemplate(w, "index.html", &pageData)
+			err = requestedPage.ExecuteTemplate(w, "index.html", &pageData)
+			if err != nil {
+				http.Redirect(w, req, "/error", http.StatusTemporaryRedirect)
+				logger.Error("[Server][/category/] Template error: %s", err)
+				return
+			}
 		} else if path.Dir(req.URL.Path) == "/group" {
 			if req.Method != "GET" {
 				http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -178,7 +183,12 @@ func New(config conf.Conf) (*Server, error) {
 				return
 			}
 
-			requestedPage.ExecuteTemplate(w, "category.html", &pageData)
+			err = requestedPage.ExecuteTemplate(w, "category.html", &pageData)
+			if err != nil {
+				http.Redirect(w, req, "/error", http.StatusTemporaryRedirect)
+				logger.Error("[Server][/category/] Template error: %s", err)
+				return
+			}
 
 		} else {
 			// default
@@ -188,7 +198,12 @@ func New(config conf.Conf) (*Server, error) {
 				req.URL.Path[1:]+".html",
 			)
 			if err == nil {
-				requestedPage.ExecuteTemplate(w, req.URL.Path[1:]+".html", nil)
+				err = requestedPage.ExecuteTemplate(w, req.URL.Path[1:]+".html", nil)
+				if err != nil {
+					http.Redirect(w, req, "/error", http.StatusTemporaryRedirect)
+					logger.Error("[Server][/default] Template error: %s", err)
+					return
+				}
 			} else {
 				http.Redirect(w, req, "/error", http.StatusTemporaryRedirect)
 			}
