@@ -1,4 +1,4 @@
-all: clean
+all: savedb clean
 	mkdir -p bin && \
 	 cd src && CGO_ENABLED=0 go build && mv dela ../bin && \
 	 cd .. && \
@@ -6,8 +6,13 @@ all: clean
 	 cp -r scripts bin && \
 	 cp -r static bin
 
+	-mv dela.db bin/
+
 portable: clean all
 	cd bin/ && cp ../COPYING . && cp ../README.md . && zip -r dela.zip * && mv dela.zip ..
+
+savedb:
+	-cp bin/dela.db .
 
 cross: clean
 	mkdir -p bin
