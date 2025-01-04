@@ -100,6 +100,7 @@
       <!-- Due -->
       <table class="table table-hover" id="due-todos">
         <thead>
+          <th>Image</th>
           <th>ToDo</th>
           <th>Created</th>
           <th>Due</th>
@@ -108,6 +109,12 @@
           {{ range .Todos }}
           {{ if not .IsDone }}
             <tr draggable="true" id="todo-{{.ID}}" ondragstart="dragStart(event);">
+              {{ if not .Image }}
+              <!-- Display transparent white pixel -->
+              <td><img src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' width="64px" height="64px"></td>
+              {{ else }}
+              <td><img src='{{ printf "%s" .Image }}' width="64px" height="64px"></td>
+              {{ end }}
               <td class="todo-text text-wrap text-break">{{ .Text }}</td>
               <td class="todo-created">{{ .TimeCreated }}</td>
               <td class="todo-due">{{ .Due }}</td>
@@ -129,6 +136,7 @@
       <!-- Completed -->
       <table class="table table-hover" style="display: none;" id="completed-todos">
         <thead>
+          <th>Image</th>
           <th>ToDo</th>
           <th>Created</th>
           <th>Completed</th>
@@ -137,6 +145,12 @@
           {{ range .Todos }}
           {{ if .IsDone }}
             <tr>
+              {{ if not .Image }}
+              <!-- Display transparent white pixel -->
+              <td><img src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' width="64px" height="64px"></td>
+              {{ else }}
+              <td><img src='{{ printf "%s" .Image }}' width="64px" height="64px"></td>
+              {{ end }}
               <td>{{ .Text }}</td>
               <td>{{ .TimeCreated }}</td>
               <td>{{ .CompletionTime }}</td>
