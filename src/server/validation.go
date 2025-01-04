@@ -26,26 +26,20 @@ import (
 )
 
 const (
-	MinimalLoginLength    uint = 3
+	MinimalEmailLength    uint = 3
 	MinimalPasswordLength uint = 5
-	MaxLoginLength        uint = 60
+	MaxEmailLength        uint = 60
 	MaxPasswordLength     uint = 250
 	MaxTodoLength         uint = 150
 )
 
 // Check if user is valid. Returns false and a reason-string if not
 func IsUserValid(user db.User) (bool, string) {
-	if uint(len(user.Login)) < MinimalLoginLength {
-		return false, "Login is too small"
+	if uint(len(user.Email)) < MinimalEmailLength {
+		return false, "Email is too small"
 	}
-	if uint(len(user.Login)) > MaxLoginLength {
-		return false, fmt.Sprintf("Login is too big; Login should be up to %d characters", MaxLoginLength)
-	}
-	for _, char := range user.Login {
-		if char < 0x21 || char > 0x7E {
-			// Not printable ASCII char!
-			return false, "Login has a non printable ASCII character"
-		}
+	if uint(len(user.Email)) > MaxEmailLength {
+		return false, fmt.Sprintf("Email is too big; Email should be up to %d characters", MaxEmailLength)
 	}
 
 	if uint(len(user.Password)) < MinimalPasswordLength {
@@ -54,19 +48,13 @@ func IsUserValid(user db.User) (bool, string) {
 	if uint(len(user.Password)) > MaxPasswordLength {
 		return false, fmt.Sprintf("Password is too big; Password should be up to %d characters", MaxPasswordLength)
 	}
-	for _, char := range user.Password {
-		if char < 0x21 || char > 0x7E {
-			// Not printable ASCII char!
-			return false, "Password has a non printable ASCII character"
-		}
-	}
 
 	return true, ""
 }
 
 // Checks if such a user exists and compares passwords. Returns true if such user exists and passwords do match
 func IsUserAuthorized(db *db.DB, user db.User) bool {
-	userDB, err := db.GetUser(user.Login)
+	userDB, err := db.GetUser(user.Email)
 	if err != nil {
 		return false
 	}
@@ -78,7 +66,7 @@ func IsUserAuthorized(db *db.DB, user db.User) bool {
 	return true
 }
 
-// Returns login and password from a cookie. If an error is encountered, returns empty strings
+// Returns email and password from a cookie. If an error is encountered, returns empty strings
 func AuthFromCookie(cookie *http.Cookie) (string, string) {
 	if cookie == nil {
 		return "", ""
@@ -98,35 +86,35 @@ checks if such a user exists and compares passwords.
 Returns true if such user exists and passwords do match
 */
 func IsUserAuthorizedReq(req *http.Request, dbase *db.DB) bool {
-	var login, password string
+	var email, password string
 	var ok bool
-	login, password, ok = req.BasicAuth()
-	if !ok || login == "" || password == "" {
+	email, password, ok = req.BasicAuth()
+	if !ok || email == "" || password == "" {
 		cookie, err := req.Cookie("auth")
 		if err != nil {
 			return false
 		}
 
-		login, password = AuthFromCookie(cookie)
+		email, password = AuthFromCookie(cookie)
 	}
 
 	return IsUserAuthorized(dbase, db.User{
-		Login:    login,
+		Email:    email,
 		Password: password,
 	})
 }
 
-// Returns login value from basic auth or from cookie if the former does not exist
+// Returns email value from basic auth or from cookie if the former does not exist
 func GetLoginFromReq(req *http.Request) string {
-	login, _, ok := req.BasicAuth()
-	if !ok || login == "" {
+	email, _, ok := req.BasicAuth()
+	if !ok || email == "" {
 		cookie, err := req.Cookie("auth")
 		if err != nil {
 			return ""
 		}
 
-		login, _ = AuthFromCookie(cookie)
+		email, _ = AuthFromCookie(cookie)
 	}
 
-	return login
+	return email
 }

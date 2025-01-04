@@ -8,14 +8,14 @@
         <h3 class="h3 mb-3 fw-normal">Log in</h3>
         <form onsubmit="return false;">
             <div class="mb-3 input-group">
-                <img src="/static/images/universal-access.svg" alt="Login" class="input-group-text">
+                <img src="/static/images/envelope-at.svg" alt="Email" class="input-group-text">
                 <input 
-                    type="text" 
+                    type="email" 
                     class="form-control" 
-                    id="input-login" 
-                    aria-describedby="Login"
-                    aria-label="Login"
-                    placeholder="Login"
+                    id="input-email" 
+                    aria-describedby="Email"
+                    aria-label="email@example.com"
+                    placeholder="email@example.com"
                     required
                     minlength="3">
             </div>
@@ -42,21 +42,21 @@
 
 <script>
 async function logIn() {
-    let loginInput = document.getElementById("input-login");
-    let login = String(loginInput.value).trim();
-    if (login.length < 3) {
+    let emailInput = document.getElementById("input-email");
+    if (!emailInput.reportValidity()) {
         return;
     }
+    let email = String(emailInput.value).trim();
 
     let passwordInput = document.getElementById("input-password");
-    let password = String(passwordInput.value);
-    if (password.length < 3) {
+    if (!passwordInput.reportValidity()) {
         return;
     }
+    let password = String(passwordInput.value);
     password = sha256(password);
 
     // Check if auth info is indeed valid
-    let response = await doLogin({login: login, password: password});
+    let response = await doLogin({email: email, password: password});
     if (response.ok) {
         window.location.replace("/");
     } else {

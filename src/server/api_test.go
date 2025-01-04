@@ -54,7 +54,7 @@ func TestApi(t *testing.T) {
 
 	// Create a new user
 	newUser := db.User{
-		Login:           "user1",
+		Email:           "user1",
 		Password:        "ruohguoeruoger",
 		TimeCreatedUnix: 12421467,
 	}
@@ -81,7 +81,7 @@ func TestApi(t *testing.T) {
 	// newGroup := db.TodoGroup{
 	// 	Name:            "group1",
 	// 	TimeCreatedUnix: 13524534,
-	// 	OwnerUsername:   newUser.Login,
+	// 	OwnerUsername:   newUser.Email,
 	// }
 	// newGroupBytes, err := json.Marshal(&newGroup)
 	// if err != nil {
@@ -92,7 +92,7 @@ func TestApi(t *testing.T) {
 	// if err != nil {
 	// 	t.Fatalf("failed to create a new POST request to create a new TODO group: %s", err)
 	// }
-	// req.Header.Add(RequestHeaderAuthKey, fmt.Sprintf("%s%s%s", newUser.Login, RequestHeaderAuthSeparator, newUser.Password))
+	// req.Header.Add(RequestHeaderAuthKey, fmt.Sprintf("%s%s%s", newUser.Email, RequestHeaderAuthSeparator, newUser.Password))
 	// req.Header.Add(RequestHeaderEncodedB64, "false")
 
 	// resp, err = http.DefaultClient.Do(req)
@@ -116,7 +116,7 @@ func TestApi(t *testing.T) {
 		Text:            "Do the dishes",
 		TimeCreatedUnix: uint64(time.Now().UnixMicro()),
 		DueUnix:         uint64(time.Now().Add(time.Hour * 5).UnixMicro()),
-		OwnerLogin:      newUser.Login,
+		OwnerEmail:      newUser.Email,
 	}
 
 	newTodoBytes, err := json.Marshal(&newTodo)

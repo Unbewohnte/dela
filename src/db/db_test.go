@@ -32,7 +32,7 @@ func TestApi(t *testing.T) {
 
 	// User
 	user := User{
-		Login:           "user1",
+		Email:           "user1@mail.ru",
 		Password:        "ruohguoeruoger",
 		TimeCreatedUnix: 12421467,
 	}
@@ -42,7 +42,7 @@ func TestApi(t *testing.T) {
 		t.Fatalf("failed to create user: %s", err)
 	}
 
-	dbUser, err := db.GetUser(user.Login)
+	dbUser, err := db.GetUser(user.Email)
 	if err != nil {
 		t.Fatalf("failed to retrieve created user: %s", err)
 	}
@@ -55,7 +55,7 @@ func TestApi(t *testing.T) {
 	group := TodoGroup{
 		Name:            "group1",
 		TimeCreatedUnix: 13524534,
-		OwnerLogin:      user.Login,
+		OwnerEmail:      user.Email,
 	}
 
 	err = db.CreateTodoGroup(group)
@@ -82,7 +82,7 @@ func TestApi(t *testing.T) {
 		Text:            "Do the dishes",
 		TimeCreatedUnix: dbGroup.TimeCreatedUnix,
 		DueUnix:         0,
-		OwnerLogin:      user.Login,
+		OwnerEmail:      user.Email,
 	}
 	err = db.CreateTodo(todo)
 	if err != nil {
@@ -90,7 +90,7 @@ func TestApi(t *testing.T) {
 	}
 
 	// Now deletion
-	err = db.DeleteUserClean(user.Login)
+	err = db.DeleteUserClean(user.Email)
 	if err != nil {
 		t.Fatalf("couldn't cleanly delete user with all TODOs: %s", err)
 	}

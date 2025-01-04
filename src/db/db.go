@@ -33,10 +33,10 @@ type DB struct {
 func setUpTables(db *DB) error {
 	// Users
 	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS users(
-		login TEXT PRIMARY KEY UNIQUE,
-		email TEXT NOT NULL UNIQUE,
+		email TEXT PRIMARY KEY UNIQUE,
 		password TEXT NOT NULL,
-		time_created_unix INTEGER)`,
+		time_created_unix INTEGER,
+		confirmed_email INTEGER)`,
 	)
 	if err != nil {
 		return err
@@ -47,9 +47,9 @@ func setUpTables(db *DB) error {
 		id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,
 		name TEXT,
 		time_created_unix INTEGER,
-		owner_login TEXT NOT NULL,
+		owner_email TEXT NOT NULL,
 		removable INTEGER,
-		FOREIGN KEY(owner_login) REFERENCES users(login))`,
+		FOREIGN KEY(owner_email) REFERENCES users(email))`,
 	)
 	if err != nil {
 		return err
@@ -62,12 +62,12 @@ func setUpTables(db *DB) error {
 		text TEXT NOT NULL,
 		time_created_unix INTEGER,
 		due_unix INTEGER,
-		owner_login TEXT NOT NULL,
+		owner_email TEXT NOT NULL,
 		is_done INTEGER,
 		completion_time_unix INTEGER,
 		image BLOB,
 		FOREIGN KEY(group_id) REFERENCES todo_groups(id),
-		FOREIGN KEY(owner_login) REFERENCES users(login))`,
+		FOREIGN KEY(owner_email) REFERENCES users(email))`,
 	)
 	if err != nil {
 		return err

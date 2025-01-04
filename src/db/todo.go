@@ -30,7 +30,7 @@ type Todo struct {
 	Text               string `json:"text"`
 	TimeCreatedUnix    uint64 `json:"timeCreatedUnix"`
 	DueUnix            uint64 `json:"dueUnix"`
-	OwnerLogin         string `json:"ownerLogin"`
+	OwnerEmail         string `json:"ownerEmail"`
 	IsDone             bool   `json:"isDone"`
 	CompletionTimeUnix uint64 `json:"completionTimeUnix"`
 	Image              []byte `json:"image"`
@@ -56,7 +56,7 @@ func scanTodo(rows *sql.Rows) (*Todo, error) {
 		&newTodo.Text,
 		&newTodo.TimeCreatedUnix,
 		&newTodo.DueUnix,
-		&newTodo.OwnerLogin,
+		&newTodo.OwnerEmail,
 		&newTodo.IsDone,
 		&newTodo.CompletionTimeUnix,
 		&newTodo.Image,
@@ -117,12 +117,12 @@ func (db *DB) GetTodos() ([]*Todo, error) {
 // Creates a new TODO in the database
 func (db *DB) CreateTodo(todo Todo) error {
 	_, err := db.Exec(
-		"INSERT INTO todos(group_id, text, time_created_unix, due_unix, owner_login, is_done, completion_time_unix, image) VALUES(?, ?, ?, ?, ?, ?, ?, ?)",
+		"INSERT INTO todos(group_id, text, time_created_unix, due_unix, owner_email, is_done, completion_time_unix, image) VALUES(?, ?, ?, ?, ?, ?, ?, ?)",
 		todo.GroupID,
 		todo.Text,
 		todo.TimeCreatedUnix,
 		todo.DueUnix,
-		todo.OwnerLogin,
+		todo.OwnerEmail,
 		todo.IsDone,
 		todo.CompletionTimeUnix,
 		todo.Image,
@@ -158,12 +158,12 @@ func (db *DB) UpdateTodo(todoID uint64, updatedTodo Todo) error {
 }
 
 // Searches and retrieves TODO groups created by the user
-func (db *DB) GetAllUserTodoGroups(login string) ([]*TodoGroup, error) {
+func (db *DB) GetAllUserTodoGroups(email string) ([]*TodoGroup, error) {
 	var todoGroups []*TodoGroup
 
 	rows, err := db.Query(
-		"SELECT * FROM todo_groups WHERE owner_login=?",
-		login,
+		"SELECT * FROM todo_groups WHERE owner_email=?",
+		email,
 	)
 	if err != nil {
 		return nil, err
@@ -182,12 +182,12 @@ func (db *DB) GetAllUserTodoGroups(login string) ([]*TodoGroup, error) {
 }
 
 // Searches and retrieves TODOs created by the user
-func (db *DB) GetAllUserTodos(login string) ([]*Todo, error) {
+func (db *DB) GetAllUserTodos(email string) ([]*Todo, error) {
 	var todos []*Todo
 
 	rows, err := db.Query(
-		"SELECT * FROM todos WHERE owner_login=?",
-		login,
+		"SELECT * FROM todos WHERE owner_email=?",
+		email,
 	)
 	if err != nil {
 		return nil, err
@@ -207,32 +207,32 @@ func (db *DB) GetAllUserTodos(login string) ([]*Todo, error) {
 }
 
 // Deletes all information regarding TODOs of specified user
-func (db *DB) DeleteAllUserTodos(login string) error {
+func (db *DB) DeleteAllUserTodos(email string) error {
 	_, err := db.Exec(
-		"DELETE FROM todos WHERE owner_login=?",
-		login,
+		"DELETE FROM todos WHERE owner_email=?",
+		email,
 	)
 
 	return err
 }
 
 // Deletes all information regarding TODO groups of specified user
-func (db *DB) DeleteAllUserTodoGroups(login string) error {
+func (db *DB) DeleteAllUserTodoGroups(email string) error {
 	_, err := db.Exec(
-		"DELETE FROM todo_groups WHERE owner_login=?",
-		login,
+		"DELETE FROM todo_groups WHERE owner_email=?",
+		email,
 	)
 
 	return err
 }
 
-func (db *DB) DoesUserOwnTodo(todoId uint64, login string) bool {
+func (db *DB) DoesUserOwnTodo(todoId uint64, email string) bool {
 	todo, err := db.GetTodo(todoId)
 	if err != nil {
 		return false
 	}
 
-	if todo.OwnerLogin != login {
+	if todo.OwnerEmail != email {
 		return false
 	}
 

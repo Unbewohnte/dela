@@ -20,7 +20,6 @@ package db
 
 import (
 	"database/sql"
-	"time"
 )
 
 // Todo group structure
@@ -28,16 +27,16 @@ type TodoGroup struct {
 	ID              uint64 `json:"id"`
 	Name            string `json:"name"`
 	TimeCreatedUnix uint64 `json:"timeCreatedUnix"`
-	OwnerLogin      string `json:"ownerLogin"`
+	OwnerEmail      string `json:"ownerEmail"`
 	Removable       bool   `json:"removable"`
 	TimeCreated     string
 }
 
-func NewTodoGroup(name string, timeCreatedUnix uint64, ownerLogin string, removable bool) TodoGroup {
+func NewTodoGroup(name string, timeCreatedUnix uint64, ownerEmail string, removable bool) TodoGroup {
 	return TodoGroup{
 		Name:            name,
 		TimeCreatedUnix: timeCreatedUnix,
-		OwnerLogin:      ownerLogin,
+		OwnerEmail:      ownerEmail,
 		Removable:       removable,
 	}
 }
@@ -45,10 +44,10 @@ func NewTodoGroup(name string, timeCreatedUnix uint64, ownerLogin string, remova
 // Creates a new TODO group in the database
 func (db *DB) CreateTodoGroup(group TodoGroup) error {
 	_, err := db.Exec(
-		"INSERT INTO todo_groups(name, time_created_unix, owner_login, removable) VALUES(?, ?, ?, ?)",
+		"INSERT INTO todo_groups(name, time_created_unix, owner_email, removable) VALUES(?, ?, ?, ?)",
 		group.Name,
 		group.TimeCreatedUnix,
-		group.OwnerLogin,
+		group.OwnerEmail,
 		group.Removable,
 	)
 
@@ -61,20 +60,15 @@ func scanTodoGroup(rows *sql.Rows) (*TodoGroup, error) {
 		&newTodoGroup.ID,
 		&newTodoGroup.Name,
 		&newTodoGroup.TimeCreatedUnix,
-		&newTodoGroup.OwnerLogin,
+		&newTodoGroup.OwnerEmail,
 		&newTodoGroup.Removable,
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	// Convert to Basic time
-	timeCreated := time.Unix(int64(newTodoGroup.TimeCreatedUnix), 0)
-	if timeCreated.Year() == 1970 {
-		newTodoGroup.TimeCreated = "None"
-	} else {
-		newTodoGroup.TimeCreated = timeCreated.Format(time.DateOnly)
-	}
+	// Convert to Basic time string
+	newTodoGroup.TimeCreated = unixToTimeStr(newTodoGroup.TimeCreatedUnix)
 
 	return &newTodoGroup, nil
 }
@@ -178,13 +172,13 @@ func (db *DB) UpdateTodoGroup(groupID uint64, updatedGroup TodoGroup) error {
 	return err
 }
 
-func (db *DB) DoesUserOwnGroup(groupId uint64, login string) bool {
+func (db *DB) DoesUserOwnGroup(groupId uint64, email string) bool {
 	group, err := db.GetTodoGroup(groupId)
 	if err != nil {
 		return false
 	}
 
-	if group.OwnerLogin != login {
+	if group.OwnerEmail != email {
 		return false
 	}
 

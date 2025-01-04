@@ -65,30 +65,30 @@ func (s *Server) EndpointUserCreate(w http.ResponseWriter, req *http.Request) {
 	// Insert into DB
 	err = s.db.CreateUser(user)
 	if err != nil {
-		logger.Error("[Server][EndpointUserCreate] Failed to insert new user \"%s\" data: %s", user.Login, err)
+		logger.Error("[Server][EndpointUserCreate] Failed to insert new user \"%s\" data: %s", user.Email, err)
 		http.Error(w, "Failed to create user", http.StatusInternalServerError)
 		return
 	}
 
-	logger.Info("[Server][EndpointUserCreate] Created a new user with login \"%s\"", user.Login)
+	logger.Info("[Server][EndpointUserCreate] Created a new user with email \"%s\"", user.Email)
 
 	// Create a non-removable default category
 	err = s.db.CreateTodoGroup(db.NewTodoGroup(
 		"Notes",
 		uint64(time.Now().Unix()),
-		user.Login,
+		user.Email,
 		false,
 	))
 	if err != nil {
 		http.Error(w, "Failed to create default group", http.StatusInternalServerError)
-		logger.Error("[Server][EndpojntUserCreate] Failed to create a default group for %s: %s", user.Login, err)
+		logger.Error("[Server][EndpojntUserCreate] Failed to create a default group for %s: %s", user.Email, err)
 		return
 	}
 
 	// Send cookie
 	http.SetCookie(w, &http.Cookie{
 		Name:     "auth",
-		Value:    fmt.Sprintf("%s:%s", user.Login, user.Password),
+		Value:    fmt.Sprintf("%s:%s", user.Email, user.Password),
 		SameSite: http.SameSiteStrictMode,
 		HttpOnly: false,
 		Path:     "/",
@@ -122,7 +122,7 @@ func (s *Server) EndpointUserLogin(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// Check auth data
-	userDB, err := s.db.GetUser(user.Login)
+	userDB, err := s.db.GetUser(user.Email)
 	if err != nil {
 		logger.Error("[Server][EndpointUserLogin] Failed to fetch user information from DB: %s", err)
 		http.Error(w, "Failed to fetch user information", http.StatusInternalServerError)
@@ -137,7 +137,7 @@ func (s *Server) EndpointUserLogin(w http.ResponseWriter, req *http.Request) {
 	// Send cookie
 	http.SetCookie(w, &http.Cookie{
 		Name:     "auth",
-		Value:    fmt.Sprintf("%s:%s", user.Login, user.Password),
+		Value:    fmt.Sprintf("%s:%s", user.Email, user.Password),
 		SameSite: http.SameSiteStrictMode,
 		HttpOnly: false,
 		Path:     "/",
@@ -177,10 +177,10 @@ func (s *Server) EndpointUserUpdate(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// Check whether the user in request is the user specified in JSON
-	login := GetLoginFromReq(req)
-	if login != user.Login {
+	email := GetLoginFromReq(req)
+	if email != user.Email {
 		// Gotcha!
-		logger.Warning("[Server][EndpointUserUpdate] %s tried to update user information of %s!", login, user.Login)
+		logger.Warning("[Server][EndpointUserUpdate] %s tried to update user information of %s!", email, user.Email)
 		http.Error(w, "Logins do not match", http.StatusForbidden)
 		return
 	}
@@ -189,11 +189,11 @@ func (s *Server) EndpointUserUpdate(w http.ResponseWriter, req *http.Request) {
 	err = s.db.UserUpdate(user)
 	if err != nil {
 		http.Error(w, "Failed to update user", http.StatusInternalServerError)
-		logger.Error("[Server][EndpointUserUpdate] Failed to update \"%s\": %s", user.Login, err)
+		logger.Error("[Server][EndpointUserUpdate] Failed to update \"%s\": %s", user.Email, err)
 		return
 	}
 
-	logger.Info("[Server][EndpointUserUpdate] Updated a user with login \"%s\"", user.Login)
+	logger.Info("[Server][EndpointUserUpdate] Updated a user with email \"%s\"", user.Email)
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -212,15 +212,15 @@ func (s *Server) EndpointUserDelete(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// Delete
-	login := GetLoginFromReq(req)
-	err := s.db.DeleteUser(login)
+	email := GetLoginFromReq(req)
+	err := s.db.DeleteUser(email)
 	if err != nil {
 		http.Error(w, "Failed to delete user", http.StatusInternalServerError)
-		logger.Error("[Server][EndpointUserDelete] Failed to delete \"%s\": %s", login, err)
+		logger.Error("[Server][EndpointUserDelete] Failed to delete \"%s\": %s", email, err)
 		return
 	}
 
-	logger.Info("[Server][EndpointUserDelete] Deleted a user with login \"%s\"", login)
+	logger.Info("[Server][EndpointUserDelete] Deleted a user with email \"%s\"", email)
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -239,17 +239,17 @@ func (s *Server) EndpointUserGet(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// Get information from the database
-	login := GetLoginFromReq(req)
-	userDB, err := s.db.GetUser(login)
+	email := GetLoginFromReq(req)
+	userDB, err := s.db.GetUser(email)
 	if err != nil {
-		logger.Error("[Server][EndpointUserGet] Failed to retrieve information on \"%s\": %s", login, err)
+		logger.Error("[Server][EndpointUserGet] Failed to retrieve information on \"%s\": %s", email, err)
 		http.Error(w, "Failed to fetch information", http.StatusInternalServerError)
 		return
 	}
 
 	userDBBytes, err := json.Marshal(&userDB)
 	if err != nil {
-		logger.Error("[Server][EndpointUserGet] Failed to marshal information on \"%s\": %s", login, err)
+		logger.Error("[Server][EndpointUserGet] Failed to marshal information on \"%s\": %s", email, err)
 		http.Error(w, "Failed to marshal information", http.StatusInternalServerError)
 		return
 	}
@@ -446,7 +446,7 @@ func (s *Server) EndpointTodoCreate(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	newTodo.OwnerLogin = GetLoginFromReq(req)
+	newTodo.OwnerEmail = GetLoginFromReq(req)
 	newTodo.TimeCreatedUnix = uint64(time.Now().Unix())
 	err = s.db.CreateTodo(newTodo)
 	if err != nil {
@@ -457,7 +457,7 @@ func (s *Server) EndpointTodoCreate(w http.ResponseWriter, req *http.Request) {
 
 	// Success!
 	w.WriteHeader(http.StatusOK)
-	logger.Info("[Server] Created a new TODO for %s", newTodo.OwnerLogin)
+	logger.Info("[Server] Created a new TODO for %s", newTodo.OwnerEmail)
 }
 
 func (s *Server) EndpointUserTodosGet(w http.ResponseWriter, req *http.Request) {
@@ -582,7 +582,7 @@ func (s *Server) EndpointTodoGroupCreate(w http.ResponseWriter, req *http.Reques
 	}
 
 	// Add group to the database
-	newGroup.OwnerLogin = GetLoginFromReq(req)
+	newGroup.OwnerEmail = GetLoginFromReq(req)
 	newGroup.TimeCreatedUnix = uint64(time.Now().Unix())
 	newGroup.Removable = true
 	err = s.db.CreateTodoGroup(newGroup)
@@ -593,7 +593,7 @@ func (s *Server) EndpointTodoGroupCreate(w http.ResponseWriter, req *http.Reques
 
 	// Success!
 	w.WriteHeader(http.StatusOK)
-	logger.Info("[Server] Created a new TODO group for %s", newGroup.OwnerLogin)
+	logger.Info("[Server] Created a new TODO group for %s", newGroup.OwnerEmail)
 }
 
 func (s *Server) EndpointTodoGroupGet(w http.ResponseWriter, req *http.Request) {

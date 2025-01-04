@@ -9,19 +9,6 @@
         </h3>
         <form onsubmit="return false;">
             <div class="mb-3 input-group">
-                <img src="/static/images/universal-access.svg" alt="Login" class="input-group-text">
-                <input 
-                    type="text" 
-                    class="form-control" 
-                    id="input-login" 
-                    aria-describedby="Login"
-                    aria-label="Login"
-                    placeholder="Login"
-                    required
-                    minlength="3">
-            </div>
-
-            <div class="mb-3 input-group">
                 <img src="/static/images/envelope-at.svg" alt="Email" class="input-group-text">
                 <input 
                     type="email" 
@@ -55,27 +42,21 @@
 
 <script>
 async function register() {
-    let loginInput = document.getElementById("input-login");
-    let login = String(loginInput.value).trim();
-    if (login.length < 3) {
-        return;
-    }
-
     let emailInput = document.getElementById("input-email");
-    let email = String(emailInput.value).trim();
-    if (email.length < 3) {
+    if (!emailInput.reportValidity()) {
         return;
     }
+    let email = String(emailInput.value).trim();
 
     let passwordInput = document.getElementById("input-password");
-    let password = String(passwordInput.value);
-    if (password.length < 3) {
+    if (!passwordInput.reportValidity()) {
         return;
     }
+    let password = String(passwordInput.value);
+
 
     let passwordSHA256 = sha256(password);
     let postData = {
-        login: login,
         email: email,
         password: passwordSHA256,
     };

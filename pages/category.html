@@ -111,9 +111,9 @@
             <tr draggable="true" id="todo-{{.ID}}" ondragstart="dragStart(event);">
               {{ if not .Image }}
               <!-- Display transparent white pixel -->
-              <td><img src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' width="64px" height="64px"></td>
+              <td><img class="todo-image" src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' width="64px" height="64px"></td>
               {{ else }}
-              <td><img src='{{ printf "%s" .Image }}' width="64px" height="64px"></td>
+              <td><img class="todo-image" src='{{ printf "%s" .Image }}' width="64px" height="64px"></td>
               {{ end }}
               <td class="todo-text text-wrap text-break">{{ .Text }}</td>
               <td class="todo-created">{{ .TimeCreated }}</td>
@@ -240,15 +240,15 @@ async function drop(event) {
     return;
   }
 
-  // Add a copy of this ToDo in the corresponding group
-  let result = await postNewTodo({
+  // Update todo's group ID
+  let result = await updateTodo(todoId, {
     text: draggedTodo.getElementsByClassName("todo-text")[0].innerText,
     groupId: Number(targetGroupId),
     dueUnix: Number(draggedTodo.getElementsByClassName("todo-due-unix")[0].innerText),
+    image: Array.from(draggedTodo.getElementsByClassName("todo-image")[0].src, char => char.charCodeAt(0))
   });
 
-  // Delete this ToDo in this group
-  await deleteTodoRefresh(todoId);
+  window.location.reload();
 }
 
 document.addEventListener('DOMContentLoaded', async function() {
