@@ -33,9 +33,19 @@ type Todo struct {
 	OwnerLogin         string `json:"ownerLogin"`
 	IsDone             bool   `json:"isDone"`
 	CompletionTimeUnix uint64 `json:"completionTimeUnix"`
+	Image              []byte `json:"image"`
 	TimeCreated        string
 	CompletionTime     string
 	Due                string
+}
+
+func unixToTimeStr(unixTimeSec uint64) string {
+	timeUnix := time.Unix(int64(unixTimeSec), 0)
+	if timeUnix.Year() == 1970 {
+		return "None"
+	} else {
+		return timeUnix.Format(time.DateOnly)
+	}
 }
 
 func scanTodo(rows *sql.Rows) (*Todo, error) {
@@ -49,32 +59,16 @@ func scanTodo(rows *sql.Rows) (*Todo, error) {
 		&newTodo.OwnerLogin,
 		&newTodo.IsDone,
 		&newTodo.CompletionTimeUnix,
+		&newTodo.Image,
 	)
 	if err != nil {
 		return nil, err
 	}
 
 	// Convert to Basic time
-	timeCreated := time.Unix(int64(newTodo.TimeCreatedUnix), 0)
-	if timeCreated.Year() == 1970 {
-		newTodo.TimeCreated = "None"
-	} else {
-		newTodo.TimeCreated = timeCreated.Format(time.DateOnly)
-	}
-
-	due := time.Unix(int64(newTodo.DueUnix), 0)
-	if due.Year() == 1970 {
-		newTodo.Due = "None"
-	} else {
-		newTodo.Due = due.Format(time.DateOnly)
-	}
-
-	completionTime := time.Unix(int64(newTodo.CompletionTimeUnix), 0)
-	if completionTime.Year() == 1970 {
-		newTodo.CompletionTime = "None"
-	} else {
-		newTodo.CompletionTime = completionTime.Format(time.DateOnly)
-	}
+	newTodo.TimeCreated = unixToTimeStr(newTodo.TimeCreatedUnix)
+	newTodo.Due = unixToTimeStr(newTodo.DueUnix)
+	newTodo.CompletionTime = unixToTimeStr(newTodo.CompletionTimeUnix)
 
 	return &newTodo, nil
 }
@@ -123,7 +117,7 @@ func (db *DB) GetTodos() ([]*Todo, error) {
 // Creates a new TODO in the database
 func (db *DB) CreateTodo(todo Todo) error {
 	_, err := db.Exec(
-		"INSERT INTO todos(group_id, text, time_created_unix, due_unix, owner_login, is_done, completion_time_unix) VALUES(?, ?, ?, ?, ?, ?, ?)",
+		"INSERT INTO todos(group_id, text, time_created_unix, due_unix, owner_login, is_done, completion_time_unix, image) VALUES(?, ?, ?, ?, ?, ?, ?, ?)",
 		todo.GroupID,
 		todo.Text,
 		todo.TimeCreatedUnix,
@@ -131,6 +125,7 @@ func (db *DB) CreateTodo(todo Todo) error {
 		todo.OwnerLogin,
 		todo.IsDone,
 		todo.CompletionTimeUnix,
+		todo.Image,
 	)
 
 	return err
@@ -146,15 +141,16 @@ func (db *DB) DeleteTodo(id uint64) error {
 	return err
 }
 
-// Updates TODO's due date, text, done state, completion time and group id
+// Updates TODO's due date, text, done state, completion time and group id with image
 func (db *DB) UpdateTodo(todoID uint64, updatedTodo Todo) error {
 	_, err := db.Exec(
-		"UPDATE todos SET group_id=?, due_unix=?, text=?, is_done=?, completion_time_unix=?  WHERE id=?",
+		"UPDATE todos SET group_id=?, due_unix=?, text=?, is_done=?, completion_time_unix=?, image=?  WHERE id=?",
 		updatedTodo.GroupID,
 		updatedTodo.DueUnix,
 		updatedTodo.Text,
 		updatedTodo.IsDone,
 		updatedTodo.CompletionTimeUnix,
+		updatedTodo.Image,
 		todoID,
 	)
 

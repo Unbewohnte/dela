@@ -65,6 +65,7 @@ func setUpTables(db *DB) error {
 		owner_login TEXT NOT NULL,
 		is_done INTEGER,
 		completion_time_unix INTEGER,
+		image BLOB,
 		FOREIGN KEY(group_id) REFERENCES todo_groups(id),
 		FOREIGN KEY(owner_login) REFERENCES users(login))`,
 	)

@@ -1,0 +1,99 @@
+{{ define "paint" }}
+
+<canvas class="row border border-dark" id="drawingCanvas" width="256" height="256"></canvas>
+<input class="row border border-dark" type="color" id="colorPicker" value="#000000" aria-label="Drawing color">
+
+<script>
+    const canvas = document.getElementById('drawingCanvas');
+    const ctx = canvas.getContext('2d');
+    const colorPicker = document.getElementById('colorPicker');
+    let drawing = false;
+
+    function startDrawing(x, y) {
+        drawing = true;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+    };
+
+    function draw(x, y){
+        if (drawing) {
+            ctx.strokeStyle = colorPicker.value;
+            ctx.lineWidth = 5;
+            ctx.lineTo(x, y);
+            ctx.stroke();
+        }
+    };
+
+    function stopDrawing() {
+        drawing = false;
+        ctx.closePath();
+    };
+
+    function getMousePos(event) {
+        const rect = canvas.getBoundingClientRect();
+        return {
+            x: event.clientX - rect.left,
+            y: event.clientY - rect.top
+        };
+    };
+
+    function getTouchPos(event) {
+        const rect = canvas.getBoundingClientRect();
+        return {
+            x: event.touches[0].clientX - rect.left,
+            y: event.touches[0].clientY - rect.top
+        };
+    };
+
+    // Mouse events
+    canvas.addEventListener('mousedown', (e) => {
+        const pos = getMousePos(e);
+        startDrawing(pos.x, pos.y);
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+        const pos = getMousePos(e);
+        draw(pos.x, pos.y);
+    });
+
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mouseleave', stopDrawing);
+
+    // Touch events
+    canvas.addEventListener('touchstart', (e) => {
+        e.preventDefault(); // Prevent scrolling
+        const pos = getTouchPos(e);
+        startDrawing(pos.x, pos.y);
+    });
+
+    canvas.addEventListener('touchmove', (e) => {
+        e.preventDefault(); // Prevent scrolling
+        const pos = getTouchPos(e);
+        draw(pos.x, pos.y);
+    });
+
+    canvas.addEventListener('touchend', stopDrawing);
+
+    // Fills with white
+    function clearCanvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function isCanvasEmpty() {
+        const pixels = new Uint32Array(
+            ctx.getImageData(0, 0, canvas.width, canvas.height).data.buffer
+        );
+
+        return !pixels.some(color => color !== 0);
+    }
+
+    function getCanvasImage() {
+        if (!isCanvasEmpty()) {
+            return canvas.toDataURL("image/png");
+        }
+
+        return null;
+    }
+</script>
+
+{{ end }}

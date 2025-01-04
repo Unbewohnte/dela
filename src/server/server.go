@@ -30,6 +30,7 @@ import (
 	"path"
 	"path/filepath"
 	"strconv"
+	"text/template"
 	"time"
 )
 
@@ -105,6 +106,7 @@ func New(config conf.Conf) (*Server, error) {
 	)
 
 	// handle page requests
+	pagesDirPath := filepath.Join(server.config.BaseContentDir, PagesDirName)
 	mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
 		if req.Method != "GET" {
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -118,8 +120,9 @@ func New(config conf.Conf) (*Server, error) {
 				return
 			}
 
-			requestedPage, err := getPage(
-				filepath.Join(server.config.BaseContentDir, PagesDirName), "base.html", "index.html",
+			requestedPage, err := template.ParseFiles(
+				filepath.Join(pagesDirPath, "base.html"),
+				filepath.Join(pagesDirPath, "index.html"),
 			)
 			if err != nil {
 				http.Redirect(w, req, "/error", http.StatusTemporaryRedirect)
@@ -166,8 +169,10 @@ func New(config conf.Conf) (*Server, error) {
 				return
 			}
 
-			requestedPage, err := getPage(
-				filepath.Join(server.config.BaseContentDir, PagesDirName), "base.html", "category.html",
+			requestedPage, err := template.ParseFiles(
+				filepath.Join(pagesDirPath, "base.html"),
+				filepath.Join(pagesDirPath, "paint.html"),
+				filepath.Join(pagesDirPath, "category.html"),
 			)
 			if err != nil {
 				http.Redirect(w, req, "/error", http.StatusTemporaryRedirect)
@@ -192,10 +197,9 @@ func New(config conf.Conf) (*Server, error) {
 
 		} else {
 			// default
-			requestedPage, err := getPage(
-				filepath.Join(server.config.BaseContentDir, PagesDirName),
-				"base.html",
-				req.URL.Path[1:]+".html",
+			requestedPage, err := template.ParseFiles(
+				filepath.Join(pagesDirPath, "base.html"),
+				filepath.Join(pagesDirPath, req.URL.Path[1:]+".html"),
 			)
 			if err == nil {
 				err = requestedPage.ExecuteTemplate(w, req.URL.Path[1:]+".html", nil)
