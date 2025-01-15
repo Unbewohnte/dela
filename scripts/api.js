@@ -13,6 +13,9 @@ async function post(url, json) {
     })
 }
 
+async function postEmailVerification(email, code) {
+    return post("/api/user/verify", {"email":email, "code":code});
+}
 
 async function postNewTodo(newTodo) {
     return post("/api/todo/create", newTodo)

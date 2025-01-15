@@ -42,6 +42,18 @@ func setUpTables(db *DB) error {
 		return err
 	}
 
+	// User Email Verification
+	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS verifications(
+		id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,
+		email TEXT NOT NULL,
+		code TEXT NOT NULL,
+		issued_unix INTEGER,
+		life_seconds INTEGER)`,
+	)
+	if err != nil {
+		return err
+	}
+
 	// Todo groups
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS todo_groups(
 		id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,

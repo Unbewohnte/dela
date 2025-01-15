@@ -21,6 +21,7 @@ package server
 import (
 	"Unbewohnte/dela/conf"
 	"Unbewohnte/dela/db"
+	"Unbewohnte/dela/email"
 	"Unbewohnte/dela/logger"
 	"context"
 	"fmt"
@@ -45,6 +46,7 @@ type Server struct {
 	db        *db.DB
 	http      http.Server
 	cookieJar *cookiejar.Jar
+	emailer   *email.Emailer
 }
 
 // Creates a new server instance with provided config
@@ -86,7 +88,7 @@ func New(config conf.Conf) (*Server, error) {
 
 	// start constructing an http server configuration
 	server.http = http.Server{
-		Addr: fmt.Sprintf(":%d", server.config.Port),
+		Addr: fmt.Sprintf(":%d", server.config.Server.Port),
 	}
 
 	// configure paths' callbacks
@@ -218,6 +220,7 @@ func New(config conf.Conf) (*Server, error) {
 	mux.HandleFunc("/api/user/update", server.EndpointUserUpdate)        // Non specific
 	mux.HandleFunc("/api/user/create", server.EndpointUserCreate)        // Non specific
 	mux.HandleFunc("/api/user/login", server.EndpointUserLogin)          // Non specific
+	mux.HandleFunc("/api/user/verify", server.EndpointUserVerify)        // Non specific
 	mux.HandleFunc("/api/todo/create", server.EndpointTodoCreate)        // Non specific
 	mux.HandleFunc("/api/todo/get", server.EndpointUserTodosGet)         // Non specific
 	mux.HandleFunc("/api/todo/delete/", server.EndpointTodoDelete)       // Specific
@@ -232,6 +235,12 @@ func New(config conf.Conf) (*Server, error) {
 	jar, _ := cookiejar.New(nil)
 	server.cookieJar = jar
 
+	server.emailer = email.NewEmailer(
+		email.Auth(server.config),
+		fmt.Sprintf("%s:%d", server.config.Verification.Emailer.Host, server.config.Verification.Emailer.HostPort),
+		server.config.Verification.Emailer.User,
+	)
+
 	logger.Info("[Server] Created an HTTP server instance")
 
 	return &server, nil
@@ -239,18 +248,18 @@ func New(config conf.Conf) (*Server, error) {
 
 // Launches server instance
 func (s *Server) Start() error {
-	if s.config.CertFilePath != "" && s.config.KeyFilePath != "" {
+	if s.config.Server.CertFilePath != "" && s.config.Server.KeyFilePath != "" {
 		logger.Info("[Server] Using TLS")
-		logger.Info("[Server] HTTP server is going live on port %d!", s.config.Port)
+		logger.Info("[Server] HTTP server is going live on port %d!", s.config.Server.Port)
 
-		err := s.http.ListenAndServeTLS(s.config.CertFilePath, s.config.KeyFilePath)
+		err := s.http.ListenAndServeTLS(s.config.Server.CertFilePath, s.config.Server.KeyFilePath)
 		if err != nil && err != http.ErrServerClosed {
 			logger.Error("[Server] Fatal server error: %s", err)
 			return err
 		}
 	} else {
 		logger.Info("[Server] Not using TLS")
-		logger.Info("[Server] HTTP server is going live on port %d!", s.config.Port)
+		logger.Info("[Server] HTTP server is going live on port %d!", s.config.Server.Port)
 
 		err := s.http.ListenAndServe()
 		if err != nil && err != http.ErrServerClosed {

@@ -40,7 +40,51 @@
     </div>
 </main>
 
+<div class="modal fade" id="verificationModal" tabindex="-1" aria-labelledby="verificationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="verificationModalLabel">Email Verification</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Enter the verification code sent to your email address</p>
+                <div class="mb-3">
+                    <label for="verificationCode" class="form-label">Verification Code</label>
+                    <input type="text" id="input-code" class="form-control" id="verificationCode" placeholder="Enter your code" required>
+                </div>
+                <p class="text-danger"><span id="error-message-modal"></span></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="verifyButton" onclick="verify();">Verify</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <script>
+function showVerificationModal() {
+    const verificationModal = new bootstrap.Modal(document.getElementById('verificationModal'), {});;
+    verificationModal.show();
+}
+
+async function verify() {
+    let emailInput = document.getElementById("input-email");
+    let email = String(emailInput.value).trim();
+
+    let codeInput = document.getElementById("input-code");
+    let code = String(codeInput.value).trim();
+
+    let response = await postEmailVerification(email, code);
+    if (response.ok) {
+        window.location.replace("/");
+    } else {
+        document.getElementById("error-message-modal").innerText = await response.text();
+    }
+}
+
 async function register() {
     let emailInput = document.getElementById("input-email");
     if (!emailInput.reportValidity()) {
@@ -62,9 +106,14 @@ async function register() {
     };
 
     let response = await postNewUser(postData);
-
     if (response.ok) {
-        window.location.replace("/");
+        let json = await response.json();
+        if (json.confirm_email) {
+            // Open email confirmation modal
+            showVerificationModal();
+        } else {
+            window.location.replace("/");
+        }
     } else {
         document.getElementById("error_message").innerText = await response.text();
     }

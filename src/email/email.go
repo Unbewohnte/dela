@@ -13,15 +13,26 @@ type Email struct {
 	Body    string
 }
 
-type MailSender struct {
-	Auth smtp.Auth
-	From string
+func NewEmail(sender, subject, body string, to []string) Email {
+	return Email{
+		Sender:  sender,
+		To:      to,
+		Subject: subject,
+		Body:    body,
+	}
 }
 
-func NewMailSender(auth smtp.Auth, from string) MailSender {
-	return MailSender{
-		Auth: auth,
-		From: from,
+type Emailer struct {
+	Auth    smtp.Auth
+	Address string
+	From    string
+}
+
+func NewEmailer(auth smtp.Auth, addr string, from string) *Emailer {
+	return &Emailer{
+		Auth:    auth,
+		Address: addr,
+		From:    from,
 	}
 }
 
@@ -35,7 +46,7 @@ func buildEmail(mail Email) []byte {
 	return []byte(message)
 }
 
-func (ms *MailSender) SendEmail(addr string, mail Email) error {
-	err := smtp.SendMail(addr, ms.Auth, ms.From, mail.To, buildEmail(mail))
+func (em *Emailer) SendEmail(mail Email) error {
+	err := smtp.SendMail(em.Address, em.Auth, em.From, mail.To, buildEmail(mail))
 	return err
 }

@@ -1,6 +1,6 @@
 /*
   	dela - web TODO list
-    Copyright (C) 2023  Kasyanov Nikolay Alexeyevich (Unbewohnte)
+    Copyright (C) 2023, 2025  Kasyanov Nikolay Alexeyevich (Unbewohnte)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as published by
@@ -24,20 +24,49 @@ import (
 	"os"
 )
 
+type ServerConf struct {
+	Port         uint16 `json:"port"`
+	CertFilePath string `json:"cert_file_path"`
+	KeyFilePath  string `json:"key_file_path"`
+}
+
+type EmailerConf struct {
+	User     string `json:"user"`
+	Host     string `json:"host"`
+	HostPort uint16 `json:"host_port"`
+	Password string `json:"password"`
+}
+
+type EmailVerificationConf struct {
+	VerifyEmails bool        `json:"verify_emails"`
+	Emailer      EmailerConf `json:"emailer"`
+}
+
 type Conf struct {
-	Port           uint16 `json:"port"`
-	CertFilePath   string `json:"cert_file_path"`
-	KeyFilePath    string `json:"key_file_path"`
-	BaseContentDir string `json:"base_content_dir"`
-	ProdDBName     string `json:"production_db_name"`
+	Server         ServerConf            `json:"server"`
+	Verification   EmailVerificationConf `json:"verification"`
+	BaseContentDir string                `json:"base_content_dir"`
+	ProdDBName     string                `json:"production_db_name"`
 }
 
 // Creates a default server configuration
 func Default() Conf {
 	return Conf{
-		Port:           8080,
-		CertFilePath:   "",
-		KeyFilePath:    "",
+		Server: ServerConf{
+			Port:         8080,
+			CertFilePath: "",
+			KeyFilePath:  "",
+		},
+		Verification: EmailVerificationConf{
+			VerifyEmails: true,
+			Emailer: EmailerConf{
+				User:     "you@example.com",
+				Host:     "smtp.example.com",
+				HostPort: 587,
+				Password: "hostpassword",
+			},
+		},
+
 		BaseContentDir: ".",
 		ProdDBName:     "dela.db",
 	}

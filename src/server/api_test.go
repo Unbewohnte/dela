@@ -63,7 +63,7 @@ func TestApi(t *testing.T) {
 		t.Fatalf("could not marshal new user JSON: %s", err)
 	}
 
-	resp, err := http.Post(fmt.Sprintf("http://localhost:%d/api/user", config.Port), "application/json", bytes.NewBuffer(newUserJsonBytes))
+	resp, err := http.Post(fmt.Sprintf("http://localhost:%d/api/user", config.Server.Port), "application/json", bytes.NewBuffer(newUserJsonBytes))
 	if err != nil {
 		t.Fatalf("failed to post a new user data: %s", err)
 	}
@@ -124,7 +124,7 @@ func TestApi(t *testing.T) {
 		t.Fatalf("could not marshal new Todo: %s", err)
 	}
 
-	req, err := http.NewRequest("POST", fmt.Sprintf("http://localhost:%d/api/todo", config.Port), bytes.NewBuffer(newTodoBytes))
+	req, err := http.NewRequest("POST", fmt.Sprintf("http://localhost:%d/api/todo", config.Server.Port), bytes.NewBuffer(newTodoBytes))
 	if err != nil {
 		t.Fatalf("failed to create a new POST request to create a new TODO: %s", err)
 	}

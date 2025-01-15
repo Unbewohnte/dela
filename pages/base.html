@@ -6,51 +6,55 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>dela</title>
+    <title>Dela</title>
     <link rel="shortcut icon" href="/static/images/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
-    <script src="/static/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/static/bootstrap/js/bootstrap.bundle.min.js"></script>
     <style>
-       html * {
-        font-family: "Roboto" !important;
-        src: url("/static/fonts/Roboto-Regular.ttf");
-       }
+        html * {
+            font-family: "Roboto", sans-serif !important;
+        }
+        body {
+            background-color: #f8f9fa;
+        }
+        header {
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
     </style>
 </head>
 
 <body class="w-100 h-100">
-  <header class="p-3 text-bg-primary">
-    <div class="container">
-      <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
-        <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none">
-          <a href="/" class="d-inline-flex link-body-emphasis text-decoration-none">
-            <img width="64" height="64" src="/static/images/android-chrome-192x192.png" alt="Dela">
-          </a>
-        </a>
+    <header class="p-3 text-bg-warning-emphasis">
+        <div class="container">
+            <div class="d-flex flex-wrap align-items-center justify-content-between">
+                <a href="/" class="d-flex align-items-center text-white text-decoration-none">
+                    <img width="64" height="64" src="/static/images/android-chrome-192x192.png" alt="Dela">
+                </a>
 
-        <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
-          <li><a href="/" class="nav-link px-2 text-white">Main</a></li>
-          <li><a href="/about" class="nav-link px-2 text-white">About</a></li>
-        </ul>
+                <nav class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
+                    <a href="/" class="nav-link px-2 text-white">Main</a>
+                    <a href="/about" class="nav-link px-2 text-white">About</a>
+                </nav>
 
-        <div class="text-end p-3">
-          <button id="theme-switch-btn" class="btn btn-secondary" onclick="toggleTheme();">
-            <img id="theme-svg" src="/static/images/brightness-high.svg" alt="Change theme">
-          </button>
+                <div class="d-flex align-items-center">
+                    <button id="theme-switch-btn" class="btn btn-secondary me-2" onclick="toggleTheme();">
+                        <img id="theme-svg" src="/static/images/brightness-high.svg" alt="Change theme">
+                    </button>
+                    <div id="bar-auth" class="d-flex">
+                        <a href="/login" class="btn btn-outline-light me-2">Login</a>
+                        <a href="/register" class="btn btn-warning">Sign-up</a>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="text-end" id="bar-auth">
-          <a href="/login" class="btn btn-outline-light me-2">Login</a>
-          <a href="/register" class="btn btn-warning">Sign-up</a>
-        </div>
-        </div>
-      </div>
-    </div>
-  </header>
-  
-  <!-- Content -->
-  {{ template "content" . }}
-
+    </header>
+    
+    <!-- Content -->
+    <main class="container mt-4">
+        {{ template "content" . }}
+    </main>
 </body>
+
 </html>
 
 <script src="/scripts/auth.js"></script>

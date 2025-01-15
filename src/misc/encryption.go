@@ -16,7 +16,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-package encryption
+package misc
 
 import (
 	"crypto/sha256"

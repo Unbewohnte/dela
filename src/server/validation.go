@@ -20,9 +20,11 @@ package server
 
 import (
 	"Unbewohnte/dela/db"
+	"Unbewohnte/dela/misc"
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 )
 
 const (
@@ -52,10 +54,14 @@ func IsUserValid(user db.User) (bool, string) {
 	return true, ""
 }
 
-// Checks if such a user exists and compares passwords. Returns true if such user exists and passwords do match
+// Checks if such user exists, passwords match and email is confirmed. Returns true if such user exists, passwords do match and email was verified
 func IsUserAuthorized(db *db.DB, user db.User) bool {
 	userDB, err := db.GetUser(user.Email)
 	if err != nil {
+		return false
+	}
+
+	if !userDB.ConfirmedEmail {
 		return false
 	}
 
@@ -82,8 +88,8 @@ func AuthFromCookie(cookie *http.Cookie) (string, string) {
 
 /*
 Gets auth information from a request and
-checks if such a user exists and compares passwords.
-Returns true if such user exists and passwords do match
+checks if such user exists and passwords match.
+Returns true if such user exists, passwords do match and email is confirmed
 */
 func IsUserAuthorizedReq(req *http.Request, dbase *db.DB) bool {
 	var email, password string
@@ -117,4 +123,22 @@ func GetLoginFromReq(req *http.Request) string {
 	}
 
 	return email
+}
+
+/*
+Generates a new verification code for given email with 8-digit numeric code,
+current issue time and one hour lifetime.
+Inserts newly created email verification into database.
+*/
+func GenerateVerificationCode(dbase *db.DB, email string) (*db.Verification, error) {
+	verification := db.NewVerification(
+		email, misc.GenerateNumericCode(8), uint64(time.Now().Unix()), uint64(time.Hour.Seconds()),
+	)
+
+	err := dbase.CreateVerification(*verification)
+	if err != nil {
+		return nil, err
+	}
+
+	return verification, nil
 }

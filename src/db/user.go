@@ -110,3 +110,32 @@ func (db *DB) DeleteUserClean(email string) error {
 
 	return nil
 }
+
+// Sets confirmed_email to true for given user
+func (db *DB) UserSetEmailConfirmed(email string) error {
+	_, err := db.Exec(
+		"UPDATE users SET confirmed_email=? WHERE email=?",
+		true,
+		email,
+	)
+
+	return err
+}
+
+// Cleanly deletes user if email is not confirmed
+func (db *DB) DeleteUnverifiedUserClean(email string) error {
+	user, err := db.GetUser(email)
+	if err != nil {
+		return err
+	}
+
+	if !user.ConfirmedEmail {
+		// Email is not verified, delete information on this user
+		err = db.DeleteUserClean(email)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}

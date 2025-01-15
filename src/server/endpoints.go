@@ -20,6 +20,7 @@ package server
 
 import (
 	"Unbewohnte/dela/db"
+	"Unbewohnte/dela/email"
 	"Unbewohnte/dela/logger"
 	"encoding/json"
 	"fmt"
@@ -81,9 +82,126 @@ func (s *Server) EndpointUserCreate(w http.ResponseWriter, req *http.Request) {
 	))
 	if err != nil {
 		http.Error(w, "Failed to create default group", http.StatusInternalServerError)
-		logger.Error("[Server][EndpojntUserCreate] Failed to create a default group for %s: %s", user.Email, err)
+		logger.Error("[Server][EndpointUserCreate] Failed to create a default group for %s: %s", user.Email, err)
 		return
 	}
+
+	// Check if email verification is required
+	if !s.config.Verification.VerifyEmails {
+		// Do not verify email
+
+		// Send cookie
+		http.SetCookie(w, &http.Cookie{
+			Name:     "auth",
+			Value:    fmt.Sprintf("%s:%s", user.Email, user.Password),
+			SameSite: http.SameSiteStrictMode,
+			HttpOnly: false,
+			Path:     "/",
+			Secure:   false,
+		})
+
+		// Done
+		w.Write([]byte("{\"confirm_email\":false}"))
+
+		logger.Info("[Server][EndpointUserCreate] Successfully sent email notification to %s", user.Email)
+		return
+	}
+
+	// Send email verification message
+	verification, err := GenerateVerificationCode(s.db, user.Email)
+	if err != nil {
+		logger.Error("[Server][EndpointUserCreate] Failed to generate verification code for %s: %s", user.Email, err)
+		http.Error(w, "Failed to generate confirmation code", http.StatusInternalServerError)
+		return
+	}
+
+	// Send verification email
+	err = s.emailer.SendEmail(
+		email.NewEmail(
+			s.config.Verification.Emailer.User,
+			"Dela: Email verification",
+			fmt.Sprintf("Your email verification code: <b>%s</b>\nPlease, verify your email in %f hours.\nThis email was specified during Dela account creation. Ignore this message if it wasn't you", verification.Code, float32(verification.LifeSeconds)/3600),
+			[]string{user.Email},
+		),
+	)
+	if err != nil {
+		logger.Error("[Server][EndpointUserCreate] Failed to send verification email to %s: %s", user.Email, err)
+		http.Error(w, "Failed to send email verification message", http.StatusInternalServerError)
+		return
+	}
+
+	// Autodelete user account if email was not verified in time
+	time.AfterFunc(time.Second*time.Duration(verification.LifeSeconds), func() {
+		err = s.db.DeleteUnverifiedUserClean(user.Email)
+		if err != nil {
+			logger.Error("[Server][EndpointUserCreate] Failed to autodelete unverified user %s: %s", user.Email, err)
+		}
+	})
+
+	w.Write([]byte("{\"confirm_email\":true}"))
+}
+
+func (s *Server) EndpointUserVerify(w http.ResponseWriter, req *http.Request) {
+	if req.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Retrieve data
+	defer req.Body.Close()
+
+	contents, err := io.ReadAll(req.Body)
+	if err != nil {
+		logger.Error("[Server][EndpointUserVerify] Failed to read request body: %s", err)
+		http.Error(w, "Failed to read request body", http.StatusInternalServerError)
+		return
+	}
+
+	type verificationAnswer struct {
+		Email string `json:"email"`
+		Code  string `json:"code"`
+	}
+
+	var answer verificationAnswer
+	err = json.Unmarshal(contents, &answer)
+	if err != nil {
+		logger.Error("[Server][EndpointUserVerify] Failed to unmarshal verification answer: %s", err)
+		http.Error(w, "Verification answer JSON unmarshal error", http.StatusInternalServerError)
+		return
+	}
+
+	// Retrieve user
+	user, err := s.db.GetUser(answer.Email)
+	if err != nil {
+		logger.Error("[Server][EndpointUserVerify] Failed to retrieve information on \"%s\": %s", answer.Email, err)
+		http.Error(w, "Failed to get user information", http.StatusInternalServerError)
+		return
+	}
+
+	// Compare codes
+	dbCode, err := s.db.GetVerificationByEmail(user.Email)
+	if err != nil {
+		logger.Error("[Server][EndpointUserVerify] Could not get verification code from DB for %s: %s", user.Email, err)
+		http.Error(w, "Could not retrieve verification information for this email", http.StatusInternalServerError)
+		return
+	}
+
+	if answer.Code != dbCode.Code {
+		// Codes do not match!
+		logger.Error("[Server][EndpointUserVerify] %s sent wrong verification code", user.Email)
+		http.Error(w, "Wrong verification code!", http.StatusForbidden)
+		return
+	}
+
+	// All's good!
+	err = s.db.UserSetEmailConfirmed(user.Email)
+	if err != nil {
+		http.Error(w, "Failed to save confirmation information", http.StatusInternalServerError)
+		logger.Error("[Server][EndpointUserVerify] Failed to set confirmed_email to true for %s: %s", user.Email, err)
+		return
+	}
+
+	logger.Info("[Server][EndpointUserVerify] %s was successfully verified!", user.Email)
 
 	// Send cookie
 	http.SetCookie(w, &http.Cookie{
@@ -122,14 +240,7 @@ func (s *Server) EndpointUserLogin(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// Check auth data
-	userDB, err := s.db.GetUser(user.Email)
-	if err != nil {
-		logger.Error("[Server][EndpointUserLogin] Failed to fetch user information from DB: %s", err)
-		http.Error(w, "Failed to fetch user information", http.StatusInternalServerError)
-		return
-	}
-
-	if user.Password != userDB.Password {
+	if !IsUserAuthorized(s.db, user) {
 		http.Error(w, "Failed auth", http.StatusForbidden)
 		return
 	}
