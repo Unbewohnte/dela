@@ -75,27 +75,26 @@
 
 <!-- Main ToDos section -->
 <div class="p-2 flex-grow-1">
-    <form action="javascript:void(0);">
-        <div class="container">
-        <div class="row">
-                <div class="col">
-                    <input type="text" class="form-control" id="newTodoText" placeholder="TODO text">
-                </div>
-                <div class="col">
-                    <label for="newTodoDue">Due</label>
-                    <input aria-placeholder="Due" type="date" name="newTodoDue" id="newTodoDue" placeholder="Due">
-                </div>
-                <div class="col">
-                  <button class="btn btn-primary" id="newTodoPaint" onclick="openPaintModal();">Paint</button>
-                </div>
-                <div class="col">
-                    <button id="newTodoSubmit" class="btn btn-primary">Add</button>
-                    <button class="btn btn-secondary" id="show-done">Show Done</button>
-                </div>
+    <form action="javascript:void(0);" id="todoForm">
+        <div class="row g-3 align-items-center">
+            <div class="col-md">
+                <label for="newTodoText" class="form-label">TODO Text</label>
+                <input type="text" class="form-control" id="newTodoText" placeholder="Enter TODO text" required>
+            </div>
+            <div class="col-md">
+                <label for="newTodoDue" class="form-label">Due Date</label>
+                <input type="date" class="form-control" name="newTodoDue" id="newTodoDue" required>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-primary" id="newTodoPaint" onclick="openPaintModal();">Paint</button>
+            </div>
+            <div class="col-auto">
+                <button type="submit" id="newTodoSubmit" class="btn btn-primary">Add</button>
+                <button type="button" id="show-done" class="btn btn-secondary">Show Done</button>
             </div>
         </div>
     </form>
-    
+      
     <div class="container text-center">
       <!-- Due -->
       <table class="table table-hover" id="due-todos">
