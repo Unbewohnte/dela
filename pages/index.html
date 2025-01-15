@@ -2,65 +2,67 @@
 
 {{ define "content" }}
 
+
 <!-- Main -->
-<main class="container mt-4">
+<main>
+
   <div class="d-flex flex-wrap">
     <!-- Sidebar -->
-    <aside id="sidebar" class="col-md-3 col-lg-2 border-end shadow-lg flex-shrink-1 p-3 d-flex flex-column align-items-stretch bg-light">
+    <div id="sidebar" class="col border-right shadow-lg flex-shrink-1 p-2 d-flex flex-column align-items-stretch bg-body-tertiary">
       <a href="/" class="d-flex align-items-center flex-shrink-0 p-3 link-body-emphasis text-decoration-none border-bottom">
-        <img class="bi pe-none me-2" width="30" height="24" src="/static/images/arrows-fullscreen.svg" alt="Logo">
+        <img class="bi pe-none me-2" width="30" height="24" src="/static/images/arrows-fullscreen.svg">
         <span class="fs-5 fw-semibold">Categories</span>
       </a>
-
+  
       <div class="list-group list-group-flush border-bottom scrollarea">
-        {{ range .Groups }}
+      {{ range .Groups  }}
           <a href="/group/{{.ID}}" class="list-group-item list-group-item-action py-3 lh-sm" aria-current="true">
             <div class="d-flex w-100 align-items-center justify-content-between">
               <strong class="mb-1">{{ .Name }}</strong>
               <small>{{ .TimeCreated }}</small>
             </div>
             {{ if not .Removable }}
-              <div class="col-10 mb-1 small text-muted">Not removable</div>
+              <div class="col-10 mb-1 small">Not removable</div>
             {{ end }}
           </a>
-        {{ end }}
+      {{ end }}
       </div>
-
-      <div class="input-group mb-3 mt-3">
-        <input type="text" name="newCategory" aria-label="Category Name" aria-describedby="button-new-category" class="form-control" id="new-category-input" placeholder="Category Name">
-        <button id="button-new-category" onclick="createNewCategory();" class="btn btn-primary">Create</button>
-      </div>
-    </aside>
-
-    <!-- Groups -->
-    <div class="col-md-9 col-lg-10 p-4">
-      <h2 class="mb-4">Available Categories</h2>
-      <div class="list-group">
-        {{ range .Groups }}
-          <div class="list-group-item list-group-item-action d-flex gap-3 py-3" aria-current="true">
-            <a href="/group/{{.ID}}" class="d-flex gap-3 w-100">
-              <img src="/static/images/box-arrow-up-right.svg" alt="Go to this category" width="32" height="32">
-              <div class="d-flex gap-2 w-100 justify-content-between">
-                <div>
-                  <h6 class="mb-0">{{ .Name }}</h6>
-                  <p class="mb-0 opacity-75">Jump here</p>
-                </div>
-                <small class="opacity-50 text-nowrap">{{ .TimeCreated }}</small>
-              </div>
-            </a>
-            {{ if .Removable }}
-              <div class="small">
-                <button class="btn btn-danger" onclick="deleteCategoryRefresh('{{.ID}}')">
-                  <img src="/static/images/trash3-fill.svg" alt="Remove category" width="20">
-                </button>
-              </div>
-            {{ end }}
-          </div>
-        {{ end }}
+  
+  
+      <div class="input-group mb-3 py-md-5">
+        <input type="text" name="newCategory"aria-label="Category Name" aria-describedby="button-new-category" class="form-control" id="new-category-input" placeholder="Category Name">
+        <button id="button-new-category" onclick="createNewCategory();" class="btn btn-primary">Create</button >
       </div>
     </div>
+  
+    <!-- Groups -->
+    <div class="d-flex flex-column flex-grow-1 flex-md-row p-4 gap-4 py-md-5">
+    <div class="list-group flex-grow-1">
+      {{ range .Groups }}
+        <div class="list-group-item list-group-item-action d-flex gap-3 py-3" aria-current="true">
+          <a href="/group/{{.ID}}" class="list-group-item list-group-item-action d-flex gap-3 py-3">
+            <img src="/static/images/box-arrow-up-right.svg" alt="Go to this category" width="32" height="32">
+            <div class="d-flex gap-2 w-100 justify-content-between">
+              <div>
+                <h6 class="mb-0">{{ .Name }}</h6>
+                <p class="mb-0 opacity-75">Jump here</p>
+              </div>
+              <small class="opacity-50 text-nowrap">{{ .TimeCreated }}</small>
+            </div>
+          </a>
+          {{ if .Removable }}
+          <div class="small">
+            <button class="btn btn-danger" onclick="deleteCategoryRefresh('{{.ID}}')">
+              <img src="/static/images/trash3-fill.svg" alt="Remove category">
+            </button>
+          </div>
+          {{ end }}
+        </div>
+      {{ end }}
+    </div>
+    </div>
   </div>
-</main>
+  </main>  
 
 
 <script>
