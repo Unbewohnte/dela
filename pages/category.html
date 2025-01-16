@@ -48,6 +48,27 @@
   </div>
 <!-- End Paint Canvas Modal -->
 
+<!-- ToDo display Modal -->
+<div class="modal fade" id="todoModal" tabindex="-1" aria-labelledby="todoModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title" id="todoModalLabel">TODO Details</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+              <p><strong>Text:</strong> <span id="modalTodoText"></span></p>
+              <p><strong>Created:</strong> <span id="modalTodoCreated"></span></p>
+              <p><strong>Due:</strong> <span id="modalTodoDue"></span></p>
+              <p><strong>Completion time:</strong> <span id="modalTodoCompletionTime"></span></p>
+              <img id="modalTodoImage" src="" class="img-fluid" style="display: none;">
+          </div>
+          <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+      </div>
+  </div>
+</div>
 
 <!-- Sidebar -->
 <div id="sidebar" class="col border-right shadow-lg flex-shrink-1 p-2 d-flex flex-column align-items-stretch bg-body-tertiary" style="width: 380px;">
@@ -107,7 +128,7 @@
         <tbody class="text-break">
           {{ range .Todos }}
           {{ if not .IsDone }}
-            <tr draggable="true" id="todo-{{.ID}}" ondragstart="dragStart(event);">
+            <tr onclick="openTodoModal('{{.ID}}', '{{.Text}}', '{{.TimeCreated}}', '{{.Due}}', null, '{{ printf "%s" .Image }}');" draggable="true" id="todo-{{.ID}}" ondragstart="dragStart(event);">
               {{ if not .Image }}
               <!-- Display transparent white pixel -->
               <td><img class="todo-image" src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' width="64px" height="64px"></td>
@@ -143,7 +164,7 @@
         <tbody class="text-break">
           {{ range .Todos }}
           {{ if .IsDone }}
-            <tr>
+            <tr onclick="openTodoModal('{{.ID}}', '{{.Text}}', '{{.TimeCreated}}', '{{.Due}}', '{{.CompletionTime}}', '{{ printf "%s" .Image }}');">
               {{ if not .Image }}
               <!-- Display transparent white pixel -->
               <td><img src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' width="64px" height="64px"></td>
@@ -248,6 +269,24 @@ async function drop(event) {
   });
 
   window.location.reload();
+}
+
+function openTodoModal(id, text, created, due, completionTime, image) {
+    document.getElementById('modalTodoText').innerText = text;
+    document.getElementById('modalTodoCreated').innerText = created;
+    document.getElementById('modalTodoDue').innerText = due;
+    document.getElementById('modalTodoCompletionTime').innerText = completionTime;
+
+    let img = document.getElementById('modalTodoImage');
+    if (img) {
+      img.src = image;
+      img.style.display = 'block';
+    } else {
+      img.style.display = 'none';
+    }
+
+    const todoModal = new bootstrap.Modal(document.getElementById('todoModal'));
+    todoModal.show();
 }
 
 document.addEventListener('DOMContentLoaded', async function() {
