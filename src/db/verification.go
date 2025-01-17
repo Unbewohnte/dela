@@ -1,6 +1,8 @@
 package db
 
-import "database/sql"
+import (
+	"database/sql"
+)
 
 type Verification struct {
 	ID          uint64 `json:"id"`
@@ -55,10 +57,10 @@ func (db *DB) GetVerification(id uint64) (*Verification, error) {
 	return verification, nil
 }
 
-// Returns the first email verification by email
+// Returns the last email verification by email
 func (db *DB) GetVerificationByEmail(email string) (*Verification, error) {
 	rows, err := db.Query(
-		"SELECT * FROM verifications WHERE email=?",
+		"SELECT * FROM verifications WHERE (email=?) ORDER BY life_seconds DESC",
 		email,
 	)
 	if err != nil {

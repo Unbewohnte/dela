@@ -127,12 +127,12 @@ func GetLoginFromReq(req *http.Request) string {
 
 /*
 Generates a new verification code for given email with 8-digit numeric code,
-current issue time and one hour lifetime.
+current issue time and provided life time.
 Inserts newly created email verification into database.
 */
-func GenerateVerificationCode(dbase *db.DB, email string) (*db.Verification, error) {
+func GenerateVerificationCode(dbase *db.DB, email string, length uint, lifeTimeSeconds uint64) (*db.Verification, error) {
 	verification := db.NewVerification(
-		email, misc.GenerateNumericCode(8), uint64(time.Now().Unix()), uint64(time.Hour.Seconds()),
+		email, misc.GenerateNumericCode(length), uint64(time.Now().Unix()), lifeTimeSeconds,
 	)
 
 	err := dbase.CreateVerification(*verification)

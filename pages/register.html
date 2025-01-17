@@ -45,7 +45,6 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="verificationModalLabel">Email Verification</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <p>Enter the verification code sent to your email address</p>
@@ -56,7 +55,6 @@
                 <p class="text-danger"><span id="error-message-modal"></span></p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 <button type="button" class="btn btn-primary" id="verifyButton" onclick="verify();">Verify</button>
             </div>
         </div>
@@ -85,7 +83,15 @@ async function verify() {
     }
 }
 
+let verificationSent = false;
+
 async function register() {
+    if (verificationSent) {
+        // No need to resend registration data, reopen verification modal, 
+        showVerificationModal();
+        return;
+    }
+
     let emailInput = document.getElementById("input-email");
     if (!emailInput.reportValidity()) {
         return;
@@ -106,9 +112,10 @@ async function register() {
     };
 
     let response = await postNewUser(postData);
-    if (response.ok) {
+    if (response.ok) {        
         let json = await response.json();
         if (json.confirm_email) {
+            verificationSent = true;
             // Open email confirmation modal
             showVerificationModal();
         } else {

@@ -108,7 +108,7 @@ func (s *Server) EndpointUserCreate(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// Send email verification message
-	verification, err := GenerateVerificationCode(s.db, user.Email)
+	verification, err := GenerateVerificationCode(s.db, user.Email, 5, uint64(time.Hour.Seconds()))
 	if err != nil {
 		logger.Error("[Server][EndpointUserCreate] Failed to generate verification code for %s: %s", user.Email, err)
 		http.Error(w, "Failed to generate confirmation code", http.StatusInternalServerError)
@@ -120,7 +120,7 @@ func (s *Server) EndpointUserCreate(w http.ResponseWriter, req *http.Request) {
 		email.NewEmail(
 			s.config.Verification.Emailer.User,
 			"Dela: Email verification",
-			fmt.Sprintf("Your email verification code: <b>%s</b>\nPlease, verify your email in %f hours.\nThis email was specified during Dela account creation. Ignore this message if it wasn't you", verification.Code, float32(verification.LifeSeconds)/3600),
+			fmt.Sprintf("<p>Your email verification code is: <b>%s</b></p><p>Please, verify your email in %.1f hours. Your account will be deleted after some time without verified status.</p><p>This email was specified during Dela account creation. Ignore this message if it wasn't you.</p>", verification.Code, float32(verification.LifeSeconds)/3600),
 			[]string{user.Email},
 		),
 	)
@@ -130,8 +130,8 @@ func (s *Server) EndpointUserCreate(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// Autodelete user account if email was not verified in time
-	time.AfterFunc(time.Second*time.Duration(verification.LifeSeconds), func() {
+	// Autodelete user account after some more time if email was not verified in time
+	time.AfterFunc((time.Second*time.Duration(verification.LifeSeconds))*5, func() {
 		err = s.db.DeleteUnverifiedUserClean(user.Email)
 		if err != nil {
 			logger.Error("[Server][EndpointUserCreate] Failed to autodelete unverified user %s: %s", user.Email, err)
@@ -173,8 +173,8 @@ func (s *Server) EndpointUserVerify(w http.ResponseWriter, req *http.Request) {
 	// Retrieve user
 	user, err := s.db.GetUser(answer.Email)
 	if err != nil {
-		logger.Error("[Server][EndpointUserVerify] Failed to retrieve information on \"%s\": %s", answer.Email, err)
-		http.Error(w, "Failed to get user information", http.StatusInternalServerError)
+		// Most likely already deleted this user's account
+		http.Error(w, "Account no longer exists, try registering again", http.StatusInternalServerError)
 		return
 	}
 
@@ -190,6 +190,13 @@ func (s *Server) EndpointUserVerify(w http.ResponseWriter, req *http.Request) {
 		// Codes do not match!
 		logger.Error("[Server][EndpointUserVerify] %s sent wrong verification code", user.Email)
 		http.Error(w, "Wrong verification code!", http.StatusForbidden)
+		return
+	}
+
+	// Check for lifetime
+	if time.Now().Unix() > int64(dbCode.IssuedUnix+dbCode.LifeSeconds) {
+		// Expired!
+		http.Error(w, "This code is expired!", http.StatusForbidden)
 		return
 	}
 
