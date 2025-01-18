@@ -421,8 +421,8 @@ func (s *Server) EndpointTodoUpdate(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// Update. (Creation date, owner username and an ID do not change)
-	err = s.db.UpdateTodo(todoID, updatedTodo)
+	// Update
+	err = s.db.UpdateTodoSoft(todoID, updatedTodo)
 	if err != nil {
 		logger.Warning("[Server] Failed to update TODO: %s", err)
 		http.Error(w, "Failed to update", http.StatusBadRequest)

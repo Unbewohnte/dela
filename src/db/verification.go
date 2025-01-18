@@ -8,8 +8,8 @@ type Verification struct {
 	ID          uint64 `json:"id"`
 	Email       string `json:"email"`
 	Code        string `json:"code"`
-	IssuedUnix  uint64 `json:"issued_unix"`
-	LifeSeconds uint64 `json:"life_seconds"`
+	IssuedUnix  uint64 `json:"issuedUnix"`
+	LifeSeconds uint64 `json:"lifeSeconds"`
 }
 
 func NewVerification(email string, code string, issuedUnix uint64, lifeSeconds uint64) *Verification {

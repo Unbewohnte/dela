@@ -19,7 +19,9 @@
 package db
 
 import (
+	"bytes"
 	"database/sql"
+	"strings"
 	"time"
 )
 
@@ -153,6 +155,52 @@ func (db *DB) UpdateTodo(todoID uint64, updatedTodo Todo) error {
 		updatedTodo.Image,
 		todoID,
 	)
+
+	return err
+}
+
+// Updates all changed fields which are not nil-valued in a ToDo and retains all unchanged ones
+func (db *DB) UpdateTodoSoft(todoID uint64, updatedTodo Todo) error {
+	originalTodo, err := db.GetTodo(todoID)
+	if err != nil {
+		return err
+	}
+
+	args := []interface{}{}
+	updates := []string{}
+	if (updatedTodo.GroupID != originalTodo.GroupID) && updatedTodo.GroupID != 0 {
+		updates = append(updates, "group_id=?")
+		args = append(args, updatedTodo.GroupID)
+	}
+	if (updatedTodo.DueUnix != originalTodo.DueUnix) && updatedTodo.DueUnix != 0 {
+		updates = append(updates, "due_unix=?")
+		args = append(args, updatedTodo.DueUnix)
+	}
+	if (updatedTodo.Text != originalTodo.Text) && updatedTodo.Text != "" {
+		updates = append(updates, "text=?")
+		args = append(args, updatedTodo.Text)
+	}
+	if updatedTodo.IsDone != originalTodo.IsDone {
+		updates = append(updates, "is_done=?")
+		args = append(args, updatedTodo.IsDone)
+	}
+	if (updatedTodo.CompletionTimeUnix != originalTodo.CompletionTimeUnix) && updatedTodo.CompletionTimeUnix != 0 {
+		updates = append(updates, "completion_time_unix=?")
+		args = append(args, updatedTodo.CompletionTimeUnix)
+	}
+	if !bytes.Equal(updatedTodo.Image, originalTodo.Image) && updatedTodo.Image != nil {
+		updates = append(updates, "image=?")
+		args = append(args, updatedTodo.Image)
+	}
+
+	if len(updates) == 0 {
+		return nil
+	}
+
+	query := "UPDATE todos SET " + strings.Join(updates, ", ") + " WHERE id=?"
+	args = append(args, todoID)
+
+	_, err = db.Exec(query, args...)
 
 	return err
 }

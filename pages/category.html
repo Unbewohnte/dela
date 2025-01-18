@@ -57,14 +57,28 @@
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-              <p><strong>Text:</strong> <span id="modalTodoText"></span></p>
-              <p><strong>Created:</strong> <span id="modalTodoCreated"></span></p>
-              <p><strong>Due:</strong> <span id="modalTodoDue"></span></p>
-              <p><strong>Completion time:</strong> <span id="modalTodoCompletionTime"></span></p>
-              <img id="modalTodoImage" src="" class="img-fluid" style="display: none;">
+              <div>
+                  <strong>Text:</strong>
+                  <span id="modalTodoTextDisplay"></span>
+                  <input type="text" id="modalTodoTextInput" class="form-control" style="display: none;">
+              </div>
+              <div>
+                  <strong>Created:</strong> <span id="modalTodoCreated"></span>
+              </div>
+              <div>
+                  <strong>Due:</strong>
+                  <span id="modalTodoDueDisplay"></span>
+                  <input type="date" id="modalTodoDueInput" class="form-control" style="display: none;">
+              </div>
+              <div>
+                  <strong>Completion time:</strong> <span id="modalTodoCompletionTime"></span>
+              </div>
+              <img id="modalTodoImage" class="img-fluid" style="display: none;">
           </div>
           <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-primary" id="editButton" style="display: none;" onclick="toggleEditMode(true)">Edit</button>
+              <button type="button" class="btn btn-success" id="saveButton" style="display: none;" onclick="saveEditedTodo()">Save</button>
           </div>
       </div>
   </div>
@@ -128,7 +142,7 @@
         <tbody class="text-break">
           {{ range .Todos }}
           {{ if not .IsDone }}
-            <tr onclick="openTodoModal('{{.ID}}', '{{.Text}}', '{{.TimeCreated}}', '{{.Due}}', null, '{{ printf "%s" .Image }}');" draggable="true" id="todo-{{.ID}}" ondragstart="dragStart(event);">
+            <tr onclick="openTodoModal('{{.ID}}', '{{.Text}}', '{{.TimeCreated}}', '{{.Due}}', null, '{{ printf "%s" .Image }}', true);" draggable="true" id="todo-{{.ID}}" ondragstart="dragStart(event);">
               {{ if not .Image }}
               <!-- Display transparent white pixel -->
               <td><img class="todo-image" src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' width="64px" height="64px"></td>
@@ -164,7 +178,7 @@
         <tbody class="text-break">
           {{ range .Todos }}
           {{ if .IsDone }}
-            <tr onclick="openTodoModal('{{.ID}}', '{{.Text}}', '{{.TimeCreated}}', '{{.Due}}', '{{.CompletionTime}}', '{{ printf "%s" .Image }}');">
+            <tr onclick="openTodoModal('{{.ID}}', '{{.Text}}', '{{.TimeCreated}}', '{{.Due}}', '{{.CompletionTime}}', '{{ printf "%s" .Image }}', false);">
               {{ if not .Image }}
               <!-- Display transparent white pixel -->
               <td><img src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' width="64px" height="64px"></td>
@@ -262,19 +276,22 @@ async function drop(event) {
 
   // Update todo's group ID
   let result = await updateTodo(todoId, {
-    text: draggedTodo.getElementsByClassName("todo-text")[0].innerText,
     groupId: Number(targetGroupId),
-    dueUnix: Number(draggedTodo.getElementsByClassName("todo-due-unix")[0].innerText),
-    image: Array.from(draggedTodo.getElementsByClassName("todo-image")[0].src, char => char.charCodeAt(0))
   });
 
   window.location.reload();
 }
 
-function openTodoModal(id, text, created, due, completionTime, image) {
-    document.getElementById('modalTodoText').innerText = text;
+
+let viewedTodoID;
+function openTodoModal(id, text, created, due, completionTime, image, editable) {
+    viewedTodoID = id;
+
+    document.getElementById('modalTodoTextDisplay').innerText = text;
+    document.getElementById('modalTodoTextInput').value = text;
     document.getElementById('modalTodoCreated').innerText = created;
-    document.getElementById('modalTodoDue').innerText = due;
+    document.getElementById('modalTodoDueDisplay').innerText = due;
+    document.getElementById('modalTodoDueInput').value = due;
     document.getElementById('modalTodoCompletionTime').innerText = completionTime;
 
     let img = document.getElementById('modalTodoImage');
@@ -285,8 +302,40 @@ function openTodoModal(id, text, created, due, completionTime, image) {
       img.style.display = 'none';
     }
 
+    let editButton = document.getElementById("editButton");
+    if (editable) {
+      // Show "Edit" button
+      editButton.style.display = "inline";     
+    } else {
+      editButton.style.display = "none";     
+    }
+
     const todoModal = new bootstrap.Modal(document.getElementById('todoModal'));
     todoModal.show();
+}
+
+async function saveEditedTodo() {
+    const updatedText = document.getElementById('modalTodoTextInput').value;
+    const updatedDue = document.getElementById('modalTodoDueInput').value;
+    document.getElementById('modalTodoTextDisplay').innerText = updatedText;
+    document.getElementById('modalTodoDueDisplay').innerText = updatedDue;
+    const updatedDueUnix = Date.parse(updatedDue) / 1000;
+
+    toggleEditMode(false);
+
+    await updateTodo(viewedTodoID, {"text":updatedText, "dueUnix":updatedDueUnix, "isDone":false});
+
+    window.location.reload();
+}
+
+
+function toggleEditMode(isEditing) {
+    document.getElementById('modalTodoTextDisplay').style.display = isEditing ? 'none' : 'inline';
+    document.getElementById('modalTodoTextInput').style.display = isEditing ? 'inline' : 'none';
+    document.getElementById('modalTodoDueDisplay').style.display = isEditing ? 'none' : 'inline';
+    document.getElementById('modalTodoDueInput').style.display = isEditing ? 'inline' : 'none';
+    document.getElementById('editButton').style.display = isEditing ? 'none' : 'inline';
+    document.getElementById('saveButton').style.display = isEditing ? 'inline' : 'none';
 }
 
 document.addEventListener('DOMContentLoaded', async function() {
@@ -331,7 +380,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
         // Make a request
         let response = await postNewTodo(
-          {text: newTodoText, groupId: Number(groupId), dueUnix: Number(dueTimeStamp), image: canvasImage}
+          {"text": newTodoText, "groupId": Number(groupId), "dueUnix": Number(dueTimeStamp), "image": canvasImage}
         );
         if (response.ok) {
             location.reload();
