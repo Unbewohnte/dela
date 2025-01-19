@@ -20,6 +20,7 @@ package server
 
 import (
 	"Unbewohnte/dela/db"
+	"Unbewohnte/dela/i18n"
 	"Unbewohnte/dela/misc"
 	"fmt"
 	"net/http"
@@ -141,4 +142,26 @@ func GenerateVerificationCode(dbase *db.DB, email string, length uint, lifeTimeS
 	}
 
 	return verification, nil
+}
+
+func LocaleFromReq(req *http.Request) string {
+	cookie, err := req.Cookie("locale")
+	if err != nil {
+		return ""
+	}
+
+	return cookie.Value
+}
+
+func LanguageFromReq(req *http.Request) i18n.Language {
+	switch LocaleFromReq(req) {
+	case "ENG":
+		return i18n.Eng
+
+	case "RU":
+		return i18n.Ru
+
+	default:
+		return i18n.Eng
+	}
 }

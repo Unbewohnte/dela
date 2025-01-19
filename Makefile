@@ -4,6 +4,7 @@ all: savedb clean
 	 cd .. && \
 	 cp -r pages bin && \
 	 cp -r scripts bin && \
+	 cp -r translations bin && \
 	 cp -r static bin
 
 	-mv dela.db bin/
@@ -19,6 +20,7 @@ cross: clean
 	mkdir -p bin/dela_linux_x64
 	cp -r pages bin/dela_linux_x64
 	cp -r scripts bin/dela_linux_x64
+	cp -r translations bin/dela_linux_x64
 	cp -r static bin/dela_linux_x64
 	cp COPYING bin/dela_linux_x64
 	cp README.md bin/dela_linux_x64
@@ -26,6 +28,7 @@ cross: clean
 	mkdir -p bin/dela_windows_x64
 	cp -r pages bin/dela_windows_x64
 	cp -r scripts bin/dela_windows_x64
+	cp -r translations bin/dela_windows_x64
 	cp -r static bin/dela_windows_x64
 	cp COPYING bin/dela_windows_x64
 	cp README.md bin/dela_windows_x64
@@ -33,6 +36,7 @@ cross: clean
 	mkdir -p bin/dela_darwin_x64
 	cp -r pages bin/dela_darwin_x64
 	cp -r scripts bin/dela_darwin_x64
+	cp -r translations bin/dela_darwin_x64
 	cp -r static bin/dela_darwin_x64
 	cp COPYING bin/dela_darwin_x64
 	cp README.md bin/dela_darwin_x64
@@ -40,6 +44,7 @@ cross: clean
 	mkdir -p bin/dela_darwin_arm64
 	cp -r pages bin/dela_darwin_arm64
 	cp -r scripts bin/dela_darwin_arm64
+	cp -r translations bin/dela_darwin_arm64
 	cp -r static bin/dela_darwin_arm64
 	cp COPYING bin/dela_darwin_arm64
 	cp README.md bin/dela_darwin_arm64
@@ -47,6 +52,7 @@ cross: clean
 	mkdir -p bin/dela_freebsd_x64
 	cp -r pages bin/dela_freebsd_x64
 	cp -r scripts bin/dela_freebsd_x64
+	cp -r translations bin/dela_freebsd_x64
 	cp -r static bin/dela_freebsd_x64
 	cp COPYING bin/dela_freebsd_x64
 	cp README.md bin/dela_freebsd_x64

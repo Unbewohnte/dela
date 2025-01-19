@@ -1,0 +1,50 @@
+{
+    "language": "ENG",
+    "messages": [
+        {
+            "id": "register main",
+            "message": "Register",
+            "translation": "Register"
+        },
+        {
+            "id": "register passwords info",
+            "message": "Passwords are hashed client-side, your information is protected",
+            "translation": "Passwords are hashed client-side, your information is protected"
+        },
+        {
+            "id": "register placeholder password",
+            "message": "Password",
+            "translation": "Password"
+        },
+        {
+            "id": "register email verification",
+            "message": "Email Verification",
+            "translation": "Email Verification"
+        },
+        {
+            "id": "register email verification info",
+            "message": "Enter the verification code sent to your email address",
+            "translation": "Enter the verification code sent to your email address"
+        },
+        {
+            "id": "register email verification code",
+            "message": "Verification Code",
+            "translation": "Verification Code"
+        },
+        {
+            "id": "register enter code",
+            "message": "Enter your code",
+            "translation": "Enter your code"
+        },
+        {
+            "id": "register verify",
+            "message": "Verify",
+            "translation": "Verify"
+        },
+        {
+            "id": "register button",
+            "message": "Register",
+            "translation": "Register"
+        }
+    ]
+}

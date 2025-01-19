@@ -30,18 +30,22 @@
         </a>
 
         <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
-          <li><a href="/" class="nav-link px-2 text-white">Main</a></li>
-          <li><a href="/about" class="nav-link px-2 text-white">About</a></li>
+          <li><a href="/" class="nav-link px-2 text-white">{{index .Translation "base link main"}}</a></li>
+          <li><a href="/about" class="nav-link px-2 text-white">{{index .Translation "base link about"}}</a></li>
         </ul>
 
         <div class="text-end p-3">
           <button id="theme-switch-btn" class="btn btn-secondary" onclick="toggleTheme();">
             <img id="theme-svg" src="/static/images/brightness-high.svg" alt="Change theme">
           </button>
+          <button id="locale-switch-btn" onclick="switchLocale();" class="btn btn-secondary">
+            <img src="/static/images/globe.svg" alt="Change Locale">
+            <small id="locale">ENG</small>
+          </button>
         </div>
         <div class="text-end" id="bar-auth">
-          <a href="/login" class="btn btn-outline-light me-2">Login</a>
-          <a href="/register" class="btn btn-warning">Sign-up</a>
+          <a href="/login" class="btn btn-outline-light me-2">{{index .Translation "base link log in"}}</a>
+          <a href="/register" class="btn btn-warning">{{index .Translation "base link sign up"}}</a>
         </div>
         </div>
       </div>
@@ -58,6 +62,32 @@
 <script src="/scripts/auth.js"></script>
 <script src="/scripts/api.js"></script>
 <script>
+const locales = ["ENG", "RU"];
+
+function switchLocale() {
+    let currentLocale = localStorage.getItem("locale");
+    if (!currentLocale) {
+        currentLocale = locales[0];
+    }
+
+    // Switch to the next locale
+    let index = locales.indexOf(currentLocale);
+    let newLocale;
+    if (index + 1 >= locales.length) {
+        newLocale = locales[0];
+      } else {
+        newLocale = locales[index+1];
+    }
+
+    // Set locale cookie
+    document.cookie = "locale="+newLocale+";path=/";
+    localStorage.setItem("locale", newLocale);
+    
+    // Refresh page
+    window.location.reload();
+}
+
+
 function toggleTheme() {
   if (document.documentElement.getAttribute('data-bs-theme') == 'dark') {
       document.documentElement.setAttribute('data-bs-theme','light');
@@ -71,6 +101,11 @@ function toggleTheme() {
 }
 
 document.addEventListener('DOMContentLoaded', async function() {
+  // Locale
+  let currentLocale = localStorage.getItem("locale");
+  document.getElementById("locale").innerText = currentLocale;
+
+
   // Theme
   let theme = localStorage.getItem("theme");
   if (theme) {

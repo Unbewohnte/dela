@@ -36,9 +36,10 @@ import (
 )
 
 const (
-	PagesDirName   string = "pages"
-	StaticDirName  string = "static"
-	ScriptsDirName string = "scripts"
+	PagesDirName        string = "pages"
+	StaticDirName       string = "static"
+	ScriptsDirName      string = "scripts"
+	TranslationsDirName string = "translations"
 )
 
 type Server struct {
@@ -70,6 +71,12 @@ func New(config conf.Conf) (*Server, error) {
 	_, err = os.Stat(filepath.Join(config.BaseContentDir, StaticDirName))
 	if err != nil {
 		logger.Error("[Server] A directory with static content is not available: %s", err)
+		return nil, err
+	}
+
+	_, err = os.Stat(filepath.Join(config.BaseContentDir, StaticDirName))
+	if err != nil {
+		logger.Error("[Server] A directory with page translations is not available: %s", err)
 		return nil, err
 	}
 
@@ -132,12 +139,20 @@ func New(config conf.Conf) (*Server, error) {
 				return
 			}
 
-			pageData, err := GetIndexPageData(server.db, GetLoginFromReq(req))
+			pageData, err := server.GetPageData([]string{"base", "index"}, LanguageFromReq(req))
+			if err != nil {
+				http.Redirect(w, req, "/error", http.StatusTemporaryRedirect)
+				logger.Error("[Server][/] Failed to get page data: %s", err)
+				return
+			}
+
+			indexPageData, err := GetIndexPageData(server.db, GetLoginFromReq(req))
 			if err != nil {
 				http.Redirect(w, req, "/error", http.StatusTemporaryRedirect)
 				logger.Error("[Server][/] Failed to get index page data: %s", err)
 				return
 			}
+			pageData.Data = indexPageData
 
 			err = requestedPage.ExecuteTemplate(w, "index.html", &pageData)
 			if err != nil {
@@ -183,12 +198,20 @@ func New(config conf.Conf) (*Server, error) {
 			}
 
 			// Get page data
-			pageData, err := GetCategoryPageData(server.db, GetLoginFromReq(req), groupId)
+			pageData, err := server.GetPageData([]string{"base", "paint", "category"}, LanguageFromReq(req))
 			if err != nil {
 				http.Redirect(w, req, "/error", http.StatusTemporaryRedirect)
 				logger.Error("[Server][/category/] Failed to get category (%d) page data: %s", groupId, err)
 				return
 			}
+
+			categoriesData, err := GetCategoryPageData(server.db, GetLoginFromReq(req), groupId)
+			if err != nil {
+				http.Redirect(w, req, "/error", http.StatusTemporaryRedirect)
+				logger.Error("[Server][/category/] Failed to get category (%d) page data: %s", groupId, err)
+				return
+			}
+			pageData.Data = categoriesData
 
 			err = requestedPage.ExecuteTemplate(w, "category.html", &pageData)
 			if err != nil {
@@ -204,13 +227,25 @@ func New(config conf.Conf) (*Server, error) {
 				filepath.Join(pagesDirPath, req.URL.Path[1:]+".html"),
 			)
 			if err == nil {
-				err = requestedPage.ExecuteTemplate(w, req.URL.Path[1:]+".html", nil)
+				pageData, err := server.GetPageData(
+					[]string{"base", req.URL.Path[1:]},
+					LanguageFromReq(req),
+				)
+				if err != nil {
+					http.Redirect(w, req, "/error", http.StatusTemporaryRedirect)
+					logger.Error("[Server][/default] Failed to GetPageData for %s: %s", req.URL.Path[1:], err)
+					return
+				}
+				pageData.Data = nil
+
+				err = requestedPage.ExecuteTemplate(w, req.URL.Path[1:]+".html", &pageData)
 				if err != nil {
 					http.Redirect(w, req, "/error", http.StatusTemporaryRedirect)
 					logger.Error("[Server][/default] Template error: %s", err)
 					return
 				}
 			} else {
+				logger.Error("[Server][/default] Error on %s: %s", req.URL.Path[1:], err)
 				http.Redirect(w, req, "/error", http.StatusTemporaryRedirect)
 			}
 		}

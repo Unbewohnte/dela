@@ -2,10 +2,9 @@
 
 {{ define "content" }}
 
-
 <main class="d-flex flex-wrap align-content-center align-items-center container my-5 flex-column">
     <div class="p-2 flex-fill text-wrap text-center border shadow-lg">
-        <h3 class="h3 mb-3 fw-normal">Log in</h3>
+        <h3 class="h3 mb-3 fw-normal">{{index .Translation "login main"}}</h3>
         <form onsubmit="return false;">
             <div class="mb-3 input-group">
                 <img src="/static/images/envelope-at.svg" alt="Email" class="input-group-text">
@@ -28,13 +27,13 @@
                     id="input-password" 
                     aria-describedby="Password"
                     aria-label="Password"
-                    placeholder="Password"
+                    placeholder='{{index .Translation "login placeholder password"}}'
                     required
                     minlength="3">
             </div>
             
             <p><span id="error_message" class="text-danger"></span></p> 
-            <input type="submit" value="Log in" class="btn btn-primary" onclick="logIn()">
+            <input type="submit" value='{{index .Translation "login main"}}' class="btn btn-primary" onclick="logIn()">
         </form>
             
     </div>

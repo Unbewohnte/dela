@@ -1,0 +1,20 @@
+{
+    "language": "ENG",
+    "messages": [
+        {
+            "id": "about info",
+            "message": "a dead simple and minimalistic web TODO list",
+            "translation": "простой и минималистичный сервис по ведению текстовых заметок"
+        },
+        {
+            "id": "about register",
+            "message": "Register",
+            "translation": "Зарегистрироваться"
+        },
+        {
+            "id": "about log in",
+            "message": "Log In",
+            "translation": "Войти"
+        }
+    ]
+}

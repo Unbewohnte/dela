@@ -2,7 +2,7 @@
 
 {{ define "content" }}
 
-<h1 style="display: none;" id="categoryId">{{.CurrentGroupId}}</h1>
+<h1 style="display: none;" id="categoryId">{{.Data.CurrentGroupId}}</h1>
 
 <!-- Main -->
 <main class="d-flex flex-wrap">
@@ -13,15 +13,15 @@
 <div class="modal-dialog">
   <div class="modal-content">
     <div class="modal-header">
-      <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
+      <h5 class="modal-title" id="deleteModalLabel">{{index .Translation "category modal confirm deletion"}}</h5>
       <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
     </div>
     <div class="modal-body">
-      Are you sure you want to delete this ToDo?
+      {{index .Translation "category modal deletion confirmation"}}
     </div>
     <div class="modal-footer">
-      <button type="button" class="btn btn-danger" id="confirmDeleteButton">Delete</button>
-      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+      <button type="button" class="btn btn-danger" id="confirmDeleteButton">{{index .Translation "category modal delete button"}}</button>
+      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{index .Translation "category modal cancel button"}}</button>
     </div>
   </div>
 </div>
@@ -33,15 +33,15 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="paintModal">Draw Note</h5>
+        <h5 class="modal-title" id="paintModal">{{index .Translation "category modal draw note"}}</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="clearCanvas();"></button>
       </div>
       <div class="modal-body w-100 d-flex flex-column justify-content-center align-items-center">
         {{ template "paint" . }}
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" id="saveCanvasButton" data-bs-dismiss="modal">Save</button>
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="clearCanvas();">Cancel</button>
+        <button type="button" class="btn btn-primary" id="saveCanvasButton" data-bs-dismiss="modal">{{index .Translation "category modal save button"}}</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="clearCanvas();">{{index .Translation "category modal cancel button"}}</button>
       </div>
     </div>
   </div>
@@ -53,32 +53,32 @@
   <div class="modal-dialog">
       <div class="modal-content">
           <div class="modal-header">
-              <h5 class="modal-title" id="todoModalLabel">TODO Details</h5>
+              <h5 class="modal-title" id="todoModalLabel">{{index .Translation "category modal todo details"}}</h5>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
               <div>
-                  <strong>Text:</strong>
+                  <strong>{{index .Translation "category modal todo text"}}</strong>
                   <span id="modalTodoTextDisplay"></span>
                   <input type="text" id="modalTodoTextInput" class="form-control" style="display: none;">
               </div>
               <div>
-                  <strong>Created:</strong> <span id="modalTodoCreated"></span>
+                  <strong>{{index .Translation "category modal todo created"}}</strong> <span id="modalTodoCreated"></span>
               </div>
               <div>
-                  <strong>Due:</strong>
+                  <strong>{{index .Translation "category modal todo due"}}</strong>
                   <span id="modalTodoDueDisplay"></span>
                   <input type="date" id="modalTodoDueInput" class="form-control" style="display: none;">
               </div>
               <div>
-                  <strong>Completion time:</strong> <span id="modalTodoCompletionTime"></span>
+                  <strong>{{index .Translation "category modal todo completion"}}</strong> <span id="modalTodoCompletionTime"></span>
               </div>
               <img id="modalTodoImage" class="img-fluid" style="display: none;">
           </div>
           <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              <button type="button" class="btn btn-primary" id="editButton" style="display: none;" onclick="toggleEditMode(true)">Edit</button>
-              <button type="button" class="btn btn-success" id="saveButton" style="display: none;" onclick="saveEditedTodo()">Save</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{index .Translation "category modal close button"}}</button>
+              <button type="button" class="btn btn-primary" id="editButton" style="display: none;" onclick="toggleEditMode(true)">{{index .Translation "category modal edit button"}}</button>
+              <button type="button" class="btn btn-success" id="saveButton" style="display: none;" onclick="saveEditedTodo()">{{index .Translation "category modal save button"}}</button>
           </div>
       </div>
   </div>
@@ -88,18 +88,18 @@
 <div id="sidebar" class="col border-right shadow-lg flex-shrink-1 p-2 d-flex flex-column align-items-stretch bg-body-tertiary" style="width: 380px;">
   <a href="/" class="d-flex align-items-center flex-shrink-0 p-3 link-body-emphasis text-decoration-none border-bottom">
       <img class="bi pe-none me-2" width="30" height="24" src="/static/images/arrows-fullscreen.svg">
-      <span class="fs-5 fw-semibold">Categories</span>
+      <span class="fs-5 fw-semibold">{{index .Translation "category categories"}}</span>
   </a>
 
   <div class="list-group list-group-flush border-bottom scrollarea">
-  {{ range .Groups  }}
-      <a id="group-{{.ID}}" href="/group/{{.ID}}" class="list-group-item list-group-item-action py-3 lh-sm {{if eq .ID $.CurrentGroupId}} active {{end}}" aria-current="true" ondragover="allowDrop(event);" ondrop="drop(event);">
+  {{ range .Data.Groups  }}
+      <a id="group-{{.ID}}" href="/group/{{.ID}}" class="list-group-item list-group-item-action py-3 lh-sm {{if eq .ID $.Data.CurrentGroupId}} active {{end}}" aria-current="true" ondragover="allowDrop(event);" ondrop="drop(event);">
         <div id="group-{{.ID}}" class="d-flex w-100 align-items-center justify-content-between">
           <strong id="group-{{.ID}}" class="mb-1">{{ .Name }}</strong>
           <small id="group-{{.ID}}">{{ .TimeCreated }}</small>
         </div>
         {{ if not .Removable }}
-          <div id="group-{{.ID}}" class="col-10 mb-1 small">Not removable</div>
+          <div id="group-{{.ID}}" class="col-10 mb-1 small">{{index $.Translation "category not removable"}}</div>
         {{ end }}
       </a>
   {{ end }}
@@ -113,19 +113,19 @@
     <form action="javascript:void(0);" id="todoForm">
         <div class="row g-3 align-items-center">
             <div class="col-md">
-                <label for="newTodoText" class="form-label">TODO Text</label>
-                <input type="text" class="form-control" id="newTodoText" placeholder="Enter TODO text" required>
+                <label for="newTodoText" class="form-label">{{index .Translation "category todo text"}}</label>
+                <input type="text" class="form-control" id="newTodoText" placeholder='{{index .Translation "category enter todo text"}}' required>
             </div>
             <div class="col-md">
-                <label for="newTodoDue" class="form-label">Due Date</label>
+                <label for="newTodoDue" class="form-label">{{index .Translation "category due date"}}</label>
                 <input type="date" class="form-control" name="newTodoDue" id="newTodoDue" required>
             </div>
             <div class="col-auto">
-                <button type="button" class="btn btn-primary" id="newTodoPaint" onclick="openPaintModal();">Paint</button>
+                <button type="button" class="btn btn-primary" id="newTodoPaint" onclick="openPaintModal();"><img src="/static/images/paint-bucket.svg"></button>
             </div>
             <div class="col-auto">
-                <button type="submit" id="newTodoSubmit" class="btn btn-primary">Add</button>
-                <button type="button" id="show-done" class="btn btn-secondary">Show Done</button>
+                <button type="submit" id="newTodoSubmit" class="btn btn-primary">{{index .Translation "category add"}}</button>
+                <button type="button" id="show-done" class="btn btn-secondary">{{index .Translation "category show done"}}</button>
             </div>
         </div>
     </form>
@@ -134,13 +134,13 @@
       <!-- Due -->
       <table class="table table-hover" id="due-todos">
         <thead>
-          <th>Image</th>
-          <th>ToDo</th>
-          <th>Created</th>
-          <th>Due</th>
+          <th>{{index .Translation "category image"}}</th>
+          <th>{{index .Translation "category todo"}}</th>
+          <th>{{index .Translation "category created"}}</th>
+          <th>{{index .Translation "category due"}}</th>
         </thead>
         <tbody class="text-break">
-          {{ range .Todos }}
+          {{ range .Data.Todos }}
           {{ if not .IsDone }}
             <tr onclick="openTodoModal('{{.ID}}', '{{.Text}}', '{{.TimeCreated}}', '{{.Due}}', null, '{{ printf "%s" .Image }}', true);" draggable="true" id="todo-{{.ID}}" ondragstart="dragStart(event);">
               {{ if not .Image }}
@@ -170,13 +170,13 @@
       <!-- Completed -->
       <table class="table table-hover" style="display: none;" id="completed-todos">
         <thead>
-          <th>Image</th>
-          <th>ToDo</th>
-          <th>Created</th>
-          <th>Completed</th>
+          <th>{{index .Translation "category image"}}</th>
+          <th>{{index .Translation "category todo"}}</th>
+          <th>{{index .Translation "category created"}}</th>
+          <th>{{index .Translation "category completed"}}</th>
         </thead>
         <tbody class="text-break">
-          {{ range .Todos }}
+          {{ range .Data.Todos }}
           {{ if .IsDone }}
             <tr onclick="openTodoModal('{{.ID}}', '{{.Text}}', '{{.TimeCreated}}', '{{.Due}}', '{{.CompletionTime}}', '{{ printf "%s" .Image }}', false);">
               {{ if not .Image }}
@@ -344,7 +344,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     let showDoneButton = document.getElementById("show-done");
     showDoneButton.addEventListener("click", (event) => {
         // Rename the button
-        showDoneButton.innerText = "Show To Do";
+        showDoneButton.innerText = '{{index .Translation "category js button show todo"}}';
         showDoneButton.className = "btn btn-success";
         // Show done
         showDone();

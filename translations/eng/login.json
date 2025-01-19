@@ -1,0 +1,20 @@
+{
+    "language": "ENG",
+    "messages": [
+        {
+            "id": "login main",
+            "message": "Log In",
+            "translation": "Log In"
+        },
+        {
+            "id": "login placeholder password",
+            "message": "Password",
+            "translation": "Password"
+        },
+        {
+            "id": "index jump here",
+            "message": "Jump here",
+            "translation": "Jump here"
+        }
+    ]
+}

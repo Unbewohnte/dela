@@ -20,7 +20,40 @@ package server
 
 import (
 	"Unbewohnte/dela/db"
+	"Unbewohnte/dela/i18n"
+	"path/filepath"
 )
+
+type PageData struct {
+	Translation map[string]string
+	Data        interface{}
+}
+
+func (s *Server) GetPageData(templateNames []string, language i18n.Language) (*PageData, error) {
+	translation := make(map[string]string)
+
+	translationsDirPath := filepath.Join(s.config.BaseContentDir, TranslationsDirName)
+	for _, page := range templateNames {
+		pageTranslation, err := i18n.GetPageTranslation(page, language, translationsDirPath)
+		if err != nil {
+			// Try ENG
+			pageTranslation, err = i18n.GetPageTranslation(page, i18n.Eng, translationsDirPath)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		// Merge translations
+		for _, message := range pageTranslation.Messages {
+			translation[message.ID] = message.Translation
+		}
+	}
+
+	return &PageData{
+		Translation: translation,
+		Data:        nil,
+	}, nil
+}
 
 type IndexPageData struct {
 	Groups []*db.TodoGroup `json:"groups"`

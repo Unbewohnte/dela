@@ -1,0 +1,25 @@
+{
+    "language": "ENG",
+    "messages": [
+        {
+            "id": "base link main",
+            "message": "Main",
+            "translation": "Main"
+        },
+        {
+            "id": "base link about",
+            "message": "About",
+            "translation": "About"
+        },
+        {
+            "id": "base link log in",
+            "message": "Log in",
+            "translation": "Log In"
+        },
+        {
+            "id": "base link sign up",
+            "message": "Sign-Up",
+            "translation": "Sign-Up"
+        }
+    ]
+}

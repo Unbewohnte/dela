@@ -3,10 +3,10 @@
 {{ define "content" }}
 <main class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
   <div class="p-2 flex-fill text-wrap text-center">
-    <h1 class="text-danger display-2">Error!</h1>
+    <h1 class="text-danger display-2">{{ index .Translation "error error big" }}</h1>
     <img src="/static/images/emoji-frown.svg" alt="Sad face" width="128px" >
-    <p>Sorry! Something went wrong somewhere!</p>
-    <p><u>Try to reload the faulty page or try again later</u></p>
+    <p>{{ index .Translation "error something went wrong" }}</p>
+    <p><u>{{ index .Translation "error try to reload" }}</u></p>
   </div>
 </main>
 

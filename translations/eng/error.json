@@ -1,0 +1,20 @@
+{
+    "language": "ENG",
+    "messages": [
+        {
+            "id": "error error big",
+            "message": "Error!",
+            "translation": "Error!"
+        },
+        {
+            "id": "error something went wrong",
+            "message": "Sorry! Something went wrong somewhere!",
+            "translation": "Sorry! Something went wrong somewhere!"
+        },
+        {
+            "id": "error try to reload",
+            "message": "Try to reload the faulty page or try again later",
+            "translation": "Try to reload the faulty page or try again later"
+        }
+    ]
+}

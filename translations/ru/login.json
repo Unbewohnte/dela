@@ -1,0 +1,15 @@
+{
+    "language": "ENG",
+    "messages": [
+        {
+            "id": "login main",
+            "message": "Log In",
+            "translation": "Войти"
+        },
+        {
+            "id": "login placeholder password",
+            "message": "Password",
+            "translation": "Пароль"
+        }
+    ]
+}

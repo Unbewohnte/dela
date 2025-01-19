@@ -1,0 +1,20 @@
+{
+    "language": "ENG",
+    "messages": [
+        {
+            "id": "about info",
+            "message": "a dead simple and minimalistic web TODO list",
+            "translation": "a dead simple and minimalistic web TODO list"
+        },
+        {
+            "id": "about register",
+            "message": "Register",
+            "translation": "Register"
+        },
+        {
+            "id": "about log in",
+            "message": "Log In",
+            "translation": "Log In"
+        }
+    ]
+}

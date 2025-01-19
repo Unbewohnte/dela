@@ -1,0 +1,135 @@
+{
+    "language": "ENG",
+    "messages": [
+        {
+            "id": "category modal confirm deletion",
+            "message": "Confirm Deletion",
+            "translation": "Подтвердите удаление"
+        },
+        {
+            "id": "category modal deletion confirmation",
+            "message": "Are you sure you want to delete this ToDo?",
+            "translation": "Вы действительно хотите удалить эту заметку?"
+        },
+        {
+            "id": "category modal delete button",
+            "message": "Delete",
+            "translation": "Удалить"
+        },
+        {
+            "id": "category modal cancel button",
+            "message": "Cancel",
+            "translation": "Отменить"
+        },
+        {
+            "id": "category modal draw note",
+            "message": "Draw Note",
+            "translation": "Рисование заметки"
+        },
+        {
+            "id": "category modal save button",
+            "message": "Save",
+            "translation": "Сохранить"
+        },
+        {
+            "id": "category modal todo details",
+            "message": "TODO Details",
+            "translation": "Описание заметки"
+        },
+        {
+            "id": "category modal todo text",
+            "message": "Text:",
+            "translation": "Текст:"
+        },
+        {
+            "id": "category modal todo created",
+            "message": "Created:",
+            "translation": "Создано:"
+        },
+        {
+            "id": "category modal todo due",
+            "message": "Due:",
+            "translation": "Окончание:"
+        },
+        {
+            "id": "category modal todo completion",
+            "message": "Completion Time:",
+            "translation": "Выполнено:"
+        },
+        {
+            "id": "category modal close button",
+            "message": "Close",
+            "translation": "Закрыть"
+        },
+        {
+            "id": "category modal edit button",
+            "message": "Edit",
+            "translation": "Изменить"
+        },
+        {
+            "id": "category categories",
+            "message": "Categories",
+            "translation": "Категории"
+        },
+        {
+            "id": "category not removable",
+            "message": "Not Removable",
+            "translation": "Неудаляемое"
+        },
+        {
+            "id": "category todo text",
+            "message": "TODO Text",
+            "translation": "Текст заметки"
+        },
+        {
+            "id": "category due date",
+            "message": "Due Date",
+            "translation": "Дата выполнения"
+        },
+        {
+            "id": "category add",
+            "message": "Add",
+            "translation": "Добавить"
+        },
+        {
+            "id": "category show done",
+            "message": "Show Done",
+            "translation": "Показать выполненные"
+        },
+        {
+            "id": "category image",
+            "message": "Image",
+            "translation": "Изображение"
+        },
+        {
+            "id": "category todo",
+            "message": "ToDo",
+            "translation": "Заметка"
+        },
+        {
+            "id": "category created",
+            "message": "Created",
+            "translation": "Создано"
+        },
+        {
+            "id": "category due",
+            "message": "Due",
+            "translation": "Окончание"
+        },
+        {
+            "id": "category completed",
+            "message": "Completed",
+            "translation": "Выполнено"
+        },
+        {
+            "id": "category enter todo text",
+            "message": "Enter ToDo Text",
+            "translation": "Введите текст заметки"
+        },
+        {
+            "id": "category js button show todo",
+            "message": "Show To Do",
+            "translation": "К невыполненным"
+        }
+    ]
+}

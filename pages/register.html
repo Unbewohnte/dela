@@ -4,7 +4,7 @@
 
 <main class="d-flex flex-wrap align-content-center container my-5 flex-column">
     <div class="p-2 flex-fill text-wrap text-center border shadow-lg">
-        <h3 class="h3 mb-3 fw-normal">Register <span title="Passwords are hashed client-side, your information is protected">
+        <h3 class="h3 mb-3 fw-normal">{{index .Translation "register main"}} <span title='{{index .Translation "register passwords info"}}'>
             <img src="/static/images/info-circle.svg" alt="Information"></span>
         </h3>
         <form onsubmit="return false;">
@@ -29,13 +29,13 @@
                     id="input-password" 
                     aria-describedby="Password"
                     aria-label="Password"
-                    placeholder="Password"
+                    placeholder='{{index .Translation "register placeholder password"}}'
                     required
                     minlength="3">
             </div>
 
             <p><span id="error_message" class="text-danger"></span></p> 
-            <input type="submit" value="Register" class="btn btn-primary" onclick="register();">
+            <input type="submit" value='{{index .Translation "register button"}}' class="btn btn-primary" onclick="register();">
         </form>    
     </div>
 </main>
@@ -44,18 +44,18 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="verificationModalLabel">Email Verification</h5>
+                <h5 class="modal-title" id="verificationModalLabel">{{index .Translation "register email verification"}}</h5>
             </div>
             <div class="modal-body">
-                <p>Enter the verification code sent to your email address</p>
+                <p>{{index .Translation "register email verification info"}}</p>
                 <div class="mb-3">
-                    <label for="verificationCode" class="form-label">Verification Code</label>
-                    <input type="text" id="input-code" class="form-control" id="verificationCode" placeholder="Enter your code" required>
+                    <label for="verificationCode" class="form-label">{{index .Translation "register email verification code"}}</label>
+                    <input type="text" id="input-code" class="form-control" id="verificationCode" placeholder='{{index .Translation "register enter code"}}' required>
                 </div>
                 <p class="text-danger"><span id="error-message-modal"></span></p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" id="verifyButton" onclick="verify();">Verify</button>
+                <button type="button" class="btn btn-primary" id="verifyButton" onclick="verify();">{{index .Translation "register verify"}}</button>
             </div>
         </div>
     </div>

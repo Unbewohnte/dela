@@ -1,0 +1,25 @@
+{
+    "language": "ENG",
+    "messages": [
+        {
+            "id": "base link main",
+            "message": "Main",
+            "translation": "Главная"
+        },
+        {
+            "id": "base link about",
+            "message": "About",
+            "translation": "О нас"
+        },
+        {
+            "id": "base link log in",
+            "message": "Log in",
+            "translation": "Войти"
+        },
+        {
+            "id": "base link sign up",
+            "message": "Sign-Up",
+            "translation": "Зарегистрироваться"
+        }
+    ]
+}

@@ -1,0 +1,50 @@
+{
+    "language": "ENG",
+    "messages": [
+        {
+            "id": "register main",
+            "message": "Register",
+            "translation": "Регистрация"
+        },
+        {
+            "id": "register passwords info",
+            "message": "Passwords are hashed client-side, your information is protected",
+            "translation": "Пароли хешируются на стороне клиента, Ваша информация в безопасности"
+        },
+        {
+            "id": "register placeholder password",
+            "message": "Password",
+            "translation": "Пароль"
+        },
+        {
+            "id": "register email verification",
+            "message": "Email Verification",
+            "translation": "Подтверждение почты"
+        },
+        {
+            "id": "register email verification info",
+            "message": "Enter the verification code sent to your email address",
+            "translation": "Введите код подтверждения, отправленный на вашу почту"
+        },
+        {
+            "id": "register email verification code",
+            "message": "Verification Code",
+            "translation": "Код подтверждения"
+        },
+        {
+            "id": "register enter code",
+            "message": "Enter your code",
+            "translation": "Введите ваш код"
+        },
+        {
+            "id": "register verify",
+            "message": "Verify",
+            "translation": "Подтвердить"
+        },
+        {
+            "id": "register button",
+            "message": "Register",
+            "translation": "Зарегистрироваться"
+        }
+    ]
+}
