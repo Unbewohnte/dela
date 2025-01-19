@@ -15,6 +15,16 @@
             "id": "index jump here",
             "message": "Jump here",
             "translation": "Jump here"
+        },
+        {
+            "id": "index placeholder category name",
+            "message": "Category Name",
+            "translation": "Category Name"
+        }, 
+        {
+            "id": "index create button",
+            "message": "Create",
+            "translation": "Create"
         }
     ]
 }

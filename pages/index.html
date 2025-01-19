@@ -30,8 +30,8 @@
   
   
       <div class="input-group mb-3 py-md-5">
-        <input type="text" name="newCategory"aria-label="Category Name" aria-describedby="button-new-category" class="form-control" id="new-category-input" placeholder="Category Name">
-        <button id="button-new-category" onclick="createNewCategory();" class="btn btn-primary">Create</button >
+        <input type="text" name="newCategory" aria-label="Category Name" aria-describedby="button-new-category" class="form-control" id="new-category-input" placeholder='{{index .Translation "index placeholder category name"}}'>
+        <button id="button-new-category" onclick="createNewCategory();" class="btn btn-primary">{{index .Translation "index create button"}}</button >
       </div>
     </div>
   
