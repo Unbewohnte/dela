@@ -142,7 +142,7 @@
         <tbody class="text-break">
           {{ range .Data.Todos }}
           {{ if not .IsDone }}
-            <tr onclick="openTodoModal('{{.ID}}', '{{.Text}}', '{{.TimeCreated}}', '{{.Due}}', null, '{{ printf "%s" .Image }}', true);" draggable="true" id="todo-{{.ID}}" ondragstart="dragStart(event);">
+            <tr draggable="true" id="todo-{{.ID}}" ondragstart="dragStart(event);">
               {{ if not .Image }}
               <!-- Display transparent white pixel -->
               <td><img class="todo-image" src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' width="64px" height="64px"></td>
@@ -159,6 +159,9 @@
                 </button>
                 <button class="btn btn-danger" onclick="openDeleteModal('{{.ID}}');">
                   <img src='/static/images/trash3-fill.svg'>
+                </button>
+                <button class="btn btn-secondary" onclick="openTodoModal('{{.ID}}', '{{.Text}}', '{{.TimeCreated}}', '{{.Due}}', null, '{{ printf "%s" .Image }}', true);">
+                  <img src="/static/images/journal-arrow-up.svg">
                 </button>
               </td>
             </tr>
@@ -178,7 +181,7 @@
         <tbody class="text-break">
           {{ range .Data.Todos }}
           {{ if .IsDone }}
-            <tr onclick="openTodoModal('{{.ID}}', '{{.Text}}', '{{.TimeCreated}}', '{{.Due}}', '{{.CompletionTime}}', '{{ printf "%s" .Image }}', false);">
+            <tr>
               {{ if not .Image }}
               <!-- Display transparent white pixel -->
               <td><img src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' width="64px" height="64px"></td>
@@ -189,7 +192,12 @@
               <td>{{ .TimeCreated }}</td>
               <td>{{ .CompletionTime }}</td>
               <td>
-                <button class="btn btn-danger" onclick="deleteTodoRefresh('{{.ID}}');"><img src='/static/images/trash3-fill.svg'></button>
+                <button class="btn btn-danger" onclick="deleteTodoRefresh('{{.ID}}');">
+                  <img src='/static/images/trash3-fill.svg'>
+                </button>
+                <button class="btn btn-secondary" onclick="openTodoModal('{{.ID}}', '{{.Text}}', '{{.TimeCreated}}', '{{.Due}}', '{{.CompletionTime}}', '{{ printf "%s" .Image }}', false);">
+                  <img src="/static/images/journal-arrow-up.svg">
+                </button>
               </td>
             </tr>
           {{ end }}
