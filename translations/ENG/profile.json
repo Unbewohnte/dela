@@ -1,0 +1,40 @@
+{
+    "language": "ENG",
+    "messages": [
+        {
+            "id": "profile log out",
+            "message": "Log Out",
+            "translation": "Log Out"
+        },
+        {
+            "id": "profile created",
+            "message": "Created",
+            "translation": "Created"
+        },
+        {
+            "id": "profile delete account",
+            "message": "Delete Account",
+            "translation": "Delete Account"
+        },
+        {
+            "id": "profile modal confirm deletion",
+            "message": "Confirm Deletion",
+            "translation": "Confirm Deletion"
+        },
+        {
+            "id": "profile modal deletion confirmation",
+            "message": "Are you sure you want to delete your account?",
+            "translation": "Are you sure you want to delete your account?"
+        },
+        {
+            "id": "profile modal delete button",
+            "message": "Delete",
+            "translation": "Delete"
+        },
+        {
+            "id": "profile modal cancel button",
+            "message": "Cancel",
+            "translation": "Cancel"
+        }
+    ]
+}

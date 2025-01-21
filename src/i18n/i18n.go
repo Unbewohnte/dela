@@ -13,8 +13,8 @@ func (l *Language) String() string {
 }
 
 const (
-	Ru  Language = "ru"
-	Eng Language = "eng"
+	RU  Language = "RU"
+	ENG Language = "ENG"
 )
 
 type Translations []*Translation

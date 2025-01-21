@@ -70,6 +70,10 @@ async function deleteTodo(id) {
     return del("/api/todo/delete/"+id);
 }
 
+async function deleteAccount() {
+    return del("/api/user/delete");
+}
+
 async function deleteCategory(id) {
     return del("/api/group/delete/"+id);
 }

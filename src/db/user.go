@@ -25,6 +25,7 @@ type User struct {
 	Email           string `json:"email"`
 	Password        string `json:"password"`
 	TimeCreatedUnix uint64 `json:"timeCreatedUnix"`
+	TimeCreated     string `json:"timeCreated"`
 	ConfirmedEmail  bool   `json:"confirmedEmail"`
 }
 
@@ -35,6 +36,9 @@ func scanUser(rows *sql.Rows) (*User, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	// Convert to Basic time string
+	user.TimeCreated = unixToTimeStr(user.TimeCreatedUnix)
 
 	return &user, nil
 }

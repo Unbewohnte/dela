@@ -295,7 +295,7 @@ func (s *Server) EndpointUserUpdate(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// Check whether the user in request is the user specified in JSON
-	email := GetLoginFromReq(req)
+	email := GetEmailFromReq(req)
 	if email != user.Email {
 		// Gotcha!
 		logger.Warning("[Server][EndpointUserUpdate] %s tried to update user information of %s!", email, user.Email)
@@ -330,8 +330,8 @@ func (s *Server) EndpointUserDelete(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// Delete
-	email := GetLoginFromReq(req)
-	err := s.db.DeleteUser(email)
+	email := GetEmailFromReq(req)
+	err := s.db.DeleteUserClean(email)
 	if err != nil {
 		http.Error(w, "Failed to delete user", http.StatusInternalServerError)
 		logger.Error("[Server][EndpointUserDelete] Failed to delete \"%s\": %s", email, err)
@@ -357,7 +357,7 @@ func (s *Server) EndpointUserGet(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// Get information from the database
-	email := GetLoginFromReq(req)
+	email := GetEmailFromReq(req)
 	userDB, err := s.db.GetUser(email)
 	if err != nil {
 		logger.Error("[Server][EndpointUserGet] Failed to retrieve information on \"%s\": %s", email, err)
@@ -399,7 +399,7 @@ func (s *Server) EndpointTodoUpdate(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// Check if the user owns this TODO
-	if !s.db.DoesUserOwnTodo(todoID, GetLoginFromReq(req)) {
+	if !s.db.DoesUserOwnTodo(todoID, GetEmailFromReq(req)) {
 		http.Error(w, "You don't own this TODO", http.StatusForbidden)
 		return
 	}
@@ -455,7 +455,7 @@ func (s *Server) EndpointTodoMarkDone(w http.ResponseWriter, req *http.Request) 
 	}
 
 	// Check if the user owns this TODO
-	if !s.db.DoesUserOwnTodo(todoID, GetLoginFromReq(req)) {
+	if !s.db.DoesUserOwnTodo(todoID, GetEmailFromReq(req)) {
 		http.Error(w, "You don't own this TODO", http.StatusForbidden)
 		return
 	}
@@ -504,7 +504,7 @@ func (s *Server) EndpointTodoDelete(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// Check if the user owns this TODO
-	if !s.db.DoesUserOwnTodo(todoID, GetLoginFromReq(req)) {
+	if !s.db.DoesUserOwnTodo(todoID, GetEmailFromReq(req)) {
 		http.Error(w, "You don't own this TODO", http.StatusForbidden)
 		return
 	}
@@ -512,7 +512,7 @@ func (s *Server) EndpointTodoDelete(w http.ResponseWriter, req *http.Request) {
 	// Now delete
 	err = s.db.DeleteTodo(todoID)
 	if err != nil {
-		logger.Error("[Server] Failed to delete %s's TODO: %s", GetLoginFromReq(req), err)
+		logger.Error("[Server] Failed to delete %s's TODO: %s", GetEmailFromReq(req), err)
 		http.Error(w, "Failed to delete TODO", http.StatusInternalServerError)
 		return
 	}
@@ -559,12 +559,12 @@ func (s *Server) EndpointTodoCreate(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if !s.db.DoesUserOwnGroup(newTodo.GroupID, GetLoginFromReq(req)) {
+	if !s.db.DoesUserOwnGroup(newTodo.GroupID, GetEmailFromReq(req)) {
 		http.Error(w, "You do not own this group", http.StatusForbidden)
 		return
 	}
 
-	newTodo.OwnerEmail = GetLoginFromReq(req)
+	newTodo.OwnerEmail = GetEmailFromReq(req)
 	newTodo.TimeCreatedUnix = uint64(time.Now().Unix())
 	err = s.db.CreateTodo(newTodo)
 	if err != nil {
@@ -596,7 +596,7 @@ func (s *Server) EndpointUserTodosGet(w http.ResponseWriter, req *http.Request) 
 	}
 
 	// Get all user TODOs
-	todos, err := s.db.GetAllUserTodos(GetLoginFromReq(req))
+	todos, err := s.db.GetAllUserTodos(GetEmailFromReq(req))
 	if err != nil {
 		http.Error(w, "Failed to get TODOs", http.StatusInternalServerError)
 		return
@@ -636,7 +636,7 @@ func (s *Server) EndpointTodoGroupDelete(w http.ResponseWriter, req *http.Reques
 		return
 	}
 
-	if !s.db.DoesUserOwnGroup(groupId, GetLoginFromReq(req)) {
+	if !s.db.DoesUserOwnGroup(groupId, GetEmailFromReq(req)) {
 		http.Error(w, "You don't own this group", http.StatusForbidden)
 		return
 	}
@@ -657,13 +657,13 @@ func (s *Server) EndpointTodoGroupDelete(w http.ResponseWriter, req *http.Reques
 	// Delete all ToDos associated with this group and then delete the group itself
 	err = s.db.DeleteTodoGroupClean(groupId)
 	if err != nil {
-		logger.Error("[Server][EndpointGroupDelete] Failed to delete %s's TODO group: %s", GetLoginFromReq(req), err)
+		logger.Error("[Server][EndpointGroupDelete] Failed to delete %s's TODO group: %s", GetEmailFromReq(req), err)
 		http.Error(w, "Failed to delete TODO group", http.StatusInternalServerError)
 		return
 	}
 
 	// Success!
-	logger.Info("[Server][EndpointGroupDelete] Cleanly deleted group ID: %d for %s", groupId, GetLoginFromReq(req))
+	logger.Info("[Server][EndpointGroupDelete] Cleanly deleted group ID: %d for %s", groupId, GetEmailFromReq(req))
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -700,7 +700,7 @@ func (s *Server) EndpointTodoGroupCreate(w http.ResponseWriter, req *http.Reques
 	}
 
 	// Add group to the database
-	newGroup.OwnerEmail = GetLoginFromReq(req)
+	newGroup.OwnerEmail = GetEmailFromReq(req)
 	newGroup.TimeCreatedUnix = uint64(time.Now().Unix())
 	newGroup.Removable = true
 	err = s.db.CreateTodoGroup(newGroup)
@@ -725,7 +725,7 @@ func (s *Server) EndpointTodoGroupGet(w http.ResponseWriter, req *http.Request) 
 	}
 
 	// Get groups
-	groups, err := s.db.GetAllUserTodoGroups(GetLoginFromReq(req))
+	groups, err := s.db.GetAllUserTodoGroups(GetEmailFromReq(req))
 	if err != nil {
 		http.Error(w, "Failed to get TODO groups", http.StatusInternalServerError)
 		return

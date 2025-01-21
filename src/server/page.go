@@ -37,7 +37,7 @@ func (s *Server) GetPageData(templateNames []string, language i18n.Language) (*P
 		pageTranslation, err := i18n.GetPageTranslation(page, language, translationsDirPath)
 		if err != nil {
 			// Try ENG
-			pageTranslation, err = i18n.GetPageTranslation(page, i18n.Eng, translationsDirPath)
+			pageTranslation, err = i18n.GetPageTranslation(page, i18n.ENG, translationsDirPath)
 			if err != nil {
 				return nil, err
 			}

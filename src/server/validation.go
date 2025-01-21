@@ -112,7 +112,7 @@ func IsUserAuthorizedReq(req *http.Request, dbase *db.DB) bool {
 }
 
 // Returns email value from basic auth or from cookie if the former does not exist
-func GetLoginFromReq(req *http.Request) string {
+func GetEmailFromReq(req *http.Request) string {
 	email, _, ok := req.BasicAuth()
 	if !ok || email == "" {
 		cookie, err := req.Cookie("auth")
@@ -154,14 +154,14 @@ func LocaleFromReq(req *http.Request) string {
 }
 
 func LanguageFromReq(req *http.Request) i18n.Language {
-	switch LocaleFromReq(req) {
+	switch strings.ToUpper(LocaleFromReq(req)) {
 	case "ENG":
-		return i18n.Eng
+		return i18n.ENG
 
 	case "RU":
-		return i18n.Ru
+		return i18n.RU
 
 	default:
-		return i18n.Eng
+		return i18n.ENG
 	}
 }

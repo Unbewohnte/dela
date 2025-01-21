@@ -1,0 +1,74 @@
+{{ template "base" . }}
+
+{{ define "content" }}
+
+<main class="container my-5">
+    <div class="row d-flex justify-content-center">
+        <div class="col col-md-9 col-lg-7 col-xl-6">
+        <div class="card" style="border-radius: 15px;">
+            <div class="card-body p-4">
+            <div class="d-flex">
+                <div class="flex-shrink-0">
+                <img src="/static/images/person-vcard.svg" class="img-fluid" style="width: 128px; border-radius: 10px;">
+                </div>
+                <div class="flex-grow-1 ms-3">
+                <h5 class="mb-1">{{ .Data.Email }}</h5>
+                <p class="mb-2 pb-1">{{index .Translation "profile created"}}: {{ .Data.TimeCreated }}</p>
+                <div class="d-flex pt-1">
+                    <button  type="button" class="btn btn-primary flex-grow-1" onclick="logOut();">
+                        {{index .Translation "profile log out"}}
+                    </button>
+                    <button  type="button" class="btn btn-outline-danger flex-grow-1" onclick="openDeleteModal();">
+                        {{index .Translation "profile delete account"}}
+                    </button>
+                </div>
+                </div>
+            </div>
+            </div>
+        </div>
+        </div>
+    </div>
+</main>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="deleteModalLabel">{{index .Translation "profile modal confirm deletion"}}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          {{index .Translation "profile modal deletion confirmation"}}
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-danger" id="confirmDeleteButton" onclick="handleAccountDelete();">
+                {{index .Translation "profile modal delete button"}}
+            </button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                {{index .Translation "profile modal cancel button"}}
+            </button>
+        </div>
+      </div>
+    </div>
+</div>
+<!-- End delete confirmation modal -->
+
+<script>
+function logOut() {
+    forgetAuthInfo();
+    window.location.replace("/about");
+}
+
+function openDeleteModal() {
+  const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'), {});
+  deleteModal.show();
+}
+
+async function handleAccountDelete() {
+    await deleteAccount();
+    window.location.replace("/about");
+}
+</script>
+
+{{ end }}

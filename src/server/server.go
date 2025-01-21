@@ -146,7 +146,7 @@ func New(config conf.Conf) (*Server, error) {
 				return
 			}
 
-			indexPageData, err := GetIndexPageData(server.db, GetLoginFromReq(req))
+			indexPageData, err := GetIndexPageData(server.db, GetEmailFromReq(req))
 			if err != nil {
 				http.Redirect(w, req, "/error", http.StatusTemporaryRedirect)
 				logger.Error("[Server][/] Failed to get index page data: %s", err)
@@ -205,7 +205,7 @@ func New(config conf.Conf) (*Server, error) {
 				return
 			}
 
-			categoriesData, err := GetCategoryPageData(server.db, GetLoginFromReq(req), groupId)
+			categoriesData, err := GetCategoryPageData(server.db, GetEmailFromReq(req), groupId)
 			if err != nil {
 				http.Redirect(w, req, "/error", http.StatusTemporaryRedirect)
 				logger.Error("[Server][/category/] Failed to get category (%d) page data: %s", groupId, err)
@@ -217,6 +217,50 @@ func New(config conf.Conf) (*Server, error) {
 			if err != nil {
 				http.Redirect(w, req, "/error", http.StatusTemporaryRedirect)
 				logger.Error("[Server][/category/] Template error: %s", err)
+				return
+			}
+
+		} else if req.URL.Path == "/profile" {
+			if req.Method != "GET" {
+				http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+				return
+			}
+
+			// Auth first
+			if !IsUserAuthorizedReq(req, server.db) {
+				http.Redirect(w, req, "/about", http.StatusTemporaryRedirect)
+				return
+			}
+
+			email := GetEmailFromReq(req)
+			user, err := server.db.GetUser(email)
+			if err != nil {
+				// TODO
+				return
+			}
+			user.Password = "" // No passwords sent
+
+			pageData, err := server.GetPageData([]string{"profile", "base"}, LanguageFromReq(req))
+			if err != nil {
+				// TODO
+				return
+			}
+			pageData.Data = user
+
+			requestedPage, err := template.ParseFiles(
+				filepath.Join(pagesDirPath, "base.html"),
+				filepath.Join(pagesDirPath, "profile.html"),
+			)
+			if err != nil {
+				http.Redirect(w, req, "/error", http.StatusTemporaryRedirect)
+				logger.Error("[Server][/profile] Failed to get a page: %s", err)
+				return
+			}
+
+			err = requestedPage.ExecuteTemplate(w, "profile.html", &pageData)
+			if err != nil {
+				http.Redirect(w, req, "/error", http.StatusTemporaryRedirect)
+				logger.Error("[Server][/profile] Template error: %s", err)
 				return
 			}
 

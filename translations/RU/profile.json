@@ -1,0 +1,40 @@
+{
+    "language": "RU",
+    "messages": [
+        {
+            "id": "profile log out",
+            "message": "Log Out",
+            "translation": "Выйти"
+        },
+        {
+            "id": "profile delete account",
+            "message": "Delete Account",
+            "translation": "Удалить Аккаунт"
+        },
+        {
+            "id": "profile created",
+            "message": "Created",
+            "translation": "Создан"
+        },
+        {
+            "id": "profile modal confirm deletion",
+            "message": "Confirm Deletion",
+            "translation": "Подтверждение удаления"
+        },
+        {
+            "id": "profile modal deletion confirmation",
+            "message": "Are you sure you want to delete your account?",
+            "translation": "Вы действительно хотите удалить свой аккаунт?"
+        },
+        {
+            "id": "profile modal delete button",
+            "message": "Delete",
+            "translation": "Удалить"
+        },
+        {
+            "id": "profile modal cancel button",
+            "message": "Cancel",
+            "translation": "Отменить"
+        }
+    ]
+}
