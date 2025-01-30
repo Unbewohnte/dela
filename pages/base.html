@@ -43,8 +43,11 @@
             <small id="locale">ENG</small>
           </button>
         </div>
-        <div class="text-end">
-          <a class="btn btn-secondary" href="/profile"><img src="/static/images/person-vcard.svg"></a>
+        <div class="text-end p-1" id="profile-link" style="display: none;">
+          <a class="btn btn-warning" href="/profile">
+            <img src="/static/images/person-vcard.svg">
+            {{index .Translation "base link profile"}}
+          </a>
         </div>
         <div class="text-end" id="bar-auth">
           <a href="/login" class="btn btn-outline-light me-2">{{index .Translation "base link log in"}}</a>
@@ -125,12 +128,14 @@ document.addEventListener('DOMContentLoaded', async function() {
     let response = await getUser();
     if (response.ok) {
       let barAuth = document.getElementById("bar-auth");
-      barAuth.innerHTML = '<button id="log-out-btn" class="btn btn-outline-light me-2"><img src="/static/images/person-dash-fill.svg"></button>';
+      barAuth.innerHTML = '<button id="log-out-btn" class="btn btn-outline-light me-2"><img src="/static/images/person-dash-fill.svg">{{index .Translation "base link log out"}}</button>';
       document.getElementById("log-out-btn").addEventListener("click", (event) => {
         // Log out
         forgetAuthInfo();
         window.location.replace("/about");
       });
+
+      document.getElementById("profile-link").style.display = "inline";
     }
   } catch(error) {
     forgetAuthInfo();

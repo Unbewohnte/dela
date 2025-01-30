@@ -20,6 +20,16 @@
             "id": "base link sign up",
             "message": "Sign-Up",
             "translation": "Зарегистрироваться"
+        },
+        {
+            "id": "base link profile",
+            "message": "Profile",
+            "translation": "Профиль"
+        },
+        {
+            "id": "base link log out",
+            "message": "Log Out",
+            "translation": "Выйти"
         }
     ]
 }

@@ -129,6 +129,7 @@ func (s *Server) EndpointUserCreate(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, "Failed to send email verification message", http.StatusInternalServerError)
 		return
 	}
+	logger.Info("[Server][EndpointUserCreate] Successfully sent confirmation email to %s", user.Email)
 
 	// Autodelete user account after some more time if email was not verified in time
 	time.AfterFunc((time.Second*time.Duration(verification.LifeSeconds))*5, func() {

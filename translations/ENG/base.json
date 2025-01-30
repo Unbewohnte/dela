@@ -20,6 +20,16 @@
             "id": "base link sign up",
             "message": "Sign-Up",
             "translation": "Sign-Up"
+        },
+        {
+            "id": "base link profile",
+            "message": "Profile",
+            "translation": "Profile"
+        },
+        {
+            "id": "base link log out",
+            "message": "Log Out",
+            "translation": "Log Out"
         }
     ]
 }
