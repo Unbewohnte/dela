@@ -300,6 +300,7 @@ func New(config conf.Conf) (*Server, error) {
 	mux.HandleFunc("/api/user/create", server.EndpointUserCreate)        // Non specific
 	mux.HandleFunc("/api/user/login", server.EndpointUserLogin)          // Non specific
 	mux.HandleFunc("/api/user/verify", server.EndpointUserVerify)        // Non specific
+	mux.HandleFunc("/api/user/notify", server.EndpointUserNotify)        // Non specific
 	mux.HandleFunc("/api/todo/create", server.EndpointTodoCreate)        // Non specific
 	mux.HandleFunc("/api/todo/get", server.EndpointUserTodosGet)         // Non specific
 	mux.HandleFunc("/api/todo/delete/", server.EndpointTodoDelete)       // Specific
@@ -327,6 +328,10 @@ func New(config conf.Conf) (*Server, error) {
 
 // Launches server instance
 func (s *Server) Start() error {
+	// Launch notifier routine
+	logger.Info("[Server] Starting Notifications Routine...")
+	go s.StartNotificationsRoutine(time.Hour * 24)
+
 	if s.config.Server.CertFilePath != "" && s.config.Server.KeyFilePath != "" {
 		logger.Info("[Server] Using TLS")
 		logger.Info("[Server] HTTP server is going live on port %d!", s.config.Server.Port)

@@ -35,6 +35,16 @@
             "id": "profile modal cancel button",
             "message": "Cancel",
             "translation": "Cancel"
+        },
+        {
+            "id": "profile option notify me",
+            "message": "Notify me on my TODOs",
+            "translation": "Notify me on my TODOs"
+        },
+        {
+            "id": "profile checkbox notify me",
+            "message": "Notify me",
+            "translation": "Notify me"
         }
     ]
 }

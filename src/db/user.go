@@ -18,7 +18,9 @@
 
 package db
 
-import "database/sql"
+import (
+	"database/sql"
+)
 
 // User structure
 type User struct {
@@ -27,12 +29,22 @@ type User struct {
 	TimeCreatedUnix uint64 `json:"timeCreatedUnix"`
 	TimeCreated     string `json:"timeCreated"`
 	ConfirmedEmail  bool   `json:"confirmedEmail"`
+	NotifyOnTodos   bool   `json:"notifyOnTodos"`
+}
+
+func scanUserRaw(rows *sql.Rows) (*User, error) {
+	var user User
+	err := rows.Scan(&user.Email, &user.Password, &user.TimeCreatedUnix, &user.ConfirmedEmail, &user.NotifyOnTodos)
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
 }
 
 func scanUser(rows *sql.Rows) (*User, error) {
 	rows.Next()
-	var user User
-	err := rows.Scan(&user.Email, &user.Password, &user.TimeCreatedUnix, &user.ConfirmedEmail)
+	user, err := scanUserRaw(rows)
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +52,7 @@ func scanUser(rows *sql.Rows) (*User, error) {
 	// Convert to Basic time string
 	user.TimeCreated = unixToTimeStr(user.TimeCreatedUnix)
 
-	return &user, nil
+	return user, nil
 }
 
 // Searches for user with email and returns it
@@ -62,11 +74,12 @@ func (db *DB) GetUser(email string) (*User, error) {
 // Creates a new user in the database
 func (db *DB) CreateUser(newUser User) error {
 	_, err := db.Exec(
-		"INSERT INTO users(email, password, time_created_unix, confirmed_email) VALUES(?, ?, ?, ?)",
+		"INSERT INTO users(email, password, time_created_unix, confirmed_email, notify_on_todos) VALUES(?, ?, ?, ?, ?)",
 		newUser.Email,
 		newUser.Password,
 		newUser.TimeCreatedUnix,
 		newUser.ConfirmedEmail,
+		newUser.NotifyOnTodos,
 	)
 
 	return err
@@ -82,16 +95,22 @@ func (db *DB) DeleteUser(email string) error {
 	return err
 }
 
-// Updades user's email address, password, email confirmation with given email address
+// Updades user's email address, password, email confirmation and todo notification status with given email address
 func (db *DB) UserUpdate(newUser User) error {
 	_, err := db.Exec(
-		"UPDATE users SET email=?, password=?, confirmed_email=? WHERE email=?",
+		"UPDATE users SET email=?, password=?, confirmed_email=?, notify_on_todos=? WHERE email=?",
 		newUser.Email,
 		newUser.Password,
 		newUser.ConfirmedEmail,
+		newUser.NotifyOnTodos,
 		newUser.Email,
 	)
 
+	return err
+}
+
+func (db *DB) UserSetNotifyOnTodos(email string, value bool) error {
+	_, err := db.Exec("UPDATE users SET notify_on_todos=? WHERE email=?", value, email)
 	return err
 }
 
@@ -142,4 +161,24 @@ func (db *DB) DeleteUnverifiedUserClean(email string) error {
 	}
 
 	return nil
+}
+
+func (db *DB) GetAllUsersWithNotificationsOn() ([]*User, error) {
+	rows, err := db.Query("SELECT * FROM users WHERE notify_on_todos=?", true)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []*User
+	for rows.Next() {
+		user, err := scanUserRaw(rows)
+		if err != nil {
+			return nil, err
+		}
+
+		users = append(users, user)
+	}
+
+	return users, nil
 }

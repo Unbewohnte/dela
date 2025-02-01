@@ -286,3 +286,28 @@ func (db *DB) DoesUserOwnTodo(todoId uint64, email string) bool {
 
 	return true
 }
+
+func (db *DB) GetUserTodosDue(userEmail string, tMinusSec uint64) ([]*Todo, error) {
+	now := time.Now().Unix()
+
+	rows, err := db.Query(
+		"SELECT * FROM todos WHERE (owner_email=? AND due_unix<=? AND NOT is_done AND due_unix>0)",
+		userEmail,
+		tMinusSec+uint64(now),
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var todos []*Todo
+	for rows.Next() {
+		todo, err := scanTodo(rows)
+		if err != nil {
+			return nil, err
+		}
+		todos = append(todos, todo)
+	}
+
+	return todos, nil
+}

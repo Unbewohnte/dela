@@ -97,3 +97,7 @@ async function updateGroup(id, updatedGroup) {
 async function updateUser(updatedUser) {
     return update("/api/user/update", updatedUser);
 }
+
+async function userSetNotify(value) {
+    return post("/api/user/notify", {"notify": Boolean(value)});
+}

@@ -14,6 +14,24 @@
                 <div class="flex-grow-1 ms-3">
                 <h5 class="mb-1">{{ .Data.Email }}</h5>
                 <p class="mb-2 pb-1">{{index .Translation "profile created"}}: {{ .Data.TimeCreated }}</p>
+                <div class="d-flex justify-content-start rounded-3 p-2 mb-2 bg-body-tertiary">
+                <div>
+                    <p class="small text-muted mb-1">{{index .Translation "profile option notify me"}}</p>
+                    <p class="mb-0">
+                        {{ if .Data.NotifyOnTodos }}
+                        <label for="notify-me-checkbox" class="btn btn-primary">
+                            {{index .Translation "profile checkbox notify me"}}
+                        </label>
+                        <input type="checkbox" class="btn-check" id="notify-me-checkbox" checked onclick="toggleNotifyOnTodos();">
+                        {{ else }}
+                        <label for="notify-me-checkbox" class="btn btn-outline-primary">
+                            {{index .Translation "profile checkbox notify me"}}
+                        </label>
+                        <input type="checkbox" class="btn-check" id="notify-me-checkbox" onclick="toggleNotifyOnTodos();">
+                        {{ end }}
+                    </p>
+                </div>
+                </div>
                 <div class="d-flex pt-1">
                     <button  type="button" class="btn btn-primary flex-grow-1" onclick="logOut();">
                         {{index .Translation "profile log out"}}
@@ -69,6 +87,19 @@ async function handleAccountDelete() {
     await deleteAccount();
     window.location.replace("/about");
 }
+
+async function toggleNotifyOnTodos() {
+    const toggleValue = document.getElementById("notify-me-checkbox").checked;
+
+
+    let response = await userSetNotify(toggleValue);
+    if (response.ok) {
+        window.location.reload();
+    } else {
+        console.log(await response.text());        
+    }
+}
+
 </script>
 
 {{ end }}

@@ -223,6 +223,51 @@ func (s *Server) EndpointUserVerify(w http.ResponseWriter, req *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+func (s *Server) EndpointUserNotify(w http.ResponseWriter, req *http.Request) {
+	if req.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	type notifyRequest struct {
+		Notify bool `json:"notify"`
+	}
+
+	// Retrieve data
+	defer req.Body.Close()
+
+	contents, err := io.ReadAll(req.Body)
+	if err != nil {
+		logger.Error("[Server][EndpointUserNotify] Failed to read request body: %s", err)
+		http.Error(w, "Failed to read request body", http.StatusInternalServerError)
+		return
+	}
+
+	var notifyResult notifyRequest
+	err = json.Unmarshal(contents, &notifyResult)
+	if err != nil {
+		logger.Error("[Server][EndpointUserVerify] Failed to unmarshal notification value change: %s", err)
+		http.Error(w, "Bad JSON", http.StatusInternalServerError)
+		return
+	}
+
+	userEmail := GetEmailFromReq(req)
+	err = s.db.UserSetNotifyOnTodos(userEmail, notifyResult.Notify)
+	if err != nil {
+		logger.Error("[Server][EndpointUserNotify] Failed to UserSetNotifyOnTodos for %s: %s", userEmail, err)
+		http.Error(w, "Failed to change user settings", http.StatusInternalServerError)
+		return
+	}
+
+	if notifyResult.Notify {
+		logger.Info("[Server][EndpointUserNotify] Notifying %s for due TODOs", userEmail)
+	} else {
+		logger.Info("[Server][EndpointUserNotify] Stopped notifying %s for due TODOs", userEmail)
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
 func (s *Server) EndpointUserLogin(w http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)

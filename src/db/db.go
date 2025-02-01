@@ -36,7 +36,8 @@ func setUpTables(db *DB) error {
 		email TEXT PRIMARY KEY UNIQUE,
 		password TEXT NOT NULL,
 		time_created_unix INTEGER,
-		confirmed_email INTEGER)`,
+		confirmed_email INTEGER,
+		notify_on_todos INTEGER)`,
 	)
 	if err != nil {
 		return err
