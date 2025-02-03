@@ -60,8 +60,9 @@
               <div>
                   <strong>{{index .Translation "category modal todo text"}}</strong>
                   <span id="modalTodoTextDisplay"></span>
-                  <input type="text" id="modalTodoTextInput" class="form-control" style="display: none;">
-              </div>
+                  <!-- <input type="text" id="modalTodoTextInput" class="form-control" style="display: none;"> -->
+                  <textarea id="modalTodoTextInput" class="form-control" style="display: none;"></textarea>
+                </div>
               <div>
                   <strong>{{index .Translation "category modal todo created"}}</strong> <span id="modalTodoCreated"></span>
               </div>
@@ -114,8 +115,9 @@
         <div class="row g-3 align-items-center">
             <div class="col-md">
                 <label for="newTodoText" class="form-label">{{index .Translation "category todo text"}}</label>
-                <input type="text" class="form-control" id="newTodoText" placeholder='{{index .Translation "category enter todo text"}}' required>
-            </div>
+                <!-- <input type="text" class="form-control" id="newTodoText" placeholder='{{index .Translation "category enter todo text"}}' required> -->
+                <textarea class="form-control" id="newTodoText" placeholder='{{index .Translation "category enter todo text"}}' required></textarea>
+              </div>
             <div class="col-md">
                 <label for="newTodoDue" class="form-label">{{index .Translation "category due date"}}</label>
                 <input type="date" class="form-control" name="newTodoDue" id="newTodoDue" required>
@@ -134,22 +136,29 @@
       <!-- Due -->
       <table class="table table-hover" id="due-todos">
         <thead>
-          <th>{{index .Translation "category image"}}</th>
           <th>{{index .Translation "category todo"}}</th>
+          <th>{{index .Translation "category image"}}</th>
           <th>{{index .Translation "category created"}}</th>
           <th>{{index .Translation "category due"}}</th>
         </thead>
         <tbody class="text-break">
           {{ range .Data.Todos }}
           {{ if not .IsDone }}
-            <tr draggable="true" id="todo-{{.ID}}" ondragstart="dragStart(event);">
+            <tr draggable="true" id="todo-{{.ID}}" ondragstart="dragStart(event);">              
+              <!-- Do not display long texts fully -->
+              {{ if lt (len .Text) 25 }}
+              <td class="todo-text text-wrap text-break">{{ .Text }}</td>
+              {{ else }}
+              <td class="todo-text text-wrap text-break">{{ printf "%.25s" .Text }}......</td>
+              {{ end }}
+
               {{ if not .Image }}
               <!-- Display transparent white pixel -->
               <td><img class="todo-image" src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' width="64px" height="64px"></td>
               {{ else }}
               <td><img class="todo-image" src='{{ printf "%s" .Image }}' width="64px" height="64px"></td>
               {{ end }}
-              <td class="todo-text text-wrap text-break">{{ .Text }}</td>
+
               <td class="todo-created">{{ .TimeCreated }}</td>
               <td class="todo-due">{{ .Due }}</td>
               <td class="todo-due-unix" style="display: none;">{{ .DueUnix }}</td>
@@ -160,7 +169,7 @@
                 <button class="btn btn-danger" onclick="openDeleteModal('{{.ID}}');">
                   <img src='/static/images/trash3-fill.svg'>
                 </button>
-                <button class="btn btn-secondary" onclick="openTodoModal('{{.ID}}', '{{.Text}}', '{{.TimeCreated}}', '{{.Due}}', null, '{{ printf "%s" .Image }}', true);">
+                <button class="btn btn-secondary" onclick="openTodoModal('{{.ID}}', String.raw`{{.Text}}`, '{{.TimeCreated}}', '{{.Due}}', null, '{{ printf "%s" .Image }}', true);">
                   <img src="/static/images/journal-arrow-up.svg">
                 </button>
               </td>
@@ -173,29 +182,36 @@
       <!-- Completed -->
       <table class="table table-hover" style="display: none;" id="completed-todos">
         <thead>
-          <th>{{index .Translation "category image"}}</th>
           <th>{{index .Translation "category todo"}}</th>
+          <th>{{index .Translation "category image"}}</th>
           <th>{{index .Translation "category created"}}</th>
           <th>{{index .Translation "category completed"}}</th>
         </thead>
         <tbody class="text-break">
           {{ range .Data.Todos }}
           {{ if .IsDone }}
-            <tr>
+            <tr>              
+              <!-- Do not display long texts fully -->
+              {{ if lt (len .Text) 25 }}
+              <td class="todo-text text-wrap text-break">{{ .Text }}</td>
+              {{ else }}
+              <td class="todo-text text-wrap text-break">{{ printf "%.25s" .Text }}......</td>
+              {{ end }}
+              
               {{ if not .Image }}
               <!-- Display transparent white pixel -->
               <td><img src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' width="64px" height="64px"></td>
               {{ else }}
               <td><img src='{{ printf "%s" .Image }}' width="64px" height="64px"></td>
               {{ end }}
-              <td>{{ .Text }}</td>
+
               <td>{{ .TimeCreated }}</td>
               <td>{{ .CompletionTime }}</td>
               <td>
                 <button class="btn btn-danger" onclick="deleteTodoRefresh('{{.ID}}');">
                   <img src='/static/images/trash3-fill.svg'>
                 </button>
-                <button class="btn btn-secondary" onclick="openTodoModal('{{.ID}}', '{{.Text}}', '{{.TimeCreated}}', '{{.Due}}', '{{.CompletionTime}}', '{{ printf "%s" .Image }}', false);">
+                <button class="btn btn-secondary" onclick="openTodoModal('{{.ID}}', String.raw`{{.Text}}`, '{{.TimeCreated}}', '{{.Due}}', '{{.CompletionTime}}', '{{ printf "%s" .Image }}', false);">
                   <img src="/static/images/journal-arrow-up.svg">
                 </button>
               </td>

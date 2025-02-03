@@ -28,7 +28,7 @@ import (
 	"path/filepath"
 )
 
-const Version string = "0.2.0"
+const Version string = "0.3.0"
 
 var (
 	printVersion *bool = flag.Bool("version", false, "Print version information and exit")
@@ -42,10 +42,20 @@ var (
 )
 
 func init() {
+	// Output Banner
+	fmt.Println(
+		`██████╗ ███████╗██╗      █████╗ 
+██╔══██╗██╔════╝██║     ██╔══██╗
+██║  ██║█████╗  ██║     ███████║
+██║  ██║██╔══╝  ██║     ██╔══██║
+██████╔╝███████╗███████╗██║  ██║
+╚═════╝ ╚══════╝╚══════╝╚═╝  ╚═╝  v` + Version,
+	)
+
 	// Parse flags
 	flag.Parse()
 	if *printVersion {
-		fmt.Printf("dela v%s - a web TODO list\n(c) 2023 Kasyanov Nikolay Alexeyevich (Unbewohnte)\n", Version)
+		fmt.Printf("dela v%s - a web TODO list\n(c) 2023-2025 Kasyanov Nikolay Alexeyevich (Unbewohnte)\n", Version)
 		os.Exit(0)
 	}
 

@@ -599,6 +599,12 @@ func (s *Server) EndpointTodoCreate(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	// Check if text is too long or not
+	if uint(len(newTodo.Text)) > MaxTodoTextLength {
+		http.Error(w, "Text is too big!", http.StatusBadRequest)
+		return
+	}
+
 	// Add TODO to the database
 	if newTodo.GroupID == 0 {
 		http.Error(w, "No group ID was provided", http.StatusBadRequest)
