@@ -1,6 +1,6 @@
 /*
   	dela - web TODO list
-    Copyright (C) 2023, 2024  Kasyanov Nikolay Alexeyevich (Unbewohnte)
+    Copyright (C) 2023, 2024, 2025  Kasyanov Nikolay Alexeyevich (Unbewohnte)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as published by
@@ -36,6 +36,7 @@ type Todo struct {
 	IsDone             bool   `json:"isDone"`
 	CompletionTimeUnix uint64 `json:"completionTimeUnix"`
 	Image              []byte `json:"image"`
+	File               []byte `json:"file"`
 	TimeCreated        string
 	CompletionTime     string
 	Due                string
@@ -62,6 +63,7 @@ func scanTodo(rows *sql.Rows) (*Todo, error) {
 		&newTodo.IsDone,
 		&newTodo.CompletionTimeUnix,
 		&newTodo.Image,
+		&newTodo.File,
 	)
 	if err != nil {
 		return nil, err
@@ -119,7 +121,7 @@ func (db *DB) GetTodos() ([]*Todo, error) {
 // Creates a new TODO in the database
 func (db *DB) CreateTodo(todo Todo) error {
 	_, err := db.Exec(
-		"INSERT INTO todos(group_id, text, time_created_unix, due_unix, owner_email, is_done, completion_time_unix, image) VALUES(?, ?, ?, ?, ?, ?, ?, ?)",
+		"INSERT INTO todos(group_id, text, time_created_unix, due_unix, owner_email, is_done, completion_time_unix, image, file) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)",
 		todo.GroupID,
 		todo.Text,
 		todo.TimeCreatedUnix,
@@ -128,6 +130,7 @@ func (db *DB) CreateTodo(todo Todo) error {
 		todo.IsDone,
 		todo.CompletionTimeUnix,
 		todo.Image,
+		todo.File,
 	)
 
 	return err
@@ -146,13 +149,14 @@ func (db *DB) DeleteTodo(id uint64) error {
 // Updates TODO's due date, text, done state, completion time and group id with image
 func (db *DB) UpdateTodo(todoID uint64, updatedTodo Todo) error {
 	_, err := db.Exec(
-		"UPDATE todos SET group_id=?, due_unix=?, text=?, is_done=?, completion_time_unix=?, image=?  WHERE id=?",
+		"UPDATE todos SET group_id=?, due_unix=?, text=?, is_done=?, completion_time_unix=?, image=?, file=?  WHERE id=?",
 		updatedTodo.GroupID,
 		updatedTodo.DueUnix,
 		updatedTodo.Text,
 		updatedTodo.IsDone,
 		updatedTodo.CompletionTimeUnix,
 		updatedTodo.Image,
+		updatedTodo.File,
 		todoID,
 	)
 
@@ -191,6 +195,10 @@ func (db *DB) UpdateTodoSoft(todoID uint64, updatedTodo Todo) error {
 	if !bytes.Equal(updatedTodo.Image, originalTodo.Image) && updatedTodo.Image != nil {
 		updates = append(updates, "image=?")
 		args = append(args, updatedTodo.Image)
+	}
+	if !bytes.Equal(updatedTodo.File, originalTodo.File) && updatedTodo.File != nil {
+		updates = append(updates, "file=?")
+		args = append(args, updatedTodo.File)
 	}
 
 	if len(updates) == 0 {
@@ -310,4 +318,9 @@ func (db *DB) GetUserTodosDue(userEmail string, tMinusSec uint64) ([]*Todo, erro
 	}
 
 	return todos, nil
+}
+
+func (db *DB) UpdateTodoFile(todoID uint64, newFile []byte) error {
+	_, err := db.Exec("UPDATE todos SET file=? WHERE id=?", newFile, todoID)
+	return err
 }

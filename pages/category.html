@@ -57,10 +57,10 @@
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
+              <p id="modalToDoErrorMessage"></p>
               <div>
                   <strong>{{index .Translation "category modal todo text"}}</strong>
                   <span id="modalTodoTextDisplay"></span>
-                  <!-- <input type="text" id="modalTodoTextInput" class="form-control" style="display: none;"> -->
                   <textarea id="modalTodoTextInput" class="form-control" style="display: none;"></textarea>
                 </div>
               <div>
@@ -74,10 +74,21 @@
               <div>
                   <strong>{{index .Translation "category modal todo completion"}}</strong> <span id="modalTodoCompletionTime"></span>
               </div>
-              <img id="modalTodoImage" class="img-fluid" style="display: none;">
+              <div>
+                <img id="modalTodoImage" class="img-fluid" style="display: none;">
+              </div>              
+              <div id="modalTodoFile" class="mb-3" style="display: none;">
+                  <label for="modalFileInput">{{ index .Translation "category modal file" }}</label>
+                  <input type="file" id="modalFileInput" class="form-control">
+              </div>
+              <div id="modalTodoFileDownload" class="mb-3">
+                <button class="btn btn-primary" onclick="downloadAttachedFile();">
+                  {{ index .Translation "category file download button"}}
+                </button>
+              </div>
           </div>
           <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{index .Translation "category modal close button"}}</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="toggleEditMode(false);">{{index .Translation "category modal close button"}}</button>
               <button type="button" class="btn btn-primary" id="editButton" style="display: none;" onclick="toggleEditMode(true)">{{index .Translation "category modal edit button"}}</button>
               <button type="button" class="btn btn-success" id="saveButton" style="display: none;" onclick="saveEditedTodo()">{{index .Translation "category modal save button"}}</button>
           </div>
@@ -146,10 +157,10 @@
           {{ if not .IsDone }}
             <tr draggable="true" id="todo-{{.ID}}" ondragstart="dragStart(event);">              
               <!-- Do not display long texts fully -->
-              {{ if lt (len .Text) 25 }}
+              {{ if lt (len .Text) 35 }}
               <td class="todo-text text-wrap text-break">{{ .Text }}</td>
               {{ else }}
-              <td class="todo-text text-wrap text-break">{{ printf "%.25s" .Text }}......</td>
+              <td class="todo-text text-wrap text-break">{{ printf "%.35s" .Text }}......</td>
               {{ end }}
 
               {{ if not .Image }}
@@ -159,17 +170,17 @@
               <td><img class="todo-image" src='{{ printf "%s" .Image }}' width="64px" height="64px"></td>
               {{ end }}
 
-              <td class="todo-created">{{ .TimeCreated }}</td>
-              <td class="todo-due">{{ .Due }}</td>
-              <td class="todo-due-unix" style="display: none;">{{ .DueUnix }}</td>
-              <td>
+              <td class="todo-created text-wrap text-break">{{ .TimeCreated }}</td>
+              <td class="todo-due text-wrap text-break">{{ .Due }}</td>
+              <td class="todo-due-unix text-wrap text-break" style="display: none;">{{ .DueUnix }}</td>
+              <td class="text-wrap text-break">
                 <button class="btn btn-success" onclick="markAsDoneRefresh('{{.ID}}');">
                   <img src='/static/images/check.svg'>
                 </button>
                 <button class="btn btn-danger" onclick="openDeleteModal('{{.ID}}');">
                   <img src='/static/images/trash3-fill.svg'>
                 </button>
-                <button class="btn btn-secondary" onclick="openTodoModal('{{.ID}}', String.raw`{{.Text}}`, '{{.TimeCreated}}', '{{.Due}}', null, '{{ printf "%s" .Image }}', true);">
+                <button class="btn btn-secondary" onclick="openTodoModal('{{.ID}}', String.raw`{{.Text}}`, '{{.TimeCreated}}', '{{.Due}}', null, '{{ printf "%s" .Image }}', {{if not .File }}false{{else}}true{{end}}, true);">
                   <img src="/static/images/journal-arrow-up.svg">
                 </button>
               </td>
@@ -192,10 +203,10 @@
           {{ if .IsDone }}
             <tr>              
               <!-- Do not display long texts fully -->
-              {{ if lt (len .Text) 25 }}
+              {{ if lt (len .Text) 35 }}
               <td class="todo-text text-wrap text-break">{{ .Text }}</td>
               {{ else }}
-              <td class="todo-text text-wrap text-break">{{ printf "%.25s" .Text }}......</td>
+              <td class="todo-text text-wrap text-break">{{ printf "%.35s" .Text }}......</td>
               {{ end }}
               
               {{ if not .Image }}
@@ -205,13 +216,13 @@
               <td><img src='{{ printf "%s" .Image }}' width="64px" height="64px"></td>
               {{ end }}
 
-              <td>{{ .TimeCreated }}</td>
-              <td>{{ .CompletionTime }}</td>
-              <td>
+              <td class="text-wrap text-break">{{ .TimeCreated }}</td>
+              <td class="text-wrap text-break">{{ .CompletionTime }}</td>
+              <td class="text-wrap text-break">
                 <button class="btn btn-danger" onclick="deleteTodoRefresh('{{.ID}}');">
                   <img src='/static/images/trash3-fill.svg'>
                 </button>
-                <button class="btn btn-secondary" onclick="openTodoModal('{{.ID}}', String.raw`{{.Text}}`, '{{.TimeCreated}}', '{{.Due}}', '{{.CompletionTime}}', '{{ printf "%s" .Image }}', false);">
+                <button class="btn btn-secondary" onclick="openTodoModal('{{.ID}}', String.raw`{{.Text}}`, '{{.TimeCreated}}', '{{.Due}}', '{{.CompletionTime}}', '{{ printf "%s" .Image }}', {{if not .File }}false{{else}}true{{end}}, false);">
                   <img src="/static/images/journal-arrow-up.svg">
                 </button>
               </td>
@@ -308,7 +319,7 @@ async function drop(event) {
 
 
 let viewedTodoID;
-function openTodoModal(id, text, created, due, completionTime, image, editable) {
+function openTodoModal(id, text, created, due, completionTime, image, hasFile, editable) {
     viewedTodoID = id;
 
     document.getElementById('modalTodoTextDisplay').innerText = text;
@@ -321,9 +332,15 @@ function openTodoModal(id, text, created, due, completionTime, image, editable) 
     let img = document.getElementById('modalTodoImage');
     if (img) {
       img.src = image;
-      img.style.display = 'block';
+      img.style.display = 'inline';
     } else {
       img.style.display = 'none';
+    }
+
+    if (hasFile) {
+      document.getElementById("modalTodoFileDownload").style.display = "inline";
+    } else {
+      document.getElementById("modalTodoFileDownload").style.display = "none";
     }
 
     let editButton = document.getElementById("editButton");
@@ -345,9 +362,20 @@ async function saveEditedTodo() {
     document.getElementById('modalTodoDueDisplay').innerText = updatedDue;
     const updatedDueUnix = Date.parse(updatedDue) / 1000;
 
-    toggleEditMode(false);
 
-    await updateTodo(viewedTodoID, {"text":updatedText, "dueUnix":updatedDueUnix, "isDone":false});
+    let response = await updateTodo(viewedTodoID, {"text":updatedText, "dueUnix":updatedDueUnix, "isDone":false});
+    if (!response.ok) {
+      document.getElementById("modalToDoErrorMessage").innerText = await response.text();
+      return;
+    }
+
+    let result = await uploadAttachedFile(viewedTodoID);
+    if (!result) {
+      alert("Failed to upload attachment file");
+      return;
+    }
+
+    toggleEditMode(false);
 
     window.location.reload();
 }
@@ -358,8 +386,52 @@ function toggleEditMode(isEditing) {
     document.getElementById('modalTodoTextInput').style.display = isEditing ? 'inline' : 'none';
     document.getElementById('modalTodoDueDisplay').style.display = isEditing ? 'none' : 'inline';
     document.getElementById('modalTodoDueInput').style.display = isEditing ? 'inline' : 'none';
+    document.getElementById('modalTodoFile').style.display = isEditing ? 'inline' : 'none';
+    document.getElementById('modalTodoFileDownload').style.display = isEditing ? 'none' : 'inline';
     document.getElementById('editButton').style.display = isEditing ? 'none' : 'inline';
     document.getElementById('saveButton').style.display = isEditing ? 'inline' : 'none';
+}
+
+async function downloadAttachedFile() {
+    await fetch("/api/todo/file/"+viewedTodoID, {})
+    .then(res => res.blob())
+    .then(blob => {
+        var file = window.URL.createObjectURL(blob);
+        var link = document.createElement("a");
+        link.href = file;
+        link.download = "fileAttachment-"+viewedTodoID;
+        link.innerText = "Download link";
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+    });
+}
+
+async function uploadAttachedFile(todoID) {
+    let todoFileInput = document.getElementById("modalFileInput");
+    if (todoFileInput.files.length === 0 ) {
+        return false;
+    }
+    if (todoFileInput.files.item(0).size > 3145728) {
+        todoFileInput.setCustomValidity("File size exceeded 3MB");
+        return false;
+    }
+
+    let file = todoFileInput.files[0];
+    let data = new FormData();
+    data.append("file", file);
+    let response = await fetch("/api/todo/file/"+todoID, {
+        method: "POST",
+        body: data
+    });
+
+    if (!response.ok) {
+      document.getElementById("modalToDoErrorMessage").innerText = "";
+      return false;
+    } else {
+      document.getElementById("modalToDoErrorMessage").innerText = await response.text();
+      return true;
+    }
 }
 
 document.addEventListener('DOMContentLoaded', async function() {

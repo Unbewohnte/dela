@@ -1,6 +1,6 @@
 /*
   	dela - web TODO list
-    Copyright (C) 2023, 2024  Kasyanov Nikolay Alexeyevich (Unbewohnte)
+    Copyright (C) 2023, 2024, 2025  Kasyanov Nikolay Alexeyevich (Unbewohnte)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as published by
@@ -79,6 +79,7 @@ func setUpTables(db *DB) error {
 		is_done INTEGER,
 		completion_time_unix INTEGER,
 		image BLOB,
+		file BLOB,
 		FOREIGN KEY(group_id) REFERENCES todo_groups(id),
 		FOREIGN KEY(owner_email) REFERENCES users(email))`,
 	)

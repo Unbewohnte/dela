@@ -34,6 +34,7 @@ const (
 	MaxEmailLength        uint = 60
 	MaxPasswordLength     uint = 250
 	MaxTodoTextLength     uint = 250
+	MaxTodoFileSizeBytes  uint = 3145728 // 3MB
 )
 
 // Check if user is valid. Returns false and a reason-string if not

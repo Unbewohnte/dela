@@ -422,6 +422,100 @@ func (s *Server) EndpointUserGet(w http.ResponseWriter, req *http.Request) {
 	w.Write(userDBBytes)
 }
 
+func (s *Server) EndpointTodoFile(w http.ResponseWriter, req *http.Request) {
+	defer req.Body.Close()
+
+	if req.Method != http.MethodPost && req.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Check authentication information
+	if !IsUserAuthorizedReq(req, s.db) {
+		http.Error(w, "Invalid user auth data", http.StatusForbidden)
+		return
+	}
+
+	// Obtain TODO ID
+	todoIDStr := path.Base(req.URL.Path)
+	todoID, err := strconv.ParseUint(todoIDStr, 10, 64)
+	if err != nil {
+		http.Error(w, "Invalid TODO ID", http.StatusBadRequest)
+		return
+	}
+
+	// Check if the user owns this TODO
+	if !s.db.DoesUserOwnTodo(todoID, GetEmailFromReq(req)) {
+		http.Error(w, "You don't own this TODO", http.StatusForbidden)
+		return
+	}
+
+	todo, err := s.db.GetTodo(todoID)
+	if err != nil {
+		http.Error(w, "Failed to retrieve this TODO", http.StatusInternalServerError)
+		logger.Error("[Server][EndpointTodoFile] Failed to get TODO with ID %d: %s", todoID, err)
+		return
+	}
+
+	switch req.Method {
+	case http.MethodGet:
+		// Retrieve file and send it
+		_, err := w.Write(todo.File)
+		if err != nil {
+			http.Error(w, "Failed to send file", http.StatusInternalServerError)
+			logger.Error("[Server][EndpointTodoFile] Failed to send TODO's file with ID %d: %s", todoID, err)
+			return
+		}
+
+	case http.MethodPost:
+		// Retrieve file and update database
+		// Parse form
+		err := req.ParseMultipartForm(int64(MaxTodoFileSizeBytes))
+		if err != nil {
+			logger.Error("[Server][EndpointTodoFile] Failed to parse multipart form: %s", err)
+			http.Error(w, "Failed to parse form", http.StatusBadRequest)
+			return
+		}
+
+		formFile, fileHeader, err := req.FormFile("file")
+		if err != nil {
+			logger.Error("[Server][EndpointTodoFile] Failed to retrieve file file from form: %s", err)
+			http.Error(w, "Failed to retrieve file", http.StatusInternalServerError)
+			return
+		}
+		defer formFile.Close()
+
+		// Check if thumbnail is good to go
+		if fileHeader.Size > int64(MaxTodoFileSizeBytes) {
+			logger.Error("[Server][EndpointTodoFile] File file is too big (%d)", fileHeader.Size)
+			http.Error(w, "Attachment File is too big", http.StatusBadRequest)
+			return
+		}
+
+		// Save attachment to database
+		fileData, err := io.ReadAll(formFile)
+		if err != nil {
+			logger.Error("[Server][EndpointTodoFile] Failed to read file from form: %s", err)
+			http.Error(w, "Failed to read Attachment File", http.StatusInternalServerError)
+			return
+		}
+
+		err = s.db.UpdateTodoFile(todoID, fileData)
+		if err != nil {
+			logger.Error("[Server][EndpointTodoFile] Failed to save attachment file: %s", err)
+			http.Error(w, "Failed to save Attachment File", http.StatusInternalServerError)
+			return
+		}
+
+		logger.Info("[Server][EndpointTodoFile] Successfully saved \"%s\" (%vMB) for %s (todoID: %d)",
+			fileHeader.Filename,
+			float32(fileHeader.Size)/1024.0/1024.0,
+			GetEmailFromReq(req),
+			todoID,
+		)
+	}
+}
+
 func (s *Server) EndpointTodoUpdate(w http.ResponseWriter, req *http.Request) {
 	defer req.Body.Close()
 

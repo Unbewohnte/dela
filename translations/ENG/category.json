@@ -130,6 +130,16 @@
             "id": "category js button show todo",
             "message": "Show To Do",
             "translation": "Show To Do"
+        },
+        {
+            "id": "category modal file",
+            "message": "Attach File",
+            "translation": "Attach File"
+        },
+        {
+            "id": "category file download button",
+            "message": "Download Attached File",
+            "translation": "Download Attached File"
         }
     ]
 }
