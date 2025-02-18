@@ -31,8 +31,8 @@ import (
 const (
 	MinimalEmailLength    uint = 3
 	MinimalPasswordLength uint = 5
-	MaxEmailLength        uint = 60
-	MaxPasswordLength     uint = 250
+	MaxEmailLength        uint = 50
+	MaxPasswordLength     uint = 50
 	MaxTodoTextLength     uint = 250
 	MaxTodoFileSizeBytes  uint = 3145728 // 3MB
 )

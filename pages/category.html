@@ -57,7 +57,6 @@
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-              <p id="modalToDoErrorMessage"></p>
               <div>
                   <strong>{{index .Translation "category modal todo text"}}</strong>
                   <span id="modalTodoTextDisplay"></span>
@@ -86,6 +85,7 @@
                   {{ index .Translation "category file download button"}}
                 </button>
               </div>
+              <p id="modalToDoErrorMessage" class="text-danger fw-bold"></p>
           </div>
           <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="toggleEditMode(false);">{{index .Translation "category modal close button"}}</button>
@@ -126,7 +126,6 @@
         <div class="row g-3 align-items-center">
             <div class="col-md">
                 <label for="newTodoText" class="form-label">{{index .Translation "category todo text"}}</label>
-                <!-- <input type="text" class="form-control" id="newTodoText" placeholder='{{index .Translation "category enter todo text"}}' required> -->
                 <textarea class="form-control" id="newTodoText" placeholder='{{index .Translation "category enter todo text"}}' required></textarea>
               </div>
             <div class="col-md">
@@ -362,7 +361,6 @@ async function saveEditedTodo() {
     document.getElementById('modalTodoDueDisplay').innerText = updatedDue;
     const updatedDueUnix = Date.parse(updatedDue) / 1000;
 
-
     let response = await updateTodo(viewedTodoID, {"text":updatedText, "dueUnix":updatedDueUnix, "isDone":false});
     if (!response.ok) {
       document.getElementById("modalToDoErrorMessage").innerText = await response.text();
@@ -371,7 +369,6 @@ async function saveEditedTodo() {
 
     let result = await uploadAttachedFile(viewedTodoID);
     if (!result) {
-      alert("Failed to upload attachment file");
       return;
     }
 
@@ -410,10 +407,11 @@ async function downloadAttachedFile() {
 async function uploadAttachedFile(todoID) {
     let todoFileInput = document.getElementById("modalFileInput");
     if (todoFileInput.files.length === 0 ) {
-        return false;
+        return true;
     }
     if (todoFileInput.files.item(0).size > 3145728) {
-        todoFileInput.setCustomValidity("File size exceeded 3MB");
+        // todoFileInput.setCustomValidity("File size exceeded 3MB");
+        document.getElementById("modalToDoErrorMessage").innerText = "File size exceeded 3MB";
         return false;
     }
 

@@ -561,6 +561,18 @@ func (s *Server) EndpointTodoUpdate(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	// Validate
+	if uint(len([]rune(updatedTodo.Text))) > MaxTodoTextLength {
+		http.Error(
+			w,
+			fmt.Sprintf("Text is too big! Text must be less than %d characters long!", MaxTodoTextLength),
+			http.StatusBadRequest,
+		)
+		return
+	}
+	updatedTodo.File = nil
+	updatedTodo.ID = todoID
+
 	// Update
 	err = s.db.UpdateTodoSoft(todoID, updatedTodo)
 	if err != nil {
@@ -694,8 +706,12 @@ func (s *Server) EndpointTodoCreate(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// Check if text is too long or not
-	if uint(len(newTodo.Text)) > MaxTodoTextLength {
-		http.Error(w, "Text is too big!", http.StatusBadRequest)
+	if uint(len([]rune(newTodo.Text))) > MaxTodoTextLength {
+		http.Error(
+			w,
+			fmt.Sprintf("Text is too big! Text must be less than %d characters long!", MaxTodoTextLength),
+			http.StatusBadRequest,
+		)
 		return
 	}
 
