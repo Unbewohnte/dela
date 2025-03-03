@@ -28,6 +28,7 @@ import (
 	"net/http"
 	"path"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -62,6 +63,7 @@ func (s *Server) EndpointUserCreate(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	user.TimeCreatedUnix = uint64(time.Now().Unix())
+	user.Email = strings.ToLower(user.Email)
 
 	// Insert into DB
 	err = s.db.CreateUser(user)

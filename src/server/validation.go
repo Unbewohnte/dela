@@ -32,7 +32,7 @@ const (
 	MinimalEmailLength    uint = 3
 	MinimalPasswordLength uint = 5
 	MaxEmailLength        uint = 50
-	MaxPasswordLength     uint = 50
+	MaxPasswordLength     uint = 100
 	MaxTodoTextLength     uint = 250
 	MaxTodoFileSizeBytes  uint = 3145728 // 3MB
 )
@@ -46,10 +46,10 @@ func IsUserValid(user db.User) (bool, string) {
 		return false, fmt.Sprintf("Email is too big; Email should be up to %d characters", MaxEmailLength)
 	}
 
-	if uint(len(user.Password)) < MinimalPasswordLength {
+	if uint(len([]rune(user.Password))) < MinimalPasswordLength {
 		return false, "Password is too small"
 	}
-	if uint(len(user.Password)) > MaxPasswordLength {
+	if uint(len([]rune(user.Password))) > MaxPasswordLength {
 		return false, fmt.Sprintf("Password is too big; Password should be up to %d characters", MaxPasswordLength)
 	}
 

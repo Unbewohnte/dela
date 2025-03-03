@@ -45,7 +45,7 @@ async function logIn() {
     if (!emailInput.reportValidity()) {
         return;
     }
-    let email = String(emailInput.value).trim();
+    let email = String(emailInput.value).trim().toLowerCase();
 
     let passwordInput = document.getElementById("input-password");
     if (!passwordInput.reportValidity()) {

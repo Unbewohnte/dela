@@ -96,7 +96,7 @@ async function register() {
     if (!emailInput.reportValidity()) {
         return;
     }
-    let email = String(emailInput.value).trim();
+    let email = String(emailInput.value).trim().toLowerCase();
 
     let passwordInput = document.getElementById("input-password");
     if (!passwordInput.reportValidity()) {
@@ -111,6 +111,7 @@ async function register() {
         password: passwordSHA256,
     };
 
+    console.log(postData);
     let response = await postNewUser(postData);
     if (response.ok) {        
         let json = await response.json();
