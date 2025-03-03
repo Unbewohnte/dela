@@ -111,7 +111,6 @@ async function register() {
         password: passwordSHA256,
     };
 
-    console.log(postData);
     let response = await postNewUser(postData);
     if (response.ok) {        
         let json = await response.json();

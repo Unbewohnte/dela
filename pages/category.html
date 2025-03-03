@@ -146,10 +146,10 @@
       <!-- Due -->
       <table class="table table-hover" id="due-todos">
         <thead>
-          <th>{{index .Translation "category todo"}}</th>
-          <th>{{index .Translation "category image"}}</th>
-          <th>{{index .Translation "category created"}}</th>
-          <th>{{index .Translation "category due"}}</th>
+          <th onclick="sortTable(0)" class="sort-asc">{{index .Translation "category todo"}}</th>
+          <th onclick="sortTable(1)">{{index .Translation "category image"}}</th>
+          <th onclick="sortTable(2)">{{index .Translation "category created"}}</th>
+          <th onclick="sortTable(3)">{{index .Translation "category due"}}</th>
         </thead>
         <tbody class="text-break">
           {{ range .Data.Todos }}
@@ -192,10 +192,10 @@
       <!-- Completed -->
       <table class="table table-hover" style="display: none;" id="completed-todos">
         <thead>
-          <th>{{index .Translation "category todo"}}</th>
-          <th>{{index .Translation "category image"}}</th>
-          <th>{{index .Translation "category created"}}</th>
-          <th>{{index .Translation "category completed"}}</th>
+          <th onclick="sortTable(0)"  class="sort-asc">{{index .Translation "category todo"}}</th>
+          <th onclick="sortTable(1)">{{index .Translation "category image"}}</th>
+          <th onclick="sortTable(2)">{{index .Translation "category created"}}</th>
+          <th onclick="sortTable(3)">{{index .Translation "category completed"}}</th>
         </thead>
         <tbody class="text-break">
           {{ range .Data.Todos }}
@@ -214,7 +214,7 @@
               {{ else }}
               <td><img src='{{ printf "%s" .Image }}' width="64px" height="64px"></td>
               {{ end }}
-
+      
               <td class="text-wrap text-break">{{ .TimeCreated }}</td>
               <td class="text-wrap text-break">{{ .CompletionTime }}</td>
               <td class="text-wrap text-break">
@@ -234,6 +234,32 @@
 </div>
 </main>
 
+
+<style>
+  th {
+    cursor: pointer; 
+    position: relative; 
+    padding-right: 20px; 
+    user-select: none; 
+    -webkit-user-select: none; 
+    -moz-user-select: none; 
+    -ms-user-select: none; 
+  }
+
+  th.sort-asc::after {
+    content: "▲";
+    position: absolute;
+    right: 5px;
+    font-size: 12px;
+  }
+
+  th.sort-desc::after {
+    content: "▼";
+    position: absolute;
+    right: 5px;
+    font-size: 12px;
+  }
+</style>
 
 <script>
 let todoToDeleteId;
@@ -430,6 +456,58 @@ async function uploadAttachedFile(todoID) {
       document.getElementById("modalToDoErrorMessage").innerText = await response.text();
       return true;
     }
+}
+
+let currentSortColumn = -1; 
+let isAscending = true; 
+
+function sortTable(n) {
+  const table = document.getElementById("due-todos");
+  const headers = table.getElementsByTagName("th");
+
+  for (let i = 0; i < headers.length; i++) {
+    headers[i].classList.remove("sort-asc", "sort-desc");
+  }
+
+  if (currentSortColumn === n) {
+    isAscending = !isAscending;
+  } else {
+    currentSortColumn = n;
+    isAscending = true;
+  }
+
+  headers[n].classList.add(isAscending ? "sort-asc" : "sort-desc");
+
+  let rows, switching, i, x, y, shouldSwitch;
+  switching = true;
+
+  while (switching) {
+    switching = false;
+    rows = table.rows;
+
+    for (i = 1; i < rows.length - 1; i++) {
+      shouldSwitch = false;
+      x = rows[i].getElementsByTagName("td")[n];
+      y = rows[i + 1].getElementsByTagName("td")[n];
+
+      if (isAscending) {
+        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+          shouldSwitch = true;
+          break;
+        }
+      } else {
+        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+          shouldSwitch = true;
+          break;
+        }
+      }
+    }
+
+    if (shouldSwitch) {
+      rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+      switching = true;
+    }
+  }
 }
 
 document.addEventListener('DOMContentLoaded', async function() {
