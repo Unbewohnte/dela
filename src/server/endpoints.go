@@ -92,6 +92,13 @@ func (s *Server) EndpointUserCreate(w http.ResponseWriter, req *http.Request) {
 	if !s.config.Verification.VerifyEmails {
 		// Do not verify email
 
+		err = s.db.UserSetEmailConfirmed(user.Email)
+		if err != nil {
+			http.Error(w, "Failed to save confirmation information", http.StatusInternalServerError)
+			logger.Error("[Server][EndpointUserCreate] Failed to set confirmed_email to true for %s: %s", user.Email, err)
+			return
+		}
+
 		// Send cookie
 		http.SetCookie(w, &http.Cookie{
 			Name:     "auth",
@@ -105,7 +112,7 @@ func (s *Server) EndpointUserCreate(w http.ResponseWriter, req *http.Request) {
 		// Done
 		w.Write([]byte("{\"confirm_email\":false}"))
 
-		logger.Info("[Server][EndpointUserCreate] Successfully sent email notification to %s", user.Email)
+		logger.Info("[Server][EndpointUserCreate] Not sending email notification to %s...", user.Email)
 		return
 	}
 
