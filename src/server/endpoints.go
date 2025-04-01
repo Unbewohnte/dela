@@ -1,6 +1,6 @@
 /*
   	dela - web TODO list
-    Copyright (C) 2023, 2024  Kasyanov Nikolay Alexeyevich (Unbewohnte)
+    Copyright (C) 2023, 2024, 2025  Kasyanov Nikolay Alexeyevich (Unbewohnte)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as published by

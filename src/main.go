@@ -1,6 +1,6 @@
 /*
   	dela - web TODO list
-    Copyright (C) 2024  Kasyanov Nikolay Alexeyevich (Unbewohnte)
+    Copyright (C) 2024, 2025  Kasyanov Nikolay Alexeyevich (Unbewohnte)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as published by
@@ -28,7 +28,7 @@ import (
 	"path/filepath"
 )
 
-const Version string = "0.3.0"
+const Version string = "0.3.1"
 
 var (
 	printVersion *bool = flag.Bool("version", false, "Print version information and exit")
